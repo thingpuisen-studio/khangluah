@@ -116,6 +116,14 @@ const existingPostsData = samplePosts.map((p) => {
             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500" id="gh-dot"></span>
             <span id="gh-status-text">Connected</span>
           </div>
+          <button
+            type="button"
+            id="btn-test-conn"
+            class="text-[10px] font-mono px-2 py-0.5 rounded bg-[var(--bg-secondary)] border border-[var(--border-color)] hover:border-[var(--accent)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer transition-colors"
+            title="Verify GitHub token permissions on repository lianhangluah/hkhangluah"
+          >
+            Test Connection
+          </button>
         </div>
         <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--text-primary)] mt-1">
           Admin CMS
@@ -1453,21 +1461,40 @@ const existingPostsData = samplePosts.map((p) => {
               </div>
 
               <div class="space-y-1.5">
-                <label class="text-xs font-semibold text-[var(--text-primary)] block">Personal Access Token (Fallback / Local)</label>
-                <p class="text-xs text-[var(--text-secondary)] leading-relaxed">Enter a fine-grained GitHub token with repository 'contents' permission.</p>
-                <div class="flex items-center gap-2 pt-1">
+                <div class="flex items-center justify-between">
+                  <label class="text-xs font-semibold text-[var(--text-primary)] block">Personal Access Token (Direct Push)</label>
+                  <a
+                    href="https://github.com/settings/tokens/new?scopes=repo&description=HK-CMS-Studio"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-[11px] text-[var(--accent)] hover:underline"
+                  >
+                    Generate Token on GitHub &rarr;
+                  </a>
+                </div>
+                <p class="text-xs text-[var(--text-secondary)] leading-relaxed">
+                  Classic token with <code class="font-mono text-[11px] bg-[var(--bg-secondary)] px-1 rounded">repo</code> scope, or fine-grained token with <code class="font-mono text-[11px] bg-[var(--bg-secondary)] px-1 rounded">Contents: Read &amp; write</code>.
+                </p>
+                <div class="flex flex-wrap items-center gap-2 pt-1">
                   <input
                     type="password"
                     id="cfg-gh-token-input"
-                    placeholder="ghp_... or gho_..."
-                    class="flex-1 min-h-[44px] px-3 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/50 text-xs font-mono text-[var(--text-primary)]"
+                    placeholder="ghp_... or github_pat_..."
+                    class="flex-1 min-w-[200px] min-h-[44px] px-3 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/50 text-xs font-mono text-[var(--text-primary)]"
                   />
                   <button
                     type="button"
                     id="btn-save-gh-token"
                     class="min-h-[44px] px-3.5 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] hover:bg-[var(--bg-primary)] text-xs font-medium text-[var(--text-primary)] cursor-pointer"
                   >
-                    Save
+                    Save &amp; Verify
+                  </button>
+                  <button
+                    type="button"
+                    id="btn-settings-test-gh"
+                    class="min-h-[44px] px-3.5 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] hover:bg-[var(--bg-primary)] text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer"
+                  >
+                    Test Access
                   </button>
                 </div>
               </div>
@@ -1737,20 +1764,34 @@ const existingPostsData = samplePosts.map((p) => {
 
   async function commitFileToGitHub(filePath, fileContent, commitMsg) {
     const token = getGhToken();
-    if (!token) throw new Error("No GitHub token available");
+    if (!token) throw new Error("No GitHub authentication token found. Please sign in with GitHub or enter a token in Site Settings.");
 
     let sha = null;
+    let authHeader = `Bearer ${token}`;
+
     try {
       const getRes = await fetch(`https://api.github.com/repos/${GH_REPO_OWNER}/${GH_REPO_NAME}/contents/${filePath}`, {
         headers: {
-          "Authorization": `Bearer ${token}`,
-          "Accept": "application/vnd.github.v3+json",
-          "User-Agent": "HK-CMS"
+          "Authorization": authHeader,
+          "Accept": "application/vnd.github.v3+json"
         }
       });
       if (getRes.ok) {
         const data = await getRes.json();
         sha = data.sha;
+      } else if (getRes.status === 401) {
+        // Fallback to classic token scheme if Bearer rejected
+        authHeader = `token ${token}`;
+        const retryRes = await fetch(`https://api.github.com/repos/${GH_REPO_OWNER}/${GH_REPO_NAME}/contents/${filePath}`, {
+          headers: {
+            "Authorization": authHeader,
+            "Accept": "application/vnd.github.v3+json"
+          }
+        });
+        if (retryRes.ok) {
+          const data = await retryRes.json();
+          sha = data.sha;
+        }
       }
     } catch {
       // New file, proceed
@@ -1770,17 +1811,20 @@ const existingPostsData = samplePosts.map((p) => {
     const putRes = await fetch(`https://api.github.com/repos/${GH_REPO_OWNER}/${GH_REPO_NAME}/contents/${filePath}`, {
       method: "PUT",
       headers: {
-        "Authorization": `Bearer ${token}`,
+        "Authorization": authHeader,
         "Accept": "application/vnd.github.v3+json",
-        "Content-Type": "application/json",
-        "User-Agent": "HK-CMS"
+        "Content-Type": "application/json"
       },
       body: JSON.stringify(body)
     });
 
     if (!putRes.ok) {
       const errData = await putRes.json().catch(() => ({}));
-      throw new Error(errData.message || `GitHub error: ${putRes.statusText}`);
+      let msg = errData.message || `HTTP ${putRes.status}: ${putRes.statusText}`;
+      if (putRes.status === 404 || putRes.status === 403) {
+        msg = `GitHub ${putRes.status} (${errData.message || putRes.statusText}):\nThe token cannot write to repository ${GH_REPO_OWNER}/${GH_REPO_NAME}.\n\nTo fix:\n1. If using GitHub App (Ov23liELdAzmQwnCaqaO): Go to GitHub Settings -> Developer settings -> GitHub Apps -> Permissions: set "Contents" to "Read & write". Then in "Install App" sidebar, install it on ${GH_REPO_OWNER}/${GH_REPO_NAME}.\n2. Or generate a Personal Access Token with "repo" scope and save it in Site Settings.`;
+      }
+      throw new Error(msg);
     }
 
     return await putRes.json();
@@ -1790,11 +1834,11 @@ const existingPostsData = samplePosts.map((p) => {
     const token = getGhToken();
     if (!token) throw new Error("No GitHub token available");
 
+    let authHeader = `Bearer ${token}`;
     const getRes = await fetch(`https://api.github.com/repos/${GH_REPO_OWNER}/${GH_REPO_NAME}/contents/${filePath}`, {
       headers: {
-        "Authorization": `Bearer ${token}`,
-        "Accept": "application/vnd.github.v3+json",
-        "User-Agent": "HK-CMS"
+        "Authorization": authHeader,
+        "Accept": "application/vnd.github.v3+json"
       }
     });
 
@@ -1808,10 +1852,9 @@ const existingPostsData = samplePosts.map((p) => {
     const delRes = await fetch(`https://api.github.com/repos/${GH_REPO_OWNER}/${GH_REPO_NAME}/contents/${filePath}`, {
       method: "DELETE",
       headers: {
-        "Authorization": `Bearer ${token}`,
+        "Authorization": authHeader,
         "Accept": "application/vnd.github.v3+json",
-        "Content-Type": "application/json",
-        "User-Agent": "HK-CMS"
+        "Content-Type": "application/json"
       },
       body: JSON.stringify({
         message: commitMsg,
@@ -1822,7 +1865,7 @@ const existingPostsData = samplePosts.map((p) => {
 
     if (!delRes.ok) {
       const errData = await delRes.json().catch(() => ({}));
-      throw new Error(errData.message || "Failed to delete from GitHub");
+      throw new Error(errData.message || `Failed to delete from GitHub (HTTP ${delRes.status})`);
     }
 
     return await delRes.json();
@@ -2604,6 +2647,82 @@ const existingPostsData = samplePosts.map((p) => {
     window.location.href = "/api/auth/login";
   });
 
+  // Test GitHub Connection and Permissions
+  async function testGitHubConnection() {
+    const token = getGhToken();
+    if (!token) {
+      alert("No GitHub authentication token found.\n\nPlease sign in with GitHub, or paste a Personal Access Token in Site Settings.");
+      return;
+    }
+
+    showToast("Testing GitHub connection and repository access...");
+
+    try {
+      // 1. Verify user identity
+      let userRes = await fetch("https://api.github.com/user", {
+        headers: { "Authorization": `Bearer ${token}`, "Accept": "application/vnd.github.v3+json" }
+      });
+      let authScheme = "Bearer";
+      if (!userRes.ok && userRes.status === 401) {
+        userRes = await fetch("https://api.github.com/user", {
+          headers: { "Authorization": `token ${token}`, "Accept": "application/vnd.github.v3+json" }
+        });
+        if (userRes.ok) authScheme = "token";
+      }
+
+      if (!userRes.ok) {
+        const errData = await userRes.json().catch(() => ({}));
+        throw new Error(`Token verification failed (HTTP ${userRes.status}: ${errData.message || userRes.statusText})`);
+      }
+      const userData = await userRes.json();
+
+      // 2. Verify repository access on lianhangluah/hkhangluah
+      const repoRes = await fetch(`https://api.github.com/repos/${GH_REPO_OWNER}/${GH_REPO_NAME}`, {
+        headers: { "Authorization": `${authScheme} ${token}`, "Accept": "application/vnd.github.v3+json" }
+      });
+
+      if (!repoRes.ok) {
+        const repoErr = await repoRes.json().catch(() => ({}));
+        throw new Error(
+          `Token belongs to @${userData.login}, but CANNOT access repository "${GH_REPO_OWNER}/${GH_REPO_NAME}" (HTTP ${repoRes.status}: ${repoErr.message || repoRes.statusText}).\n\n` +
+          `Why this happens:\n` +
+          `1. If using GitHub App (Ov23liELdAzmQwnCaqaO):\n` +
+          `   - Open GitHub Settings -> Developer settings -> GitHub Apps -> click your app.\n` +
+          `   - Go to "Permissions & events" -> "Repository permissions" -> set "Contents" to "Read & write".\n` +
+          `   - Go to "Install App" in the left sidebar -> click "Install" on lianhangluah for repository "hkhangluah".\n\n` +
+          `2. Alternatively (Instant fix):\n` +
+          `   - Create a Personal Access Token on GitHub with "repo" scope.\n` +
+          `   - Paste it in Site Settings -> Personal Access Token and click "Save & Verify".`
+        );
+      }
+
+      const repoData = await repoRes.json();
+      const hasPush = repoData.permissions?.push;
+
+      if (!hasPush) {
+        throw new Error(
+          `Connected to ${repoData.full_name}, but token only has READ access (permissions.push is false).\n\n` +
+          `Please grant write permission to the app or provide a Personal Access Token with repo/write scope.`
+        );
+      }
+
+      alert(
+        `GitHub Connection Verified!\n\n` +
+        `User: @${userData.login}\n` +
+        `Repository: ${repoData.full_name}\n` +
+        `Write / Push Access: YES\n` +
+        `Default Branch: ${repoData.default_branch}\n\n` +
+        `Your CMS is fully configured and ready to publish live updates directly to GitHub.`
+      );
+      showToast("GitHub write access verified!");
+    } catch (err) {
+      alert(`GitHub Test Result:\n\n${err.message}`);
+    }
+  }
+
+  document.getElementById('btn-test-conn')?.addEventListener('click', testGitHubConnection);
+  document.getElementById('btn-settings-test-gh')?.addEventListener('click', testGitHubConnection);
+
   document.getElementById('btn-save-gh-token')?.addEventListener('click', async () => {
     const input = document.getElementById('cfg-gh-token-input');
     const token = input?.value.trim();
@@ -2617,26 +2736,27 @@ const existingPostsData = samplePosts.map((p) => {
 
     showToast("Verifying token with GitHub...");
     try {
-      const res = await fetch("https://api.github.com/user", {
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "User-Agent": "HK-CMS"
-        }
+      let res = await fetch("https://api.github.com/user", {
+        headers: { "Authorization": `Bearer ${token}`, "Accept": "application/vnd.github.v3+json" }
       });
+      if (!res.ok && res.status === 401) {
+        res = await fetch("https://api.github.com/user", {
+          headers: { "Authorization": `token ${token}`, "Accept": "application/vnd.github.v3+json" }
+        });
+      }
+
       if (res.ok) {
         const data = await res.json();
         localStorage.setItem('hk_gh_token', token);
         localStorage.setItem('hk_gh_user', data.login || "User");
         updateGhAuthUI();
         showToast(`Connected as @${data.login}!`);
+        await testGitHubConnection();
       } else {
-        showToast("Invalid token. Please check permissions.");
+        alert("Invalid token: GitHub rejected this token. Please verify the token string.");
       }
-    } catch {
-      localStorage.setItem('hk_gh_token', token);
-      localStorage.setItem('hk_gh_user', "Manual Token");
-      updateGhAuthUI();
-      showToast("Saved token locally");
+    } catch (err) {
+      alert("Failed to connect to GitHub API: " + err.message);
     }
   });
 
