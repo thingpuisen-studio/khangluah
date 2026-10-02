@@ -1830,6 +1830,52 @@ const existingPostsData = samplePosts.map((p) => {
     return await putRes.json();
   }
 
+  async function commitBinaryFileToGitHub(filePath, rawBase64, commitMsg) {
+    const token = getGhToken();
+    if (!token) throw new Error("No GitHub token available");
+
+    let sha = null;
+    let authHeader = `Bearer ${token}`;
+
+    try {
+      const getRes = await fetch(`https://api.github.com/repos/${GH_REPO_OWNER}/${GH_REPO_NAME}/contents/${filePath}`, {
+        headers: { "Authorization": authHeader, "Accept": "application/vnd.github.v3+json" }
+      });
+      if (getRes.ok) {
+        const data = await getRes.json();
+        sha = data.sha;
+      }
+    } catch {
+      // New file
+    }
+
+    const body = {
+      message: commitMsg,
+      content: rawBase64,
+      branch: "main"
+    };
+    if (sha) {
+      body.sha = sha;
+    }
+
+    const putRes = await fetch(`https://api.github.com/repos/${GH_REPO_OWNER}/${GH_REPO_NAME}/contents/${filePath}`, {
+      method: "PUT",
+      headers: {
+        "Authorization": authHeader,
+        "Accept": "application/vnd.github.v3+json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(body)
+    });
+
+    if (!putRes.ok) {
+      const errData = await putRes.json().catch(() => ({}));
+      throw new Error(errData.message || `Failed to commit image (${putRes.status})`);
+    }
+
+    return await putRes.json();
+  }
+
   async function deleteFileFromGitHub(filePath, commitMsg) {
     const token = getGhToken();
     if (!token) throw new Error("No GitHub token available");
@@ -2259,28 +2305,61 @@ const existingPostsData = samplePosts.map((p) => {
     });
   });
 
-  // Device Image file picker
-  imageFileInput?.addEventListener('change', (e) => {
+  // Device Image file picker with client-side canvas compression
+  let pendingImageBase64 = null;
+  let pendingImageExt = "jpg";
+
+  function compressImageFile(file, maxWidth = 1400, quality = 0.82) {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+          resolve(compressedDataUrl);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  imageFileInput?.addEventListener('change', async (e) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const dataUrl = event.target?.result;
-        coverInput.value = dataUrl;
-        document.getElementById('image-preview-thumb').src = dataUrl;
-        document.getElementById('image-preview-name').textContent = file.name;
+      showToast("Optimizing image...");
+      try {
+        const compressedDataUrl = await compressImageFile(file, 1400, 0.82);
+        pendingImageBase64 = compressedDataUrl;
+        pendingImageExt = "jpg";
+        coverInput.value = compressedDataUrl;
+        document.getElementById('image-preview-thumb').src = compressedDataUrl;
+        document.getElementById('image-preview-name').textContent = `${file.name.replace(/\.[^.]+$/, '')}.jpg (web-optimized)`;
         document.getElementById('image-preview-box').classList.remove('hidden');
         document.getElementById('image-preview-box').classList.add('flex');
         updateLivePreview();
-        showToast("Image selected");
-      };
-      reader.readAsDataURL(file);
+        showToast("Image optimized");
+      } catch (err) {
+        console.error("Compression error:", err);
+      }
     }
   });
 
   document.getElementById('btn-remove-image')?.addEventListener('click', () => {
     coverInput.value = '';
     imageFileInput.value = '';
+    pendingImageBase64 = null;
     document.getElementById('image-preview-box').classList.add('hidden');
     document.getElementById('image-preview-box').classList.remove('flex');
     updateLivePreview();
@@ -2301,16 +2380,21 @@ const existingPostsData = samplePosts.map((p) => {
   }
 
   // Generate Markdown file utility
-  function generateCode() {
+  function generateCode(forDeploy = false, deploySlug = null) {
     const title = titleInput.value.trim() || "Untitled Publication";
-    const slug = slugInput.value.trim() || "untitled-publication";
+    const slug = deploySlug || slugInput.value.trim() || "untitled-publication";
     const subtitle = subtitleInput.value.trim();
     const category = categoryInput.value.trim() || (currentType === 'poem' ? "Poetry & Literature" : (currentType === 'academic_paper' ? "Linguistic Research" : "Indigenous Knowledge"));
     const date = dateInput.value.trim() || "October 2026";
     const yearDigits = date.replace(/\D/g, '');
     const year = parseInt(yearDigits && yearDigits.length >= 4 ? yearDigits.slice(-4) : "2026") || 2026;
     const readingTime = readingTimeInput.value.trim() || "3 min read";
-    const coverImage = coverInput.value.trim() || "https://placehold.co/800x450/1c1917/ffffff?text=Publication";
+    let coverImage = coverInput.value.trim();
+    if (forDeploy && pendingImageBase64 && coverImage.startsWith('data:image/')) {
+      coverImage = `/images/posts/${slug}.${pendingImageExt}`;
+    } else if (!coverImage) {
+      coverImage = "https://placehold.co/800x450/1c1917/ffffff?text=Publication";
+    }
     const body = bodyInput.value.trim();
     const tags = tagsInput.value.split(',').map(t => t.trim()).filter(Boolean);
 
@@ -2559,7 +2643,24 @@ const existingPostsData = samplePosts.map((p) => {
     showToast("Committing to GitHub repository...");
 
     try {
-      await commitFileToGitHub(targetFile, code, `feat(content): publish ${title}`);
+      // 1. Upload standalone web-optimized image file to GitHub if present
+      if (pendingImageBase64 && pendingImageBase64.startsWith('data:image/')) {
+        const imgPath = `public/images/posts/${slug}.${pendingImageExt}`;
+        const rawBase64 = pendingImageBase64.split(',')[1];
+        showToast("Uploading optimized cover image to GitHub...");
+        try {
+          await commitBinaryFileToGitHub(imgPath, rawBase64, `chore(assets): add cover image for ${slug}`);
+        } catch (imgErr) {
+          console.warn("Cover image upload warning:", imgErr);
+        }
+      }
+
+      // 2. Generate clean, lightweight markdown pointing to the static asset
+      generateCode(true, slug);
+      const deployCode = document.getElementById('code-output').querySelector('code').textContent;
+
+      // 3. Commit markdown file
+      await commitFileToGitHub(targetFile, deployCode, `feat(content): publish ${title}`);
       showToast("Committed to GitHub! Cloudflare will deploy in ~60s.");
 
       const pubModal = document.getElementById('publish-modal');
