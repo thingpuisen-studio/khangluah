@@ -8,12 +8,16 @@ interface Props {
   title?: string;
   description?: string;
   ogImage?: string;
+  showHeader?: boolean;
+  showFooter?: boolean;
 }
 
 const {
   title = "H. Kapginlian | Linguist & Researcher",
   description = "Linguistics research, field notes, morphosyntax, and language documentation by H. Kapginlian.",
   ogImage = "https://placehold.co/1200x630/1c1917/ffffff?text=H.+Kapginlian+Linguistics",
+  showHeader = true,
+  showFooter = true,
 } = Astro.props;
 ---
 
@@ -50,10 +54,10 @@ const {
     </script>
   </head>
   <body class="min-h-[100dvh] flex flex-col antialiased selection:bg-[var(--accent-light)] selection:text-[var(--accent)]" id="top">
-    <Header />
+    {showHeader && <Header />}
     <main class="flex-grow">
       <slot />
     </main>
-    <Footer />
+    {showFooter && <Footer />}
   </body>
 </html>
