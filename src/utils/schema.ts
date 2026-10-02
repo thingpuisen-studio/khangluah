@@ -73,7 +73,39 @@ export function getPersonSchema(siteUrl: string = DEFAULT_SITE_URL) {
 }
 
 /**
- * Builds the WebSite entity with SearchAction
+ * Builds the Person entity for the developer (Donal Muolhoi)
+ */
+export function getDeveloperSchema() {
+  return {
+    '@type': 'Person',
+    '@id': 'https://thingpuisen.pages.dev/#developer',
+    name: 'Donal Muolhoi',
+    alternateName: [
+      'D Muolhoi',
+      'Donal Hmar',
+      'Donald Hmar',
+      'Donald Muolhoi',
+      'Muolhoi',
+    ],
+    url: 'https://thingpuisen.pages.dev',
+    jobTitle: 'Software Engineer & Web Developer',
+    sameAs: [
+      'https://thingpuisen.pages.dev',
+    ],
+    knowsAbout: [
+      'Web Development',
+      'Front-End Engineering',
+      'Full-Stack Web Development',
+      'Astro Framework',
+      'Software Architecture',
+      'Content Management Systems',
+      'SEO & Structured Data',
+    ],
+  };
+}
+
+/**
+ * Builds the WebSite entity with SearchAction, creator, and maintainer attribution
  */
 export function getWebSiteSchema(siteUrl: string = DEFAULT_SITE_URL) {
   return {
@@ -84,6 +116,12 @@ export function getWebSiteSchema(siteUrl: string = DEFAULT_SITE_URL) {
     description: siteConfig.meta.siteDescription,
     publisher: {
       '@id': `${siteUrl}/#person`,
+    },
+    creator: {
+      '@id': 'https://thingpuisen.pages.dev/#developer',
+    },
+    maintainer: {
+      '@id': 'https://thingpuisen.pages.dev/#developer',
     },
     potentialAction: {
       '@type': 'SearchAction',
@@ -312,6 +350,7 @@ export function generateJsonLdGraph(options: JsonLdOptions = {}): Record<string,
   const graph: Record<string, any>[] = [
     getWebSiteSchema(siteUrl),
     getPersonSchema(siteUrl),
+    getDeveloperSchema(),
   ];
 
   if (options.breadcrumbs && options.breadcrumbs.length > 0) {
