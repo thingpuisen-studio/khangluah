@@ -1,0 +1,64 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { url } from '../utils/url';
+---
+
+<BaseLayout
+  title="AI Prompts Library | H. Kapginlian"
+  description="Curated AI prompting templates, linguistic extraction patterns, and editorial workflows."
+  showHeader={false}
+  showFooter={false}
+>
+  <div class="max-w-5xl mx-auto px-4 sm:px-8 py-8 sm:py-12 pb-24 font-sans text-[var(--text-primary)]">
+    
+    <!-- Top Bar -->
+    <header class="flex items-center justify-between pb-6 border-b border-[var(--border-color)]/60">
+      <div class="flex items-center gap-3">
+        <a href={url("/admin")} class="min-h-[40px] px-3.5 py-1.5 rounded-lg border border-[var(--border-color)]/70 bg-[var(--bg-secondary)]/30 hover:bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-medium transition-colors inline-flex items-center gap-1.5 cursor-pointer">
+          <span class="font-mono text-[11px]">&larr;</span>
+          <span>Back to Studio</span>
+        </a>
+        <div class="h-4 w-[1px] bg-[var(--border-color)]"></div>
+        <span class="text-xs uppercase tracking-widest font-mono text-[var(--text-secondary)]">AI Prompts</span>
+      </div>
+
+      <a
+        href={url("/")}
+        class="min-h-[40px] px-3.5 py-1.5 rounded-lg border border-[var(--border-color)]/70 bg-[var(--bg-secondary)]/30 hover:bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-medium transition-colors inline-flex items-center gap-1.5 cursor-pointer"
+      >
+        <span>View Site</span>
+        <span class="font-mono text-[11px]">&nearr;</span>
+      </a>
+    </header>
+
+    <!-- Page Content -->
+    <main class="py-12 space-y-8">
+      <div class="space-y-3">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-[var(--accent)]"></span>
+          <span class="text-[11px] font-mono uppercase tracking-widest text-[var(--accent)] font-semibold">Workspace</span>
+        </div>
+        <h1 class="text-3xl sm:text-4xl font-serif font-bold tracking-tight text-[var(--text-primary)]">
+          AI Prompts Library
+        </h1>
+        <p class="text-sm text-[var(--text-secondary)] leading-relaxed max-w-2xl">
+          Curated prompting templates for linguistic gloss generation, academic abstract synthesis, poetry scansion, and monograph translations.
+        </p>
+      </div>
+
+      <div class="p-8 sm:p-12 rounded-2xl border border-dashed border-[var(--border-color)] bg-[var(--bg-secondary)]/20 text-center space-y-4">
+        <div class="w-12 h-12 mx-auto rounded-xl bg-[var(--accent-light)] border border-[var(--accent)]/30 flex items-center justify-center text-[var(--accent)]">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+        </div>
+        <div class="space-y-1">
+          <h2 class="text-base font-bold text-[var(--text-primary)]">Prompt Templates in Preparation</h2>
+          <p class="text-xs text-[var(--text-secondary)] max-w-md mx-auto leading-relaxed">
+            This module will house your custom prompting workflows, interlinear gloss formatters, and monograph generation tools.
+          </p>
+        </div>
+      </div>
+    </main>
+  </div>
+</BaseLayout>
