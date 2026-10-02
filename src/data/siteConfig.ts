@@ -64,6 +64,7 @@ export interface SiteConfig {
     siteTitle: string;
     siteDescription: string;
     authorName: string;
+    googleSiteVerification?: string;
   };
   author: {
     name: string;
@@ -158,6 +159,7 @@ export const defaultSiteConfig: SiteConfig = {
     siteTitle: "H. Kapginlian | Linguist & Language Researcher",
     siteDescription: "Personal academic website, fieldwork notes, and linguistic research by H. Kapginlian (NEHU, Shillong).",
     authorName: "H. Kapginlian",
+    googleSiteVerification: "",
   },
   author: {
     name: "H. Kapginlian",

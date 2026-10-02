@@ -60,6 +60,10 @@ const jsonLdGraph = customJsonLd || generateJsonLdGraph({
     <!-- Canonical URL -->
     <link rel="canonical" href={canonicalUrl} />
 
+    {siteConfig.meta.googleSiteVerification && (
+      <meta name="google-site-verification" content={siteConfig.meta.googleSiteVerification} />
+    )}
+
     <!-- Open Graph / Social Sharing -->
     <meta property="og:type" content={post ? "article" : "website"} />
     <meta property="og:url" content={canonicalUrl} />
