@@ -13,6 +13,11 @@ const { eyebrow, title, description, researchNoticeText, researchNoticeBtnText }
 <BaseLayout
   title={`${title} | ${siteConfig.author.name}`}
   description={description}
+  pageType="collection"
+  breadcrumbs={[
+    { name: "Home", url: "/" },
+    { name: "Writing & Field Notes", url: "/feed" },
+  ]}
 >
   <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
     <!-- Header -->

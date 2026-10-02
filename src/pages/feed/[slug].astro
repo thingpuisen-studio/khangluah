@@ -30,6 +30,13 @@ const isAcademic = post.postType === "academic_paper";
   title={`${post.title} | Writing | H. Kapginlian`}
   description={post.excerpt}
   ogImage={post.coverImage}
+  pageType="article"
+  post={post}
+  breadcrumbs={[
+    { name: "Home", url: "/" },
+    { name: post.postType === "poem" ? "Poems" : "Writing", url: post.postType === "poem" ? "/poems" : "/feed" },
+    { name: post.title, url: `/feed/${post.slug}` },
+  ]}
 >
   <article class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
     <!-- Breadcrumb & Back navigation -->

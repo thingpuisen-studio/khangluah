@@ -12,6 +12,11 @@ const { eyebrow, title, description, specializations } = siteConfig.pages.resear
 <BaseLayout
   title={`${title} | ${siteConfig.author.name}`}
   description={description}
+  pageType="collection"
+  breadcrumbs={[
+    { name: "Home", url: "/" },
+    { name: "Research & Publications", url: "/research" },
+  ]}
 >
   <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
     <!-- Header -->

@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /prompts
+
+Sitemap: https://lianhangluah.com/sitemap.xml

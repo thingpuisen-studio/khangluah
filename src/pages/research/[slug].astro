@@ -27,8 +27,15 @@ const nextPost = currentIndex < researchPosts.length - 1 ? researchPosts[current
 
 <BaseLayout
   title={`${post.title} | Research | H. Kapginlian`}
-  description={post.excerpt}
+  description={post.abstract || post.excerpt}
   ogImage={post.coverImage}
+  pageType="scholarly_article"
+  post={post}
+  breadcrumbs={[
+    { name: "Home", url: "/" },
+    { name: "Research & Publications", url: "/research" },
+    { name: post.title, url: `/research/${post.slug}` },
+  ]}
 >
   <article class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
     <!-- Breadcrumb & Back navigation -->

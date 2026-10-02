@@ -1,0 +1,346 @@
+import { siteConfig } from '../data/siteConfig';
+import type { Post } from '../data/posts';
+
+export interface BreadcrumbItem {
+  name: string;
+  url: string;
+}
+
+export interface JsonLdOptions {
+  siteUrl?: string;
+  canonicalUrl?: string;
+  pageType?: 'website' | 'profile' | 'collection' | 'article' | 'scholarly_article';
+  title?: string;
+  description?: string;
+  post?: Post;
+  breadcrumbs?: BreadcrumbItem[];
+  customSchemas?: Record<string, any>[];
+}
+
+const DEFAULT_SITE_URL = 'https://lianhangluah.com';
+
+/**
+ * Normalizes an image path to an absolute URL
+ */
+export function toAbsoluteUrl(pathOrUrl: string, baseUrl: string = DEFAULT_SITE_URL): string {
+  if (!pathOrUrl) return `${baseUrl}/images/author-avatar.jpg`;
+  if (pathOrUrl.startsWith('http://') || pathOrUrl.startsWith('https://')) {
+    return pathOrUrl;
+  }
+  const cleanPath = pathOrUrl.startsWith('/') ? pathOrUrl : `/${pathOrUrl}`;
+  return `${baseUrl}${cleanPath}`;
+}
+
+/**
+ * Builds the Person entity for H. Kapginlian
+ */
+export function getPersonSchema(siteUrl: string = DEFAULT_SITE_URL) {
+  const { author } = siteConfig;
+  return {
+    '@type': 'Person',
+    '@id': `${siteUrl}/#person`,
+    name: author.name,
+    jobTitle: author.title,
+    description: author.shortBio,
+    url: `${siteUrl}/`,
+    image: toAbsoluteUrl(author.avatar, siteUrl),
+    worksFor: {
+      '@type': 'EducationalOrganization',
+      name: 'North-Eastern Hill University (NEHU), Shillong',
+      url: 'https://nehu.ac.in',
+    },
+    alumniOf: {
+      '@type': 'EducationalOrganization',
+      name: 'North-Eastern Hill University (NEHU), Shillong',
+    },
+    sameAs: [
+      `https://orcid.org/${author.orcid}`,
+      author.academia,
+      author.facebook,
+      author.instagram,
+    ].filter(Boolean) as string[],
+    knowsAbout: [
+      'Tibeto-Burman Linguistics',
+      'Kuki-Chin Languages',
+      'Morphosyntax & Pro-Drop',
+      'Simte Language',
+      'Kaipeng Language',
+      'Language Documentation',
+      'Indigenous Knowledge Systems',
+      'Oral History & Archiving',
+    ],
+  };
+}
+
+/**
+ * Builds the WebSite entity with SearchAction
+ */
+export function getWebSiteSchema(siteUrl: string = DEFAULT_SITE_URL) {
+  return {
+    '@type': 'WebSite',
+    '@id': `${siteUrl}/#website`,
+    url: `${siteUrl}/`,
+    name: siteConfig.meta.siteTitle,
+    description: siteConfig.meta.siteDescription,
+    publisher: {
+      '@id': `${siteUrl}/#person`,
+    },
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: `${siteUrl}/archive?q={search_term_string}`,
+      },
+      'query-input': 'required name=search_term_string',
+    },
+  };
+}
+
+/**
+ * Builds BreadcrumbList structured data for Google Search rich snippets
+ */
+export function getBreadcrumbSchema(items: BreadcrumbItem[], siteUrl: string = DEFAULT_SITE_URL) {
+  return {
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((item, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: item.name,
+      item: item.url.startsWith('http') ? item.url : `${siteUrl}${item.url.startsWith('/') ? item.url : `/${item.url}`}`,
+    })),
+  };
+}
+
+/**
+ * Parses authors string into Person schema entities
+ */
+function parseAuthorEntities(authorsStr?: string, siteUrl: string = DEFAULT_SITE_URL) {
+  if (!authorsStr) {
+    return [{ '@id': `${siteUrl}/#person` }];
+  }
+
+  // Check if it's the primary author
+  if (authorsStr.includes('H. Kapginlian') && !authorsStr.includes('&')) {
+    return [{ '@id': `${siteUrl}/#person` }];
+  }
+
+  // If multiple authors e.g. "H. Kapginlian & Dr. Saralin A. Lyngdoh, Associate Professor (NEHU, Shillong)"
+  const parts = authorsStr.split(/\s*&\s*|\s*,\s*and\s*/i);
+  return parts.map((namePart) => {
+    const cleanName = namePart.trim();
+    if (cleanName.includes('H. Kapginlian')) {
+      return { '@id': `${siteUrl}/#person` };
+    }
+    const firstCommaIdx = cleanName.indexOf(',');
+    if (firstCommaIdx === -1) {
+      return {
+        '@type': 'Person',
+        name: cleanName,
+        worksFor: {
+          '@type': 'EducationalOrganization',
+          name: 'North-Eastern Hill University (NEHU), Shillong',
+        },
+      };
+    }
+    const authorName = cleanName.slice(0, firstCommaIdx).trim();
+    const titleOrRole = cleanName.slice(firstCommaIdx + 1).trim();
+    return {
+      '@type': 'Person',
+      name: authorName,
+      jobTitle: titleOrRole,
+      worksFor: {
+        '@type': 'EducationalOrganization',
+        name: 'North-Eastern Hill University (NEHU), Shillong',
+      },
+    };
+  });
+}
+
+/**
+ * Builds ScholarlyArticle structured data for peer-reviewed academic publications
+ */
+export function getScholarlyArticleSchema(post: Post, siteUrl: string = DEFAULT_SITE_URL) {
+  const canonicalUrl = `${siteUrl}/research/${post.slug}`;
+  const authors = parseAuthorEntities(post.authors, siteUrl);
+
+  const schema: Record<string, any> = {
+    '@type': 'ScholarlyArticle',
+    '@id': `${canonicalUrl}#article`,
+    isPartOf: {
+      '@id': `${siteUrl}/#website`,
+    },
+    mainEntityOfPage: canonicalUrl,
+    headline: post.title,
+    name: post.title,
+    description: post.abstract || post.excerpt,
+    datePublished: post.date,
+    dateModified: post.date,
+    image: toAbsoluteUrl(post.coverImage, siteUrl),
+    author: authors,
+    publisher: post.journal
+      ? {
+          '@type': 'Organization',
+          name: post.journal,
+          ...(post.doi ? { url: `https://doi.org/${post.doi}` } : {}),
+        }
+      : {
+          '@id': `${siteUrl}/#person`,
+        },
+    inLanguage: post.language || 'en',
+    keywords: post.keywords ? post.keywords.join(', ') : post.tags?.join(', '),
+  };
+
+  if (post.abstract) {
+    schema.abstract = post.abstract;
+  }
+
+  if (post.journal) {
+    schema.publication = {
+      '@type': 'PublicationIssue',
+      issueNumber: post.volume || undefined,
+      isPartOf: {
+        '@type': 'Periodical',
+        name: post.journal,
+        issn: post.issn || undefined,
+      },
+    };
+  }
+
+  if (post.doi) {
+    schema.identifier = `https://doi.org/${post.doi}`;
+    schema.sameAs = `https://doi.org/${post.doi}`;
+  }
+
+  if (post.language) {
+    schema.about = {
+      '@type': 'Language',
+      name: post.language,
+    };
+  }
+
+  if (post.citationApa) {
+    schema.citation = post.citationApa;
+  }
+
+  return schema;
+}
+
+/**
+ * Builds Article/TechArticle/BlogPosting structured data for writing & guides
+ */
+export function getArticleSchema(post: Post, siteUrl: string = DEFAULT_SITE_URL) {
+  const canonicalUrl = `${siteUrl}/feed/${post.slug}`;
+  const isTechnical = post.category === 'Technical Guides';
+
+  return {
+    '@type': isTechnical ? 'TechArticle' : 'BlogPosting',
+    '@id': `${canonicalUrl}#article`,
+    isPartOf: {
+      '@id': `${siteUrl}/#website`,
+    },
+    mainEntityOfPage: canonicalUrl,
+    headline: post.title,
+    name: post.title,
+    description: post.excerpt,
+    datePublished: post.date,
+    dateModified: post.date,
+    image: toAbsoluteUrl(post.coverImage, siteUrl),
+    author: {
+      '@id': `${siteUrl}/#person`,
+    },
+    publisher: {
+      '@id': `${siteUrl}/#person`,
+    },
+    articleSection: post.category,
+    keywords: post.tags?.join(', '),
+    inLanguage: post.articleLanguage || 'English',
+    ...(isTechnical
+      ? {
+          dependencies: 'Markdown, Astro, CMS Studio',
+          proficiencyLevel: 'Beginner to Intermediate',
+        }
+      : {}),
+  };
+}
+
+/**
+ * Builds ProfilePage structured data for the /about biography page
+ */
+export function getProfilePageSchema(siteUrl: string = DEFAULT_SITE_URL) {
+  return {
+    '@type': 'ProfilePage',
+    '@id': `${siteUrl}/about#webpage`,
+    url: `${siteUrl}/about`,
+    name: 'About & Research | H. Kapginlian',
+    description: 'Biography, research focus, language documentation fieldwork, and academic publications of H. Kapginlian (NEHU Shillong).',
+    isPartOf: {
+      '@id': `${siteUrl}/#website`,
+    },
+    mainEntity: {
+      '@id': `${siteUrl}/#person`,
+    },
+  };
+}
+
+/**
+ * Builds CollectionPage structured data for archive/feed/research listing indexes
+ */
+export function getCollectionPageSchema(
+  name: string,
+  description: string,
+  path: string,
+  siteUrl: string = DEFAULT_SITE_URL
+) {
+  const canonicalUrl = `${siteUrl}${path.startsWith('/') ? path : `/${path}`}`;
+  return {
+    '@type': 'CollectionPage',
+    '@id': `${canonicalUrl}#webpage`,
+    url: canonicalUrl,
+    name,
+    description,
+    isPartOf: {
+      '@id': `${siteUrl}/#website`,
+    },
+  };
+}
+
+/**
+ * Creates the complete JSON-LD Schema.org graph object
+ */
+export function generateJsonLdGraph(options: JsonLdOptions = {}): Record<string, any> {
+  const siteUrl = options.siteUrl || DEFAULT_SITE_URL;
+  const graph: Record<string, any>[] = [
+    getWebSiteSchema(siteUrl),
+    getPersonSchema(siteUrl),
+  ];
+
+  if (options.breadcrumbs && options.breadcrumbs.length > 0) {
+    graph.push(getBreadcrumbSchema(options.breadcrumbs, siteUrl));
+  }
+
+  if (options.pageType === 'scholarly_article' && options.post) {
+    graph.push(getScholarlyArticleSchema(options.post, siteUrl));
+  } else if (options.pageType === 'article' && options.post) {
+    graph.push(getArticleSchema(options.post, siteUrl));
+  } else if (options.pageType === 'profile') {
+    graph.push(getProfilePageSchema(siteUrl));
+  } else if (options.pageType === 'collection') {
+    graph.push(
+      getCollectionPageSchema(
+        options.title || siteConfig.meta.siteTitle,
+        options.description || siteConfig.meta.siteDescription,
+        options.canonicalUrl || '/',
+        siteUrl
+      )
+    );
+  }
+
+  if (options.customSchemas && options.customSchemas.length > 0) {
+    graph.push(...options.customSchemas);
+  }
+
+  return {
+    '@context': 'https://schema.org',
+    '@graph': graph,
+  };
+}

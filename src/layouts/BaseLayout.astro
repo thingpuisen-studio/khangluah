@@ -2,23 +2,50 @@
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { url } from '../utils/url';
+import { generateJsonLdGraph, toAbsoluteUrl, type BreadcrumbItem } from '../utils/schema';
+import { siteConfig } from '../data/siteConfig';
+import type { Post } from '../data/posts';
 import '../styles/global.css';
 
 interface Props {
   title?: string;
   description?: string;
   ogImage?: string;
+  canonicalUrl?: string;
   showHeader?: boolean;
   showFooter?: boolean;
+  pageType?: 'website' | 'profile' | 'collection' | 'article' | 'scholarly_article';
+  post?: Post;
+  breadcrumbs?: BreadcrumbItem[];
+  customJsonLd?: Record<string, any>;
 }
 
 const {
-  title = "H. Kapginlian | Linguist & Researcher",
-  description = "Linguistics research, field notes, morphosyntax, and language documentation by H. Kapginlian.",
-  ogImage = "https://placehold.co/1200x630/1c1917/ffffff?text=H.+Kapginlian+Linguistics",
+  title = siteConfig.meta.siteTitle,
+  description = siteConfig.meta.siteDescription,
+  ogImage = "/images/author-centered.jpg",
+  canonicalUrl: propCanonicalUrl,
   showHeader = true,
   showFooter = true,
+  pageType = 'website',
+  post,
+  breadcrumbs,
+  customJsonLd,
 } = Astro.props;
+
+const siteUrl = Astro.site ? Astro.site.origin : 'https://lianhangluah.com';
+const canonicalUrl = propCanonicalUrl || (Astro.url ? new URL(Astro.url.pathname, siteUrl).href : siteUrl);
+const absoluteOgImage = toAbsoluteUrl(ogImage, siteUrl);
+
+const jsonLdGraph = customJsonLd || generateJsonLdGraph({
+  siteUrl,
+  canonicalUrl,
+  pageType,
+  title,
+  description,
+  post,
+  breadcrumbs,
+});
 ---
 
 <!doctype html>
@@ -30,11 +57,26 @@ const {
     <title>{title}</title>
     <meta name="description" content={description} />
 
-    <!-- Open Graph -->
+    <!-- Canonical URL -->
+    <link rel="canonical" href={canonicalUrl} />
+
+    <!-- Open Graph / Social Sharing -->
+    <meta property="og:type" content={post ? "article" : "website"} />
+    <meta property="og:url" content={canonicalUrl} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content={ogImage} />
-    <meta property="og:type" content="website" />
+    <meta property="og:image" content={absoluteOgImage} />
+    <meta property="og:site_name" content={siteConfig.meta.siteTitle} />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={canonicalUrl} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={absoluteOgImage} />
+
+    <!-- Google Search Console & Schema.org JSON-LD -->
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLdGraph)} />
 
     <!-- Academic Fonts: Inter (UI), Newsreader (Prose), Charis SIL (Linguistic IPA & Tones), JetBrains Mono (Code/Gloss) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
