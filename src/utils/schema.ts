@@ -88,7 +88,9 @@ export function getDeveloperSchema() {
       'Muolhoi',
     ],
     url: 'https://thingpuisen.pages.dev',
+    mainEntityOfPage: 'https://thingpuisen.pages.dev',
     jobTitle: 'Software Engineer & Web Developer',
+    disambiguatingDescription: 'Software engineer and web developer, creator of thingpuisen.pages.dev',
     sameAs: [
       'https://thingpuisen.pages.dev',
     ],
@@ -105,7 +107,7 @@ export function getDeveloperSchema() {
 }
 
 /**
- * Builds the WebSite entity with SearchAction, creator, and maintainer attribution
+ * Builds the WebSite entity with SearchAction, creator, producer, and maintainer attribution
  */
 export function getWebSiteSchema(siteUrl: string = DEFAULT_SITE_URL) {
   return {
@@ -118,6 +120,9 @@ export function getWebSiteSchema(siteUrl: string = DEFAULT_SITE_URL) {
       '@id': `${siteUrl}/#person`,
     },
     creator: {
+      '@id': 'https://thingpuisen.pages.dev/#developer',
+    },
+    producer: {
       '@id': 'https://thingpuisen.pages.dev/#developer',
     },
     maintainer: {
