@@ -24,6 +24,8 @@ You do **not** need to install any software or use the command line. You can man
 
 ## 1. Understanding How the Site Works
 
+- **Live Website:** `https://lianhangluah.com`
+- **Contact Email:** `contact@lianhangluah.com`
 - **Where your poems and essays live:**  
   Folder path: `src/content/posts/`  
   Every poem or essay is an individual file ending in `.md` (Markdown).
@@ -243,7 +245,7 @@ File: **`src/data/siteConfig.ts`**
 ## 8. Using the In-Browser CMS Studio
 
 Your website comes with a private, built-in visual Content Studio at:
-`https://yourdomain.com/admin` *(or `http://localhost:4321/admin` in development)*
+`https://lianhangluah.com/admin` *(or `http://localhost:4321/admin` in development)*
 
 ### How to Use the Studio:
 1. Open your browser and go to your site URL with `/admin` at the end.

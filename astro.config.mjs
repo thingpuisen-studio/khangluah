@@ -4,7 +4,7 @@ import mdx from '@astrojs/mdx';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://hkhangluah.pages.dev',
+  site: 'https://lianhangluah.com',
   base: '/',
   redirects: {
     '/feed/pronouns-in-simte-pro-drop-emphatic': '/research/pronouns-in-simte-pro-drop-emphatic',
