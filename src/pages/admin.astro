@@ -49,32 +49,41 @@ const existingPostsData = samplePosts.map((p) => {
   title="Admin CMS Studio | H. Kapginlian"
   description="Content Management Studio with Markdown Composer, Live Preview, and Content Catalog."
 >
-  <!-- Authentication Gate Screen (Shown when unauthenticated) -->
-  <div id="admin-login-gate" class="max-w-md mx-auto px-4 py-20 sm:py-32 font-sans text-center">
-    <div class="p-8 sm:p-10 rounded-3xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/60 shadow-xl space-y-6">
-      <div class="w-16 h-16 rounded-2xl bg-[var(--bg-primary)] border border-[var(--border-color)] flex items-center justify-center mx-auto text-[var(--accent)] shadow-xs">
-        <svg class="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
-          <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+  <!-- Unauthenticated Lockout Gate (Visible when not authenticated with GitHub) -->
+  <div id="admin-login-gate" class="max-w-md mx-auto px-4 py-16 sm:py-24 text-center font-sans">
+    <div class="p-6 sm:p-8 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/50 shadow-xl space-y-6">
+      <div class="w-12 h-12 mx-auto rounded-2xl bg-[var(--accent-light)] flex items-center justify-center text-[var(--accent)] border border-[var(--accent)]/30">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
         </svg>
       </div>
 
       <div class="space-y-2">
-        <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--accent)] font-bold">
+        <span class="text-xs font-mono font-bold uppercase tracking-wider text-[var(--accent)]">
           Restricted Area
         </span>
-        <h1 class="text-2xl font-bold tracking-tight text-[var(--text-primary)]">
-          CMS Studio Access
+        <h1 class="text-xl sm:text-2xl font-bold text-[var(--text-primary)] tracking-tight">
+          Admin CMS Studio
         </h1>
-        <p class="text-xs text-[var(--text-secondary)] font-serif leading-relaxed">
-          Sign in with the repository owner GitHub account (<span class="font-mono text-[var(--text-primary)]">lianhangluah</span>) to manage publications, poems, and website settings.
+        <p class="text-xs text-[var(--text-secondary)] leading-relaxed">
+          Sign in with the repository owner GitHub account (<code class="font-mono text-[var(--text-primary)]">lianhangluah</code>) to manage publications, poems, and website settings.
         </p>
       </div>
 
-      <div class="space-y-3 pt-2">
+      <div class="p-3.5 rounded-xl border border-amber-500/30 bg-amber-500/10 text-left space-y-1">
+        <div class="flex items-center gap-1.5 text-amber-500 text-xs font-semibold">
+          <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+          <span>Authentication Required</span>
+        </div>
+        <p class="text-[11px] text-[var(--text-secondary)] leading-relaxed">
+          Direct content editing, local catalog management, and Cloudflare deployments are protected and reserved for the repository owner.
+        </p>
+      </div>
+
+      <div class="space-y-2 pt-2">
         <a
           href="/api/auth/login"
-          id="btn-gate-login"
-          class="w-full min-h-[44px] px-5 py-3 rounded-xl bg-[var(--text-primary)] text-[var(--bg-primary)] font-bold text-xs hover:opacity-90 transition-opacity inline-flex items-center justify-center gap-2 shadow-md cursor-pointer"
+          class="w-full min-h-[44px] px-4 py-2.5 rounded-xl bg-[var(--text-primary)] text-[var(--bg-primary)] font-bold text-xs hover:opacity-90 transition-opacity inline-flex items-center justify-center gap-2 shadow-xs cursor-pointer"
         >
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
             <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
@@ -82,19 +91,17 @@ const existingPostsData = samplePosts.map((p) => {
           <span>Sign In with GitHub</span>
         </a>
 
-        <div class="pt-2 text-center">
-          <a
-            href={url("/")}
-            class="text-xs text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors inline-block"
-          >
-            &larr; Back to Website
-          </a>
-        </div>
+        <a
+          href={url("/")}
+          class="w-full min-h-[44px] px-4 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-primary)] hover:bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium text-xs transition-colors inline-flex items-center justify-center gap-1.5"
+        >
+          <span>&larr; Return to Home</span>
+        </a>
       </div>
     </div>
   </div>
 
-  <!-- Main Authenticated CMS Studio (Hidden by default until GitHub authentication is verified) -->
+  <!-- Main Authenticated Studio (Hidden by default until authenticated) -->
   <div id="admin-main-ui" class="hidden max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 pb-28 md:pb-16 font-sans">
     
     <!-- Top Header Bar -->
@@ -106,8 +113,8 @@ const existingPostsData = samplePosts.map((p) => {
             Content Management Studio
           </span>
           <div id="gh-status-badge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-[var(--bg-secondary)] border border-[var(--border-color)] text-[var(--text-secondary)] flex items-center gap-1.5">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" id="gh-dot"></span>
-            <span id="gh-status-text" class="text-emerald-400 font-semibold">Authenticated</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500" id="gh-dot"></span>
+            <span id="gh-status-text">Connected</span>
           </div>
         </div>
         <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--text-primary)] mt-1">
@@ -115,21 +122,21 @@ const existingPostsData = samplePosts.map((p) => {
         </h1>
       </div>
 
-      <div class="flex items-center gap-2">
+      <div class="flex flex-wrap items-center gap-2">
         <button
           type="button"
           id="btn-gh-auth"
           class="min-h-[44px] px-3.5 py-2 text-xs rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] hover:bg-[var(--bg-primary)] text-[var(--text-primary)] font-medium transition-colors inline-flex items-center gap-1.5 cursor-pointer"
-          title="Sign in with GitHub to publish and delete directly"
+          title="Sign out of GitHub"
         >
           <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
-          <span id="btn-gh-auth-text">Connect GitHub</span>
+          <span id="btn-gh-auth-text">Sign Out</span>
         </button>
         <a
           href={url("/")}
           class="min-h-[44px] px-3.5 py-2 text-xs rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] hover:bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors inline-flex items-center gap-1.5"
         >
-          <span>View Live Site</span>
+          <span>View Site</span>
           <span aria-hidden="true">&rarr;</span>
         </a>
         <button
@@ -142,11 +149,21 @@ const existingPostsData = samplePosts.map((p) => {
         </button>
         <button
           type="button"
-          id="btn-publish-top"
+          id="btn-save-post-top"
+          class="min-h-[44px] px-3.5 py-2 text-xs rounded-xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold hover:bg-emerald-500/20 transition-colors inline-flex items-center gap-1.5 cursor-pointer"
+          title="Save post to local catalog in browser without triggering a Cloudflare build"
+        >
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+          <span>Save Post (Local)</span>
+        </button>
+        <button
+          type="button"
+          id="btn-deploy-top"
           class="min-h-[44px] px-4 py-2 text-xs rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition-colors inline-flex items-center gap-1.5 cursor-pointer shadow-xs"
+          title="Commit directly to GitHub on main branch, triggering Cloudflare Pages rebuild"
         >
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
-          <span>Publish Post</span>
+          <span>Deploy to Live Site</span>
         </button>
       </div>
     </header>
@@ -752,7 +769,7 @@ const existingPostsData = samplePosts.map((p) => {
               Clear Form
             </button>
 
-            <div class="flex items-center gap-2">
+            <div class="flex flex-wrap items-center gap-2">
               <button
                 type="button"
                 id="btn-goto-preview"
@@ -762,11 +779,21 @@ const existingPostsData = samplePosts.map((p) => {
               </button>
               <button
                 type="button"
-                id="btn-publish-post"
+                id="btn-save-post"
+                class="min-h-[44px] px-4 py-2 rounded-xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-semibold hover:bg-emerald-500/20 transition-colors cursor-pointer inline-flex items-center gap-1.5"
+                title="Save post to local catalog in browser without triggering a Cloudflare build"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+                <span>Save Post (Local)</span>
+              </button>
+              <button
+                type="button"
+                id="btn-deploy-post"
                 class="min-h-[44px] px-5 py-2 rounded-xl bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition-colors cursor-pointer inline-flex items-center gap-1.5 shadow-xs"
+                title="Commit directly to GitHub on main branch, triggering Cloudflare Pages rebuild"
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
-                <span>Publish Post</span>
+                <span>Deploy to Live Site</span>
               </button>
             </div>
           </div>
@@ -1537,18 +1564,18 @@ const existingPostsData = samplePosts.map((p) => {
       </button>
     </nav>
 
-    <!-- Publish Success Modal -->
+    <!-- Save & Publish Confirmation Modal -->
     <div id="publish-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
       <div class="bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
         <div class="flex items-center gap-2">
           <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span class="text-xs font-mono font-bold uppercase tracking-wider text-emerald-500">
-            Post Published Successfully
+          <span id="pub-modal-eyebrow" class="text-xs font-mono font-bold uppercase tracking-wider text-emerald-500">
+            Post Saved Locally
           </span>
         </div>
         <h3 class="text-base font-bold text-[var(--text-primary)]" id="pub-modal-title"></h3>
-        <p class="text-xs text-[var(--text-secondary)] leading-relaxed">
-          Your post has been published into the local catalog. To persist it permanently in your Git repository, commit the generated file.
+        <p class="text-xs text-[var(--text-secondary)] leading-relaxed" id="pub-modal-notice">
+          Your post is saved in your local browser catalog. You can continue editing, previewing, or deploy to GitHub whenever you are ready.
         </p>
 
         <div class="p-3.5 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-color)] text-xs font-mono space-y-1.5 text-[var(--text-secondary)]">
@@ -1566,17 +1593,18 @@ const existingPostsData = samplePosts.map((p) => {
           </button>
           <button
             type="button"
-            id="pub-modal-copy-code"
+            id="pub-modal-view-catalog"
             class="min-h-[44px] px-3.5 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] hover:bg-[var(--bg-primary)] text-xs font-semibold text-[var(--text-primary)] transition-colors cursor-pointer"
           >
-            Copy Markdown
+            View in Catalog
           </button>
           <button
             type="button"
-            id="pub-modal-view-catalog"
-            class="min-h-[44px] px-4 py-2 rounded-xl bg-emerald-600 text-white font-semibold text-xs hover:bg-emerald-700 cursor-pointer shadow-xs"
+            id="pub-modal-deploy-live"
+            class="min-h-[44px] px-4 py-2 rounded-xl bg-emerald-600 text-white font-semibold text-xs hover:bg-emerald-700 cursor-pointer shadow-xs inline-flex items-center gap-1.5"
           >
-            View in Catalog
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+            <span id="pub-modal-deploy-text">Deploy to Live Site</span>
           </button>
         </div>
       </div>
@@ -1650,7 +1678,7 @@ const existingPostsData = samplePosts.map((p) => {
     const isAuth = Boolean(token);
 
     const loginGate = document.getElementById('admin-login-gate');
-    const mainUI = document.getElementById('admin-main-ui');
+    const mainUi = document.getElementById('admin-main-ui');
     const ghDot = document.getElementById('gh-dot');
     const ghStatusText = document.getElementById('gh-status-text');
     const btnGhAuthText = document.getElementById('btn-gh-auth-text');
@@ -1664,7 +1692,7 @@ const existingPostsData = samplePosts.map((p) => {
 
     if (isAuth) {
       if (loginGate) loginGate.classList.add('hidden');
-      if (mainUI) mainUI.classList.remove('hidden');
+      if (mainUi) mainUi.classList.remove('hidden');
 
       if (ghDot) {
         ghDot.className = "w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse";
@@ -1685,17 +1713,17 @@ const existingPostsData = samplePosts.map((p) => {
       }
     } else {
       if (loginGate) loginGate.classList.remove('hidden');
-      if (mainUI) mainUI.classList.add('hidden');
+      if (mainUi) mainUi.classList.add('hidden');
 
       if (ghDot) {
         ghDot.className = "w-1.5 h-1.5 rounded-full bg-amber-500";
       }
       if (ghStatusText) {
-        ghStatusText.textContent = "Unauthenticated";
+        ghStatusText.textContent = "Disconnected";
         ghStatusText.className = "";
       }
       if (btnGhAuthText) {
-        btnGhAuthText.textContent = "Connect GitHub";
+        btnGhAuthText.textContent = "Sign In";
       }
       if (cfgGhPill) {
         cfgGhPill.textContent = "Disconnected";
@@ -2379,13 +2407,13 @@ const existingPostsData = samplePosts.map((p) => {
     });
   }
 
-  // Publish Post Handler
-  async function publishCurrentPost() {
+  // 1. Save Post Locally (No GitHub Commit, No Cloudflare Rebuild)
+  function saveCurrentPostLocally(showModal = true) {
     const title = titleInput.value.trim();
     if (!title) {
-      showToast("Please enter a title before publishing");
+      showToast("Please enter a title before saving");
       titleInput.focus();
-      return;
+      return null;
     }
 
     generateCode();
@@ -2397,7 +2425,6 @@ const existingPostsData = samplePosts.map((p) => {
     const coverImage = coverInput.value.trim();
     const tags = tagsInput.value.split(',').map(t => t.trim()).filter(Boolean);
     const targetFile = currentType === 'academic_paper' ? `src/data/posts/${slug}.ts` : `src/content/posts/${slug}.md`;
-    const code = document.getElementById('code-output').querySelector('code').textContent;
 
     const postItem = {
       slug,
@@ -2441,60 +2468,96 @@ const existingPostsData = samplePosts.map((p) => {
     // Render immediately into catalog DOM
     renderPublishedItemToCatalog(postItem);
 
-    // Direct GitHub commit if authenticated
-    const token = getGhToken();
-    const pubBtnTop = document.getElementById('btn-publish-top');
-    const pubBtnBottom = document.getElementById('btn-publish-post');
-    let committedToGitHub = false;
+    showToast(`Saved "${title}" to local catalog!`);
 
-    if (token) {
-      if (pubBtnTop) pubBtnTop.textContent = "Committing...";
-      if (pubBtnBottom) pubBtnBottom.textContent = "Committing to GitHub...";
-      showToast("Committing directly to GitHub repository...");
-
-      try {
-        await commitFileToGitHub(targetFile, code, `feat(content): publish ${title}`);
-        committedToGitHub = true;
-        showToast("Committed to GitHub! Cloudflare will deploy in ~60s.");
-      } catch (ghErr) {
-        console.error("GitHub commit failed:", ghErr);
-        showToast(`GitHub commit warning: ${ghErr.message}. Saved locally.`);
-      } finally {
-        if (pubBtnTop) pubBtnTop.innerHTML = '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg><span>Publish Post</span>';
-        if (pubBtnBottom) pubBtnBottom.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg><span>Publish Post</span>';
+    if (showModal) {
+      const pubModal = document.getElementById('publish-modal');
+      if (pubModal) {
+        document.getElementById('pub-modal-eyebrow').textContent = "Post Saved Locally";
+        document.getElementById('pub-modal-title').textContent = `"${title}"`;
+        document.getElementById('pub-modal-filename').textContent = targetFile;
+        document.getElementById('pub-modal-notice').textContent =
+          "Your post has been saved locally to your browser catalog. It is ready for previewing. When you are ready to push to production, click 'Deploy to Live Site'.";
+        const deployBtn = document.getElementById('pub-modal-deploy-live');
+        if (deployBtn) deployBtn.classList.remove('hidden');
+        pubModal.classList.remove('hidden');
       }
-    } else {
-      showToast(`Published "${title}" to local catalog!`);
     }
 
-    // Show publish success modal
-    const pubModal = document.getElementById('publish-modal');
-    if (pubModal) {
-      document.getElementById('pub-modal-title').textContent = `"${title}"`;
-      document.getElementById('pub-modal-filename').textContent = targetFile;
-      const modalNotice = pubModal.querySelector('p');
-      if (modalNotice) {
-        modalNotice.textContent = committedToGitHub
-          ? "Your post has been committed directly to GitHub on branch 'main'. Cloudflare Pages is now rebuilding and deploying to lianhangluah.com within 1 to 2 minutes."
-          : "Your post has been published into the local catalog. Connect your GitHub account to commit directly, or copy the file manually.";
+    return { slug, title, targetFile, postItem };
+  }
+
+  // 2. Deploy Post to Live Site (GitHub API -> Cloudflare Pages)
+  async function deployCurrentPostToGitHub() {
+    const token = getGhToken();
+    if (!token) {
+      alert("GitHub authentication required to deploy to the live site. Please sign in with GitHub.");
+      window.location.href = "/api/auth/login";
+      return;
+    }
+
+    const saved = saveCurrentPostLocally(false);
+    if (!saved) return;
+
+    const { title, slug, targetFile } = saved;
+    const code = document.getElementById('code-output').querySelector('code').textContent;
+
+    const confirmed = confirm(`Deploy "${title}" to GitHub on branch 'main'?\n\nThis will commit directly to the repository and trigger a Cloudflare Pages rebuild for lianhangluah.com.`);
+    if (!confirmed) return;
+
+    const deployTop = document.getElementById('btn-deploy-top');
+    const deployBottom = document.getElementById('btn-deploy-post');
+    const deployModal = document.getElementById('pub-modal-deploy-text');
+
+    if (deployTop) deployTop.textContent = "Deploying...";
+    if (deployBottom) deployBottom.textContent = "Deploying to GitHub...";
+    if (deployModal) deployModal.textContent = "Deploying...";
+
+    showToast("Committing to GitHub repository...");
+
+    try {
+      await commitFileToGitHub(targetFile, code, `feat(content): publish ${title}`);
+      showToast("Committed to GitHub! Cloudflare will deploy in ~60s.");
+
+      const pubModal = document.getElementById('publish-modal');
+      if (pubModal) {
+        document.getElementById('pub-modal-eyebrow').textContent = "Deployed to Live Site";
+        document.getElementById('pub-modal-title').textContent = `"${title}"`;
+        document.getElementById('pub-modal-filename').textContent = targetFile;
+        document.getElementById('pub-modal-notice').textContent =
+          "Your post has been committed directly to GitHub on branch 'main'. Cloudflare Pages is rebuilding and deploying to lianhangluah.com within 1 to 2 minutes.";
+        const deployBtn = document.getElementById('pub-modal-deploy-live');
+        if (deployBtn) deployBtn.classList.add('hidden');
+        pubModal.classList.remove('hidden');
       }
-      pubModal.classList.remove('hidden');
+    } catch (ghErr) {
+      console.error("GitHub deploy failed:", ghErr);
+      showToast(`GitHub commit error: ${ghErr.message}. Saved locally.`);
+      alert(`GitHub deploy failed: ${ghErr.message}\nYour post is still saved locally.`);
+    } finally {
+      if (deployTop) {
+        deployTop.innerHTML = '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg><span>Deploy to Live Site</span>';
+      }
+      if (deployBottom) {
+        deployBottom.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg><span>Deploy to Live Site</span>';
+      }
+      if (deployModal) {
+        deployModal.textContent = "Deploy to Live Site";
+      }
     }
   }
 
-  // Publish button triggers
-  document.getElementById('btn-publish-post')?.addEventListener('click', publishCurrentPost);
-  document.getElementById('btn-publish-top')?.addEventListener('click', publishCurrentPost);
+  // Post Save & Deploy triggers
+  document.getElementById('btn-save-post')?.addEventListener('click', () => saveCurrentPostLocally(true));
+  document.getElementById('btn-save-post-top')?.addEventListener('click', () => saveCurrentPostLocally(true));
+  document.getElementById('btn-deploy-post')?.addEventListener('click', deployCurrentPostToGitHub);
+  document.getElementById('btn-deploy-top')?.addEventListener('click', deployCurrentPostToGitHub);
+  document.getElementById('pub-modal-deploy-live')?.addEventListener('click', deployCurrentPostToGitHub);
   document.getElementById('btn-goto-preview')?.addEventListener('click', () => switchTab('tab-preview'));
 
   // Publish Modal handlers
   document.getElementById('pub-modal-close')?.addEventListener('click', () => {
     document.getElementById('publish-modal')?.classList.add('hidden');
-  });
-
-  document.getElementById('pub-modal-copy-code')?.addEventListener('click', () => {
-    const code = document.getElementById('code-output').querySelector('code').textContent;
-    navigator.clipboard.writeText(code).then(() => showToast("Markdown copied!"));
   });
 
   document.getElementById('pub-modal-view-catalog')?.addEventListener('click', () => {
