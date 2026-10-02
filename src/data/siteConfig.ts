@@ -75,9 +75,12 @@ export interface SiteConfig {
     locationDetail: string;
     email: string;
     orcid: string;
-    scholar: string;
-    github: string;
-    bluesky: string;
+    scholar?: string;
+    academia?: string;
+    github?: string;
+    facebook?: string;
+    instagram?: string;
+    bluesky?: string;
     avatar: string;
     fullPhoto: string;
     shortBio: string;
@@ -166,9 +169,9 @@ export const defaultSiteConfig: SiteConfig = {
     locationDetail: "NEHU, Shillong • Manipur, Northeast India",
     email: "contact@lianhangluah.com",
     orcid: "0009-0008-9045-3527",
-    scholar: "https://scholar.google.com",
-    github: "https://github.com/kapginlian",
-    bluesky: "https://bsky.app",
+    academia: "https://nehuac.academia.edu/HKapginlian",
+    facebook: "https://facebook.com/lianhangluah",
+    instagram: "https://instagram.com/lian.hangluah",
     avatar: url("/images/author-avatar.jpg"),
     fullPhoto: url("/images/author-centered.jpg"),
     shortBio: "I am H. Kapginlian, a linguist working at the intersection of morphology and syntax, Indigenous Knowledge Systems, language documentation, traditional folklore and folktales, and intangible cultural heritage.",
@@ -240,6 +243,19 @@ export const defaultSiteConfig: SiteConfig = {
   },
   socialLinks: [
     {
+      id: "academia",
+      title: "Academia.edu",
+      handle: "hkapginlian",
+      description: "Department of Linguistics, North-Eastern Hill University (NEHU), Shillong. Research papers and academic monographs.",
+      category: "academic",
+      badge: "NEHU Shillong",
+      href: "https://nehuac.academia.edu/HKapginlian",
+      icon: "academia",
+      colorTheme: "border-sky-700/30 bg-sky-700/5 hover:bg-sky-700/15 text-sky-700 dark:text-sky-400",
+      isActive: true,
+      order: 1
+    },
+    {
       id: "orcid",
       title: "ORCID Registry",
       handle: "0009-0008-9045-3527",
@@ -250,85 +266,33 @@ export const defaultSiteConfig: SiteConfig = {
       icon: "orcid",
       colorTheme: "border-[#A6CE39]/30 bg-[#A6CE39]/5 hover:bg-[#A6CE39]/15 text-[#A6CE39]",
       isActive: true,
-      order: 1
-    },
-    {
-      id: "scholar",
-      title: "Google Scholar",
-      handle: "H. Kapginlian",
-      description: "Citations, peer-reviewed articles, co-authored publications, and index metrics.",
-      category: "academic",
-      badge: "Citations",
-      href: "https://scholar.google.com",
-      icon: "scholar",
-      colorTheme: "border-blue-500/30 bg-blue-500/5 hover:bg-blue-500/15 text-blue-500",
-      isActive: true,
       order: 2
-    },
-    {
-      id: "researchgate",
-      title: "ResearchGate",
-      handle: "H. Kapginlian",
-      description: "Working papers, conference presentation slides, and scholarly Q&A with peer linguists.",
-      category: "academic",
-      badge: "Preprints",
-      href: "https://www.researchgate.net",
-      icon: "researchgate",
-      colorTheme: "border-emerald-500/30 bg-emerald-500/5 hover:bg-emerald-500/15 text-emerald-500",
-      isActive: true,
-      order: 3
     },
     {
       id: "facebook",
       title: "Facebook",
-      handle: "H. Kapginlian",
-      description: "Community updates, cultural reflections, folk documentation news, and regional public posts.",
+      handle: "lianhangluah",
+      description: "Community updates, cultural reflections, folk documentation dispatches, and public notes.",
       category: "social",
-      badge: "Community",
-      href: "https://www.facebook.com",
+      badge: "Personal",
+      href: "https://facebook.com/lianhangluah",
       icon: "facebook",
       colorTheme: "border-sky-600/30 bg-sky-600/5 hover:bg-sky-600/15 text-sky-600 dark:text-sky-400",
       isActive: true,
+      order: 3
+    },
+    {
+      id: "instagram",
+      title: "Instagram",
+      handle: "lian.hangluah",
+      description: "Visual dispatches, fieldwork landscapes, book notes, and personal updates.",
+      category: "social",
+      badge: "Personal",
+      href: "https://instagram.com/lian.hangluah",
+      icon: "instagram",
+      colorTheme: "border-pink-500/30 bg-pink-500/5 hover:bg-pink-500/15 text-pink-600 dark:text-pink-400",
+      isActive: true,
       order: 4
-    },
-    {
-      id: "twitter",
-      title: "X / Twitter",
-      handle: "@kapginlian",
-      description: "Linguistics dispatches, Tibeto-Burman morphology notes, and conference commentary.",
-      category: "social",
-      badge: "Microblog",
-      href: "https://x.com",
-      icon: "twitter",
-      colorTheme: "border-stone-500/30 bg-stone-500/5 hover:bg-stone-500/15 text-stone-700 dark:text-stone-300",
-      isActive: true,
-      order: 5
-    },
-    {
-      id: "whatsapp",
-      title: "WhatsApp",
-      handle: "Direct / Community",
-      description: "Direct messaging for fieldwork informants, regional researchers, and community coordination.",
-      category: "social",
-      badge: "Direct Chat",
-      href: "https://wa.me/?text=Hello%20Kapginlian",
-      icon: "whatsapp",
-      colorTheme: "border-emerald-600/30 bg-emerald-600/5 hover:bg-emerald-600/15 text-emerald-600 dark:text-emerald-400",
-      isActive: true,
-      order: 6
-    },
-    {
-      id: "github",
-      title: "GitHub Repository",
-      handle: "kapginlian",
-      description: "Computational tools, open language datasets, orthography scripts, and website source code.",
-      category: "direct",
-      badge: "Code",
-      href: "https://github.com/kapginlian",
-      icon: "github",
-      colorTheme: "border-purple-500/30 bg-purple-500/5 hover:bg-purple-500/15 text-purple-600 dark:text-purple-400",
-      isActive: true,
-      order: 7
     },
     {
       id: "email",
@@ -341,7 +305,7 @@ export const defaultSiteConfig: SiteConfig = {
       icon: "email",
       colorTheme: "border-[var(--accent)]/30 bg-[var(--accent)]/5 hover:bg-[var(--accent)]/15 text-[var(--accent)]",
       isActive: true,
-      order: 8
+      order: 5
     }
   ],
   pages: {

@@ -49,6 +49,14 @@ const activeNav = siteConfig.navigation
               </a>
             </li>
           )}
+          {siteConfig.author.academia && (
+            <li>
+              <a href={siteConfig.author.academia} target="_blank" rel="noopener noreferrer" class="text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors py-0.5 inline-flex items-center gap-1.5">
+                <span>Academia.edu</span>
+                <SocialIcon name="external" class="w-3 h-3 opacity-70" />
+              </a>
+            </li>
+          )}
           <li><a href={url("/terms")} class="text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors py-0.5 inline-block">Terms &amp; Citation Use</a></li>
           <li><a href={url("/privacy")} class="text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors py-0.5 inline-block">Privacy Policy</a></li>
           {siteConfig.footer.showAdminLink && (

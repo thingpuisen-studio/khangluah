@@ -74,7 +74,7 @@ const directLinks = socialLinks.filter((s) => s.category === "direct" && s.isAct
         <span>Academic Registries &amp; Citations</span>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 font-sans">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 font-sans">
         {academicLinks.map((item) => (
           <a
             href={item.href}
@@ -113,14 +113,14 @@ const directLinks = socialLinks.filter((s) => s.category === "direct" && s.isAct
       </div>
     </div>
 
-    <!-- SECTION 2: SOCIAL & COMMUNITY CHANNELS (FB, TWITTER, WA) -->
+    <!-- SECTION 2: SOCIAL & COMMUNITY CHANNELS -->
     <div class="space-y-4">
       <div class="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-[var(--text-secondary)] font-semibold">
         <SocialIcon name="globe" class="w-4 h-4 text-[var(--accent)]" />
         <span>Social &amp; Community Channels</span>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 font-sans">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 font-sans">
         {socialMediaLinks.map((item) => (
           <a
             href={item.href}
