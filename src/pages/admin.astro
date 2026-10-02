@@ -287,35 +287,35 @@ const existingPostsData = allPosts.map((p) => {
       </nav>
 
       <!-- Contextual Action Buttons -->
-      <div class="flex items-center gap-2 self-end lg:self-auto flex-wrap">
+      <div class="flex items-center gap-2 shrink-0">
         <button
           type="button"
           id="btn-save-draft"
-          class="min-h-[40px] px-3 py-1.5 text-xs rounded-lg border border-[var(--border-color)]/70 bg-[var(--bg-secondary)]/30 hover:bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium transition-colors inline-flex items-center gap-1.5 cursor-pointer"
+          class="min-h-[38px] px-3 py-1.5 text-xs rounded-lg border border-[var(--border-color)]/70 bg-[var(--bg-secondary)]/30 hover:bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-mono font-medium transition-colors inline-flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
           title="Save Post as Draft to Local Storage (SPADTLS)"
         >
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
-          <span>Save Draft (SPADTLS)</span>
+          <span>SPADTLS</span>
         </button>
 
         <button
           type="button"
           id="btn-save-remote-draft"
-          class="min-h-[40px] px-3 py-1.5 text-xs rounded-lg border border-indigo-500/30 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-medium hover:bg-indigo-500/20 transition-colors inline-flex items-center gap-1.5 cursor-pointer"
+          class="min-h-[38px] px-3 py-1.5 text-xs rounded-lg border border-indigo-500/30 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-mono font-medium hover:bg-indigo-500/20 transition-colors inline-flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
           title="Save Post as Draft in Remote Repo (SPADIRR) - commits to GitHub with draft: true"
         >
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
-          <span>Save Draft (SPADIRR)</span>
+          <span>SPADIRR</span>
         </button>
 
         <button
           type="button"
           id="btn-deploy-top"
-          class="min-h-[40px] px-3.5 py-1.5 text-xs rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-medium transition-colors inline-flex items-center gap-1.5 cursor-pointer shadow-xs"
-          title="Publish post with draft: false and deploy live to Cloudflare Pages"
+          class="min-h-[38px] px-3.5 py-1.5 text-xs rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-medium transition-colors inline-flex items-center gap-1.5 cursor-pointer shadow-xs whitespace-nowrap"
+          title="Publish live to website (draft: false)"
         >
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
-          <span>Deploy to Live Site</span>
+          <span>Publish</span>
         </button>
 
         <button type="button" id="btn-save-post-top" class="hidden" aria-hidden="true"></button>
@@ -882,29 +882,29 @@ const existingPostsData = allPosts.map((p) => {
               <button
                 type="button"
                 id="btn-save-post"
-                class="min-h-[44px] px-3.5 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 hover:bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-semibold transition-colors cursor-pointer inline-flex items-center gap-1.5"
+                class="min-h-[44px] px-3.5 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 hover:bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-mono font-semibold transition-colors cursor-pointer inline-flex items-center gap-1.5"
                 title="Save Post as Draft to Local Storage (SPADTLS)"
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
-                <span>Save Draft (SPADTLS)</span>
+                <span>SPADTLS</span>
               </button>
               <button
                 type="button"
                 id="btn-save-remote-draft-bottom"
-                class="min-h-[44px] px-3.5 py-2 rounded-xl border border-indigo-500/30 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs font-semibold hover:bg-indigo-500/20 transition-colors cursor-pointer inline-flex items-center gap-1.5"
+                class="min-h-[44px] px-3.5 py-2 rounded-xl border border-indigo-500/30 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs font-mono font-semibold hover:bg-indigo-500/20 transition-colors cursor-pointer inline-flex items-center gap-1.5"
                 title="Save Post as Draft in Remote Repo (SPADIRR) - commits to GitHub with draft: true"
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
-                <span>Save Draft (SPADIRR)</span>
+                <span>SPADIRR</span>
               </button>
               <button
                 type="button"
                 id="btn-deploy-post"
                 class="min-h-[44px] px-5 py-2 rounded-xl bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition-colors cursor-pointer inline-flex items-center gap-1.5 shadow-xs"
-                title="Commit directly to GitHub on main branch with draft: false, triggering Cloudflare Pages rebuild"
+                title="Publish post live to website (draft: false)"
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
-                <span>Deploy to Live Site</span>
+                <span>Publish</span>
               </button>
             </div>
           </div>
@@ -2387,46 +2387,135 @@ const existingPostsData = allPosts.map((p) => {
     });
   });
 
-  // Simple, rock-solid client-side Markdown parser for live preview
+  // Full-featured client-side Markdown parser for live preview
   function renderMarkdown(md) {
     if (!md) return '<p class="text-[var(--text-secondary)] italic">Start typing in the composer to view rendered markdown preview...</p>';
 
-    // Escape raw HTML entities
-    let html = md
+    const codeBlocks = [];
+
+    // 1. Extract fenced code blocks first so inner content is untouched
+    let text = md.replace(/```([a-zA-Z0-9_-]*)\n([\s\S]*?)```/g, (match, lang, code) => {
+      const idx = codeBlocks.length;
+      const escapedCode = code
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+      const langBadge = lang ? `<span class="px-2 py-0.5 rounded bg-[var(--bg-primary)] border border-[var(--border-color)] text-[10px] font-mono text-[var(--accent)] font-semibold uppercase absolute top-2.5 right-3">${lang}</span>` : '';
+      codeBlocks.push(
+        `<div class="relative my-5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/80 overflow-hidden font-mono text-xs">
+          ${langBadge}
+          <pre class="p-4 overflow-x-auto text-[var(--text-primary)] leading-relaxed"><code>${escapedCode}</code></pre>
+        </div>`
+      );
+      return `@@CODEBLOCK_${idx}@@`;
+    });
+
+    // 2. Extract inline code
+    const inlineCodes = [];
+    text = text.replace(/`([^`\n]+)`/g, (match, code) => {
+      const idx = inlineCodes.length;
+      const escaped = code
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+      inlineCodes.push(`<code class="px-1.5 py-0.5 rounded bg-[var(--bg-secondary)] border border-[var(--border-color)] font-mono text-xs text-[var(--accent)] font-semibold">${escaped}</code>`);
+      return `@@INLINECODE_${idx}@@`;
+    });
+
+    // 3. Escape HTML
+    text = text
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;');
 
-    // Headings
-    html = html.replace(/^### (.*$)/gim, '<h3 class="text-lg font-bold font-sans tracking-tight text-[var(--text-primary)] mt-4 mb-1">$1</h3>');
-    html = html.replace(/^## (.*$)/gim, '<h2 class="text-xl font-bold font-sans tracking-tight text-[var(--text-primary)] mt-6 mb-2 border-b border-[var(--border-color)]/60 pb-1">$1</h2>');
-    html = html.replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold font-sans tracking-tight text-[var(--text-primary)] mt-6 mb-2">$1</h1>');
+    // 4. Headings
+    text = text.replace(/^#### (.*$)/gim, '<h4 class="text-base font-bold font-sans tracking-tight text-[var(--text-primary)] mt-4 mb-1">$1</h4>');
+    text = text.replace(/^### (.*$)/gim, '<h3 class="text-lg font-bold font-sans tracking-tight text-[var(--text-primary)] mt-5 mb-2">$1</h3>');
+    text = text.replace(/^## (.*$)/gim, '<h2 class="text-xl sm:text-2xl font-bold font-sans tracking-tight text-[var(--text-primary)] mt-7 mb-3 border-b border-[var(--border-color)]/60 pb-1.5">$1</h2>');
+    text = text.replace(/^# (.*$)/gim, '<h1 class="text-2xl sm:text-3xl font-bold font-sans tracking-tight text-[var(--text-primary)] mt-6 mb-3">$1</h1>');
 
-    // Horizontal Rule / Stanza Divider
-    html = html.replace(/^---$/gim, '<hr class="my-6 border-[var(--border-color)]" />');
+    // 5. Horizontal Rules
+    text = text.replace(/^(\s*[-*_]\s*){3,}$/gim, '<hr class="my-6 border-[var(--border-color)]" />');
 
-    // Images: ![alt](url)
-    html = html.replace(/!\[(.*?)\]\((.*?)\)/gim, '<div class="my-4 rounded-xl overflow-hidden border border-[var(--border-color)]"><img src="$2" alt="$1" class="w-full object-cover max-h-80" /><span class="block p-2 text-center text-xs text-[var(--text-secondary)] font-sans italic">$1</span></div>');
+    // 6. Blockquotes (> quote)
+    text = text.replace(/^&gt;\s?(.*$)/gim, '<blockquote class="p-4 my-4 rounded-xl bg-[var(--bg-secondary)]/50 border-l-4 border-[var(--accent)] font-serif italic text-base text-[var(--text-primary)] leading-relaxed">$1</blockquote>');
 
-    // Links: [text](url)
-    html = html.replace(/\[(.*?)\]\((.*?)\)/gim, '<a href="$2" class="text-[var(--accent)] underline underline-offset-2">$1</a>');
+    // 7. Images and Links
+    text = text.replace(/!\[(.*?)\]\((.*?)\)/gim, '<div class="my-5 rounded-2xl overflow-hidden border border-[var(--border-color)] bg-[var(--bg-secondary)]/30"><img src="$2" alt="$1" class="w-full object-cover max-h-96" loading="lazy" /><span class="block py-2 px-3 text-center text-xs text-[var(--text-secondary)] font-sans italic border-t border-[var(--border-color)]/60">$1</span></div>');
+    text = text.replace(/\[(.*?)\]\((.*?)\)/gim, '<a href="$2" class="text-[var(--accent)] underline underline-offset-2 hover:opacity-80 transition-opacity">$1</a>');
 
-    // Bold & Italics
-    html = html.replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>');
-    html = html.replace(/\*(.*?)\*/gim, '<em>$1</em>');
+    // 8. Bold, Italics, Strikethrough
+    text = text.replace(/\*\*\*(.*?)\*\*\*/gim, '<strong><em>$1</em></strong>');
+    text = text.replace(/\*\*(.*?)\*\*/gim, '<strong class="font-bold text-[var(--text-primary)]">$1</strong>');
+    text = text.replace(/__(.*?)__/gim, '<strong class="font-bold text-[var(--text-primary)]">$1</strong>');
+    text = text.replace(/\*([^*\n]+)\*/gim, '<em>$1</em>');
+    text = text.replace(/_([^_\n]+)_/gim, '<em>$1</em>');
+    text = text.replace(/~~(.*?)~~/gim, '<del class="line-through opacity-70">$1</del>');
 
-    // Blockquotes: > quote
-    html = html.replace(/^> (.*$)/gim, '<blockquote class="p-3.5 my-3 rounded-xl bg-[var(--bg-secondary)]/60 border-l-4 border-[var(--accent)] font-serif italic text-sm text-[var(--text-primary)] leading-relaxed">$1</blockquote>');
+    // 9. Tables
+    text = text.replace(/((?:\|[^\n]+\|\n?)+)/g, (match) => {
+      const rows = match.trim().split('\n');
+      if (rows.length < 2) return match;
+      const headerCells = rows[0].split('|').slice(1, -1);
+      const isDelimiter = rows[1].includes('-');
+      if (!isDelimiter) return match;
+      
+      let tableHtml = '<div class="my-5 overflow-x-auto rounded-xl border border-[var(--border-color)]"><table class="w-full text-left text-xs font-sans">';
+      tableHtml += '<thead class="bg-[var(--bg-secondary)]/60 border-b border-[var(--border-color)] font-semibold text-[var(--text-primary)]"><tr>';
+      headerCells.forEach(cell => {
+        tableHtml += `<th class="py-2.5 px-3.5">${cell.trim()}</th>`;
+      });
+      tableHtml += '</tr></thead><tbody class="divide-y divide-[var(--border-color)]/60 bg-[var(--bg-primary)]">';
+      
+      for (let i = 2; i < rows.length; i++) {
+        const rowCells = rows[i].split('|').slice(1, -1);
+        if (rowCells.length > 0) {
+          tableHtml += '<tr class="hover:bg-[var(--bg-secondary)]/30 transition-colors">';
+          rowCells.forEach(c => {
+            tableHtml += `<td class="py-2.5 px-3.5 text-[var(--text-primary)] font-serif">${c.trim()}</td>`;
+          });
+          tableHtml += '</tr>';
+        }
+      }
+      tableHtml += '</tbody></table></div>';
+      return tableHtml;
+    });
 
-    // Paragraphs / Stanzas (split on double newlines)
-    const blocks = html.split(/\n\s*\n/);
+    // 10. Lists (Unordered & Ordered)
+    text = text.replace(/(?:^[*-]\s+(.+)$\n?)+/gm, (match) => {
+      const items = match.trim().split('\n').map(line => line.replace(/^[*-]\s+/, '').trim());
+      return `<ul class="list-disc list-inside space-y-1 my-3 pl-2 text-base font-serif text-[var(--text-primary)]">${items.map(it => `<li>${it}</li>`).join('')}</ul>`;
+    });
+    text = text.replace(/(?:^\d+\.\s+(.+)$\n?)+/gm, (match) => {
+      const items = match.trim().split('\n').map(line => line.replace(/^\d+\.\s+/, '').trim());
+      return `<ol class="list-decimal list-inside space-y-1 my-3 pl-2 text-base font-serif text-[var(--text-primary)]">${items.map(it => `<li>${it}</li>`).join('')}</ol>`;
+    });
+
+    // 11. Restore Code Blocks and Inline Code
+    codeBlocks.forEach((block, idx) => {
+      text = text.replace(new RegExp(`@@CODEBLOCK_${idx}@@`, 'g'), block);
+    });
+    inlineCodes.forEach((code, idx) => {
+      text = text.replace(new RegExp(`@@INLINECODE_${idx}@@`, 'g'), code);
+    });
+
+    // 12. Paragraph separation on double line-breaks
+    const blocks = text.split(/\n\s*\n/);
     return blocks.map(block => {
       block = block.trim();
       if (!block) return '';
-      if (block.startsWith('<h') || block.startsWith('<blockquote') || block.startsWith('<div') || block.startsWith('<hr')) {
+      if (
+        block.startsWith('<h') ||
+        block.startsWith('<blockquote') ||
+        block.startsWith('<div') ||
+        block.startsWith('<hr') ||
+        block.startsWith('<ul') ||
+        block.startsWith('<ol') ||
+        block.startsWith('<table')
+      ) {
         return block;
       }
-      return `<p class="whitespace-pre-line text-base font-serif leading-relaxed text-[var(--text-primary)]">${block}</p>`;
+      return `<p class="whitespace-pre-line text-base sm:text-lg font-serif leading-relaxed text-[var(--text-primary)] mb-4">${block}</p>`;
     }).join('\n');
   }
 
@@ -3156,13 +3245,13 @@ const existingPostsData = allPosts.map((p) => {
       alert(`GitHub deploy failed: ${ghErr.message}\nYour post is still saved locally.`);
     } finally {
       if (deployTop) {
-        deployTop.innerHTML = '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg><span>Deploy to Live Site</span>';
+        deployTop.innerHTML = '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg><span>Publish</span>';
       }
       if (deployBottom) {
-        deployBottom.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg><span>Deploy to Live Site</span>';
+        deployBottom.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg><span>Publish</span>';
       }
       if (deployModal) {
-        deployModal.textContent = "Deploy to Live Site";
+        deployModal.textContent = "Publish";
       }
     }
   }
