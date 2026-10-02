@@ -97,6 +97,16 @@ const existingPostsData = samplePosts.map((p) => {
         >
           <span>&larr; Return to Home</span>
         </a>
+
+        <div id="local-dev-bypass" class="hidden pt-3 border-t border-[var(--border-color)]/60 text-center">
+          <button
+            type="button"
+            id="btn-local-bypass"
+            class="w-full min-h-[44px] px-3.5 py-2 rounded-xl border border-dashed border-amber-500/40 bg-amber-500/5 hover:bg-amber-500/10 text-amber-500 font-mono text-xs cursor-pointer transition-colors"
+          >
+            [Localhost Detected: Unlock Studio for Testing]
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -1765,6 +1775,9 @@ const existingPostsData = samplePosts.map((p) => {
   async function commitFileToGitHub(filePath, fileContent, commitMsg) {
     const token = getGhToken();
     if (!token) throw new Error("No GitHub authentication token found. Please sign in with GitHub or enter a token in Site Settings.");
+    if (token === 'local_dev_token') {
+      throw new Error("You are using local mock mode. Your post is saved in your local browser storage. To push real commits to GitHub, connect your GitHub account or paste a GitHub Personal Access Token.");
+    }
 
     let sha = null;
     let authHeader = `Bearer ${token}`;
@@ -3803,6 +3816,18 @@ export const siteConfig: SiteConfig = defaultSiteConfig;
     }
   } catch (e) {
     console.error("Failed to load locally published posts", e);
+  }
+
+  // Local development bypass listener
+  const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  if (isLocalHost) {
+    document.getElementById('local-dev-bypass')?.classList.remove('hidden');
+    document.getElementById('btn-local-bypass')?.addEventListener('click', () => {
+      localStorage.setItem('hk_gh_token', 'local_dev_token');
+      localStorage.setItem('hk_gh_user', 'local_developer');
+      updateGhAuthUI();
+      showToast("Unlocked studio for local testing!");
+    });
   }
 
   // Init
