@@ -444,7 +444,7 @@ export const defaultSiteConfig: SiteConfig = {
     copyright: "H. Kapginlian. All rights reserved.",
     standardsNotice: "ISO 639-3 Documentation Standards",
     backToTopText: "Back to top",
-    showAdminLink: true,
+    showAdminLink: false,
     adminLinkLabel: "Admin CMS"
   }
 };
