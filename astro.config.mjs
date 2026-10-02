@@ -4,8 +4,8 @@ import mdx from '@astrojs/mdx';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://azinamotoe.github.io',
-  base: '/kapginlian',
+  site: 'https://hkhangluah.pages.dev',
+  base: '/',
   redirects: {
     '/feed/pronouns-in-simte-pro-drop-emphatic': '/research/pronouns-in-simte-pro-drop-emphatic',
     '/feed/gender-marking-in-simte-human-animal': '/research/gender-marking-in-simte-human-animal',
