@@ -59,9 +59,10 @@ const existingPostsData = samplePosts.map((p) => {
           <span class="text-xs font-mono uppercase tracking-wider text-[var(--accent)] font-semibold">
             Content Management Studio
           </span>
-          <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-[var(--bg-secondary)] border border-[var(--border-color)] text-[var(--text-secondary)]">
-            Local Mode
-          </span>
+          <div id="gh-status-badge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-[var(--bg-secondary)] border border-[var(--border-color)] text-[var(--text-secondary)] flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-500" id="gh-dot"></span>
+            <span id="gh-status-text">Local Mode</span>
+          </div>
         </div>
         <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--text-primary)] mt-1">
           Admin CMS
@@ -69,6 +70,15 @@ const existingPostsData = samplePosts.map((p) => {
       </div>
 
       <div class="flex items-center gap-2">
+        <button
+          type="button"
+          id="btn-gh-auth"
+          class="min-h-[44px] px-3.5 py-2 text-xs rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] hover:bg-[var(--bg-primary)] text-[var(--text-primary)] font-medium transition-colors inline-flex items-center gap-1.5 cursor-pointer"
+          title="Sign in with GitHub to publish and delete directly"
+        >
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+          <span id="btn-gh-auth-text">Connect GitHub</span>
+        </button>
         <a
           href={url("/")}
           class="min-h-[44px] px-3.5 py-2 text-xs rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] hover:bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors inline-flex items-center gap-1.5"
@@ -1343,7 +1353,55 @@ const existingPostsData = samplePosts.map((p) => {
             </div>
           </div>
 
-          <!-- 7. Export TypeScript Panel -->
+          <!-- 7. GitHub Live Synchronization -->
+          <div id="sec-cfg-github" class="p-5 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-primary)] space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 class="text-sm font-bold text-[var(--text-primary)]">GitHub Live Synchronization</h3>
+                <p class="text-xs text-[var(--text-secondary)]">Connect your account or set a token to commit posts directly to <code class="font-mono text-[11px] text-[var(--accent)] font-semibold">lianhangluah/hkhangluah</code>.</p>
+              </div>
+              <span id="cfg-gh-pill" class="text-[10px] font-mono px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20 font-bold self-start sm:self-auto">
+                Disconnected
+              </span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 border-t border-[var(--border-color)]/60">
+              <div class="space-y-1.5">
+                <label class="text-xs font-semibold text-[var(--text-primary)] block">One-Click OAuth Login</label>
+                <p class="text-xs text-[var(--text-secondary)] leading-relaxed">Sign in with your browser to authorize publishing directly from mobile or desktop.</p>
+                <button
+                  type="button"
+                  id="btn-settings-gh-oauth"
+                  class="mt-2 min-h-[44px] px-4 py-2 rounded-xl bg-[var(--text-primary)] text-[var(--bg-primary)] text-xs font-semibold hover:opacity-90 transition-opacity cursor-pointer inline-flex items-center gap-1.5"
+                >
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+                  <span id="btn-settings-gh-oauth-text">Sign in with GitHub</span>
+                </button>
+              </div>
+
+              <div class="space-y-1.5">
+                <label class="text-xs font-semibold text-[var(--text-primary)] block">Personal Access Token (Fallback / Local)</label>
+                <p class="text-xs text-[var(--text-secondary)] leading-relaxed">Enter a fine-grained GitHub token with repository 'contents' permission.</p>
+                <div class="flex items-center gap-2 pt-1">
+                  <input
+                    type="password"
+                    id="cfg-gh-token-input"
+                    placeholder="ghp_... or gho_..."
+                    class="flex-1 min-h-[44px] px-3 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/50 text-xs font-mono text-[var(--text-primary)]"
+                  />
+                  <button
+                    type="button"
+                    id="btn-save-gh-token"
+                    class="min-h-[44px] px-3.5 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] hover:bg-[var(--bg-primary)] text-xs font-medium text-[var(--text-primary)] cursor-pointer"
+                  >
+                    Save
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 8. Export TypeScript Panel -->
           <div id="sec-cfg-export" class="p-5 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-primary)] space-y-4">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
@@ -1487,24 +1545,24 @@ const existingPostsData = samplePosts.map((p) => {
         </p>
 
         <div class="p-3.5 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-color)] text-xs font-mono space-y-1.5 text-[var(--text-secondary)]">
-          <span class="text-[10px] font-bold uppercase tracking-wider block text-[var(--accent)]">Local Removal Command:</span>
-          <code id="del-modal-command" class="block text-rose-500 font-bold select-all">rm src/content/posts/slug.md</code>
+          <span class="text-[10px] font-bold uppercase tracking-wider block text-[var(--accent)]" id="del-modal-desc">Target Repository File:</span>
+          <code id="del-modal-command" class="block text-rose-500 font-bold select-all">src/content/posts/slug.md</code>
         </div>
 
         <div class="flex items-center justify-end gap-2 pt-2">
           <button
             type="button"
             id="del-modal-cancel"
-            class="px-4 py-2 rounded-xl border border-[var(--border-color)] text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer"
+            class="min-h-[44px] px-4 py-2 rounded-xl border border-[var(--border-color)] text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer"
           >
             Cancel
           </button>
           <button
             type="button"
             id="del-modal-confirm"
-            class="px-4 py-2 rounded-xl bg-rose-600 text-white font-semibold text-xs hover:bg-rose-700 cursor-pointer"
+            class="min-h-[44px] px-4 py-2 rounded-xl bg-rose-600 text-white font-semibold text-xs hover:bg-rose-700 cursor-pointer shadow-xs inline-flex items-center gap-2"
           >
-            Hide from Catalog
+            <span id="del-modal-btn-text">Delete Post</span>
           </button>
         </div>
       </div>
@@ -1528,6 +1586,165 @@ const existingPostsData = samplePosts.map((p) => {
   let currentTipName = "Purple";
   let currentThemeClass = "from-slate-950 via-purple-950 to-stone-950 text-purple-100";
   let currentThemeName = "Poetic Violet";
+
+  const GH_REPO_OWNER = "lianhangluah";
+  const GH_REPO_NAME = "hkhangluah";
+
+  function getGhToken() {
+    return localStorage.getItem('hk_gh_token') || "";
+  }
+
+  function getGhUser() {
+    return localStorage.getItem('hk_gh_user') || "";
+  }
+
+  function updateGhAuthUI() {
+    const token = getGhToken();
+    const user = getGhUser();
+    const isAuth = Boolean(token);
+
+    const ghDot = document.getElementById('gh-dot');
+    const ghStatusText = document.getElementById('gh-status-text');
+    const btnGhAuthText = document.getElementById('btn-gh-auth-text');
+    const cfgGhPill = document.getElementById('cfg-gh-pill');
+    const cfgGhTokenInput = document.getElementById('cfg-gh-token-input');
+    const btnSettingsOAuthText = document.getElementById('btn-settings-gh-oauth-text');
+
+    if (cfgGhTokenInput && token) {
+      cfgGhTokenInput.value = token;
+    }
+
+    if (isAuth) {
+      if (ghDot) {
+        ghDot.className = "w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse";
+      }
+      if (ghStatusText) {
+        ghStatusText.textContent = user ? `@${user}` : "Connected";
+        ghStatusText.className = "text-emerald-400 font-semibold";
+      }
+      if (btnGhAuthText) {
+        btnGhAuthText.textContent = "Disconnect";
+      }
+      if (cfgGhPill) {
+        cfgGhPill.textContent = user ? `Connected as @${user}` : "Connected";
+        cfgGhPill.className = "text-[10px] font-mono px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-bold self-start sm:self-auto";
+      }
+      if (btnSettingsOAuthText) {
+        btnSettingsOAuthText.textContent = "Reconnect GitHub";
+      }
+    } else {
+      if (ghDot) {
+        ghDot.className = "w-1.5 h-1.5 rounded-full bg-amber-500";
+      }
+      if (ghStatusText) {
+        ghStatusText.textContent = "Local Mode";
+        ghStatusText.className = "";
+      }
+      if (btnGhAuthText) {
+        btnGhAuthText.textContent = "Connect GitHub";
+      }
+      if (cfgGhPill) {
+        cfgGhPill.textContent = "Disconnected";
+        cfgGhPill.className = "text-[10px] font-mono px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20 font-bold self-start sm:self-auto";
+      }
+      if (btnSettingsOAuthText) {
+        btnSettingsOAuthText.textContent = "Sign in with GitHub";
+      }
+    }
+  }
+
+  async function commitFileToGitHub(filePath, fileContent, commitMsg) {
+    const token = getGhToken();
+    if (!token) throw new Error("No GitHub token available");
+
+    let sha = null;
+    try {
+      const getRes = await fetch(`https://api.github.com/repos/${GH_REPO_OWNER}/${GH_REPO_NAME}/contents/${filePath}`, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Accept": "application/vnd.github.v3+json",
+          "User-Agent": "HK-CMS"
+        }
+      });
+      if (getRes.ok) {
+        const data = await getRes.json();
+        sha = data.sha;
+      }
+    } catch {
+      // New file, proceed
+    }
+
+    const base64Content = btoa(unescape(encodeURIComponent(fileContent)));
+
+    const body = {
+      message: commitMsg,
+      content: base64Content,
+      branch: "main"
+    };
+    if (sha) {
+      body.sha = sha;
+    }
+
+    const putRes = await fetch(`https://api.github.com/repos/${GH_REPO_OWNER}/${GH_REPO_NAME}/contents/${filePath}`, {
+      method: "PUT",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Accept": "application/vnd.github.v3+json",
+        "Content-Type": "application/json",
+        "User-Agent": "HK-CMS"
+      },
+      body: JSON.stringify(body)
+    });
+
+    if (!putRes.ok) {
+      const errData = await putRes.json().catch(() => ({}));
+      throw new Error(errData.message || `GitHub error: ${putRes.statusText}`);
+    }
+
+    return await putRes.json();
+  }
+
+  async function deleteFileFromGitHub(filePath, commitMsg) {
+    const token = getGhToken();
+    if (!token) throw new Error("No GitHub token available");
+
+    const getRes = await fetch(`https://api.github.com/repos/${GH_REPO_OWNER}/${GH_REPO_NAME}/contents/${filePath}`, {
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Accept": "application/vnd.github.v3+json",
+        "User-Agent": "HK-CMS"
+      }
+    });
+
+    if (!getRes.ok) {
+      return true;
+    }
+
+    const fileData = await getRes.json();
+    const sha = fileData.sha;
+
+    const delRes = await fetch(`https://api.github.com/repos/${GH_REPO_OWNER}/${GH_REPO_NAME}/contents/${filePath}`, {
+      method: "DELETE",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Accept": "application/vnd.github.v3+json",
+        "Content-Type": "application/json",
+        "User-Agent": "HK-CMS"
+      },
+      body: JSON.stringify({
+        message: commitMsg,
+        sha: sha,
+        branch: "main"
+      })
+    });
+
+    if (!delRes.ok) {
+      const errData = await delRes.json().catch(() => ({}));
+      throw new Error(errData.message || "Failed to delete from GitHub");
+    }
+
+    return await delRes.json();
+  }
 
   // DOM Elements
   const titleInput = document.getElementById('post-title');
@@ -2109,7 +2326,7 @@ const existingPostsData = samplePosts.map((p) => {
   }
 
   // Publish Post Handler
-  function publishCurrentPost() {
+  async function publishCurrentPost() {
     const title = titleInput.value.trim();
     if (!title) {
       showToast("Please enter a title before publishing");
@@ -2125,6 +2342,8 @@ const existingPostsData = samplePosts.map((p) => {
     const body = bodyInput.value;
     const coverImage = coverInput.value.trim();
     const tags = tagsInput.value.split(',').map(t => t.trim()).filter(Boolean);
+    const targetFile = currentType === 'academic_paper' ? `src/data/posts/${slug}.ts` : `src/content/posts/${slug}.md`;
+    const code = document.getElementById('code-output').querySelector('code').textContent;
 
     const postItem = {
       slug,
@@ -2168,16 +2387,45 @@ const existingPostsData = samplePosts.map((p) => {
     // Render immediately into catalog DOM
     renderPublishedItemToCatalog(postItem);
 
+    // Direct GitHub commit if authenticated
+    const token = getGhToken();
+    const pubBtnTop = document.getElementById('btn-publish-top');
+    const pubBtnBottom = document.getElementById('btn-publish-post');
+    let committedToGitHub = false;
+
+    if (token) {
+      if (pubBtnTop) pubBtnTop.textContent = "Committing...";
+      if (pubBtnBottom) pubBtnBottom.textContent = "Committing to GitHub...";
+      showToast("Committing directly to GitHub repository...");
+
+      try {
+        await commitFileToGitHub(targetFile, code, `feat(content): publish ${title}`);
+        committedToGitHub = true;
+        showToast("Committed to GitHub! Cloudflare will deploy in ~60s.");
+      } catch (ghErr) {
+        console.error("GitHub commit failed:", ghErr);
+        showToast(`GitHub commit warning: ${ghErr.message}. Saved locally.`);
+      } finally {
+        if (pubBtnTop) pubBtnTop.innerHTML = '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg><span>Publish Post</span>';
+        if (pubBtnBottom) pubBtnBottom.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg><span>Publish Post</span>';
+      }
+    } else {
+      showToast(`Published "${title}" to local catalog!`);
+    }
+
     // Show publish success modal
     const pubModal = document.getElementById('publish-modal');
     if (pubModal) {
-      const targetFile = currentType === 'academic_paper' ? `src/data/posts/${slug}.ts` : `src/content/posts/${slug}.md`;
       document.getElementById('pub-modal-title').textContent = `"${title}"`;
       document.getElementById('pub-modal-filename').textContent = targetFile;
+      const modalNotice = pubModal.querySelector('p');
+      if (modalNotice) {
+        modalNotice.textContent = committedToGitHub
+          ? "Your post has been committed directly to GitHub on branch 'main'. Cloudflare Pages is now rebuilding and deploying to lianhangluah.com within 1 to 2 minutes."
+          : "Your post has been published into the local catalog. Connect your GitHub account to commit directly, or copy the file manually.";
+      }
       pubModal.classList.remove('hidden');
     }
-
-    showToast(`Published "${title}" to catalog!`);
   }
 
   // Publish button triggers
@@ -2219,6 +2467,60 @@ const existingPostsData = samplePosts.map((p) => {
     link.click();
     URL.revokeObjectURL(link.href);
     showToast(`Downloaded ${slug}.${ext}`);
+  });
+
+  // GitHub Auth Event Listeners
+  document.getElementById('btn-gh-auth')?.addEventListener('click', () => {
+    if (getGhToken()) {
+      if (confirm("Disconnect GitHub account from this browser?")) {
+        localStorage.removeItem('hk_gh_token');
+        localStorage.removeItem('hk_gh_user');
+        updateGhAuthUI();
+        showToast("Disconnected from GitHub");
+      }
+    } else {
+      window.location.href = "/api/auth/login";
+    }
+  });
+
+  document.getElementById('btn-settings-gh-oauth')?.addEventListener('click', () => {
+    window.location.href = "/api/auth/login";
+  });
+
+  document.getElementById('btn-save-gh-token')?.addEventListener('click', async () => {
+    const input = document.getElementById('cfg-gh-token-input');
+    const token = input?.value.trim();
+    if (!token) {
+      localStorage.removeItem('hk_gh_token');
+      localStorage.removeItem('hk_gh_user');
+      updateGhAuthUI();
+      showToast("Cleared GitHub token");
+      return;
+    }
+
+    showToast("Verifying token with GitHub...");
+    try {
+      const res = await fetch("https://api.github.com/user", {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "User-Agent": "HK-CMS"
+        }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        localStorage.setItem('hk_gh_token', token);
+        localStorage.setItem('hk_gh_user', data.login || "User");
+        updateGhAuthUI();
+        showToast(`Connected as @${data.login}!`);
+      } else {
+        showToast("Invalid token. Please check permissions.");
+      }
+    } catch {
+      localStorage.setItem('hk_gh_token', token);
+      localStorage.setItem('hk_gh_user', "Manual Token");
+      updateGhAuthUI();
+      showToast("Saved token locally");
+    }
   });
 
   // Drafts Management (LocalStorage)
@@ -2458,8 +2760,28 @@ const existingPostsData = samplePosts.map((p) => {
     postToDelete = null;
   });
 
-  delModalConfirm?.addEventListener('click', () => {
+  delModalConfirm?.addEventListener('click', async () => {
     if (!postToDelete) return;
+    const token = getGhToken();
+    const isAcademic = postToDelete.postType === "academic_paper";
+    const filePath = isAcademic ? `src/data/posts/${postToDelete.slug}.ts` : `src/content/posts/${postToDelete.slug}.md`;
+    const btnText = document.getElementById('del-modal-btn-text');
+
+    if (token) {
+      if (btnText) btnText.textContent = "Deleting on GitHub...";
+      delModalConfirm.setAttribute("disabled", "true");
+      try {
+        await deleteFileFromGitHub(filePath, `chore(content): delete ${postToDelete.slug} via CMS Studio`);
+        showToast(`Deleted ${filePath} from GitHub repository`);
+      } catch (err) {
+        console.error("GitHub deletion error:", err);
+        showToast(err.message || "Failed to delete file from GitHub");
+      } finally {
+        if (btnText) btnText.textContent = "Delete Post";
+        delModalConfirm.removeAttribute("disabled");
+      }
+    }
+
     const item = document.querySelector(`.catalog-item[data-slug="${postToDelete.slug}"]`);
     if (item) {
       item.remove();
