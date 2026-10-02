@@ -1,0 +1,230 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SocialIcon from '../components/SocialIcon.astro';
+import { authorProfile } from '../data/posts';
+import { socialLinks, linkhubConfig } from '../data/socials';
+
+const academicLinks = socialLinks.filter((s) => s.category === "academic" && s.isActive);
+const socialMediaLinks = socialLinks.filter((s) => s.category === "social" && s.isActive);
+const directLinks = socialLinks.filter((s) => s.category === "direct" && s.isActive);
+---
+
+<BaseLayout
+  title="Linkhub & Social Directory | H. Kapginlian"
+  description="Connect with H. Kapginlian across academic networks, social channels, WhatsApp, and direct correspondence."
+>
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 space-y-12">
+    
+    <!-- Linkhub Bento Hero Profile Card -->
+    <div class="relative overflow-hidden rounded-3xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/50 p-6 sm:p-8 text-center space-y-4 shadow-xs">
+      <!-- Background subtle gradient glow -->
+      <div class="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-48 bg-[var(--accent)]/10 blur-3xl rounded-full pointer-events-none" aria-hidden="true"></div>
+
+      <!-- Avatar with Verified Ring -->
+      <div class="relative inline-block mx-auto">
+        <img
+          src={authorProfile.avatar}
+          alt={authorProfile.name}
+          class="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-4 border-[var(--bg-primary)] shadow-md mx-auto"
+        />
+        <span
+          class="absolute bottom-1 right-1 w-6 h-6 rounded-full bg-[var(--accent)] text-white text-xs flex items-center justify-center border-2 border-[var(--bg-primary)] shadow-xs"
+          title="Verified Academic Profile"
+        >
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+        </span>
+      </div>
+
+      <!-- Identity & Affiliation -->
+      <div class="space-y-1.5">
+        <h1 class="text-2xl sm:text-3xl font-bold font-sans tracking-tight text-[var(--text-primary)]">
+          {authorProfile.name}
+        </h1>
+        <p class="text-sm sm:text-base font-serif text-[var(--accent)] font-medium">
+          Completed PhD in Linguistics from NEHU, Shillong
+        </p>
+      </div>
+
+      <!-- Location & Bio snippet -->
+      <p class="text-xs sm:text-sm font-serif text-[var(--text-secondary)] max-w-lg mx-auto leading-relaxed">
+        Linguist documenting Tibeto-Burman &amp; Kuki-Chin morphology, syntax, Indigenous Knowledge Systems, and intangible cultural heritage.
+      </p>
+
+      <!-- Quick Action Badges -->
+      <div class="pt-2 flex flex-wrap items-center justify-center gap-2 font-mono text-xs">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-secondary)]">
+          <SocialIcon name="pin" class="w-3.5 h-3.5 text-[var(--accent)]" />
+          <span>Shillong, Meghalaya • Manipur</span>
+        </span>
+        <button
+          type="button"
+          id="share-linkhub-btn"
+          class="px-3.5 py-1 rounded-full bg-[var(--text-primary)] text-[var(--bg-primary)] font-semibold hover:opacity-90 transition-opacity cursor-pointer inline-flex items-center gap-1.5 font-sans"
+        >
+          <span id="share-btn-text">Share Linkhub</span>
+          <SocialIcon name="share" class="w-3.5 h-3.5" />
+        </button>
+      </div>
+    </div>
+
+    <!-- SECTION 1: ACADEMIC & CITATION REGISTRIES -->
+    <div class="space-y-4">
+      <div class="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-[var(--text-secondary)] font-semibold">
+        <SocialIcon name="academic" class="w-4 h-4 text-[var(--accent)]" />
+        <span>Academic Registries &amp; Citations</span>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 font-sans">
+        {academicLinks.map((item) => (
+          <a
+            href={item.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            class={`group p-4 rounded-2xl border transition-all duration-200 flex flex-col justify-between ${item.colorTheme} shadow-xs hover:shadow-md`}
+          >
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <div class="p-2 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-color)] shadow-2xs group-hover:scale-105 transition-transform">
+                  <SocialIcon name={item.icon} class="w-5 h-5" />
+                </div>
+                <span class="text-[var(--text-secondary)] group-hover:text-[var(--accent)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all">
+                  <SocialIcon name="external" class="w-3.5 h-3.5" />
+                </span>
+              </div>
+              <div>
+                <div class="flex items-center gap-1.5 mb-1">
+                  <span class="text-[10px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-[var(--bg-primary)]/80 text-[var(--text-primary)] border border-[var(--border-color)]">
+                    {item.badge}
+                  </span>
+                </div>
+                <h3 class="text-base font-bold text-[var(--text-primary)]">
+                  {item.title}
+                </h3>
+                <p class="text-xs font-mono text-[var(--text-secondary)] truncate">
+                  {item.handle}
+                </p>
+              </div>
+            </div>
+            <p class="text-[11px] font-serif text-[var(--text-secondary)] mt-3 leading-snug line-clamp-2">
+              {item.description}
+            </p>
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <!-- SECTION 2: SOCIAL & COMMUNITY CHANNELS (FB, TWITTER, WA) -->
+    <div class="space-y-4">
+      <div class="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-[var(--text-secondary)] font-semibold">
+        <SocialIcon name="globe" class="w-4 h-4 text-[var(--accent)]" />
+        <span>Social &amp; Community Channels</span>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 font-sans">
+        {socialMediaLinks.map((item) => (
+          <a
+            href={item.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            class={`group p-4 rounded-2xl border transition-all duration-200 flex flex-col justify-between ${item.colorTheme} shadow-xs hover:shadow-md`}
+          >
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <div class="p-2 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-color)] shadow-2xs group-hover:scale-105 transition-transform">
+                  <SocialIcon name={item.icon} class="w-5 h-5" />
+                </div>
+                <span class="text-[var(--text-secondary)] group-hover:text-[var(--accent)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all">
+                  <SocialIcon name="external" class="w-3.5 h-3.5" />
+                </span>
+              </div>
+              <div>
+                <div class="flex items-center gap-1.5 mb-1">
+                  <span class="text-[10px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-[var(--bg-primary)]/80 text-[var(--text-primary)] border border-[var(--border-color)]">
+                    {item.badge}
+                  </span>
+                </div>
+                <h3 class="text-base font-bold text-[var(--text-primary)]">
+                  {item.title}
+                </h3>
+                <p class="text-xs font-mono text-[var(--text-secondary)] truncate">
+                  {item.handle}
+                </p>
+              </div>
+            </div>
+            <p class="text-[11px] font-serif text-[var(--text-secondary)] mt-3 leading-snug line-clamp-2">
+              {item.description}
+            </p>
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <!-- SECTION 3: DIRECT CONTACT & WEB REPOSITORY SHORTCUTS -->
+    <div class="space-y-4">
+      <div class="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-[var(--text-secondary)] font-semibold">
+        <SocialIcon name="email" class="w-4 h-4 text-[var(--accent)]" />
+        <span>Direct Correspondence &amp; Permanent Archives</span>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 font-sans">
+        {directLinks.map((item) => (
+          <a
+            href={item.href}
+            class={`group p-5 rounded-2xl border transition-all duration-200 flex items-center justify-between ${item.colorTheme} shadow-xs hover:shadow-md`}
+          >
+            <div class="space-y-2 max-w-[85%]">
+              <div class="flex items-center gap-2.5">
+                <div class="p-2 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-color)] shadow-2xs text-[var(--text-primary)]">
+                  <SocialIcon name={item.icon} class="w-5 h-5" />
+                </div>
+                <span class="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-[var(--bg-primary)]/80 text-[var(--text-primary)] border border-[var(--border-color)]">
+                  {item.badge}
+                </span>
+              </div>
+              <h3 class="text-base font-bold text-[var(--text-primary)] pt-0.5">
+                {item.title}
+              </h3>
+              <p class="text-xs font-mono text-[var(--accent)] truncate">
+                {item.handle}
+              </p>
+              <p class="text-xs font-serif text-[var(--text-secondary)] leading-relaxed">
+                {item.description}
+              </p>
+            </div>
+            <span class="text-lg font-sans text-[var(--text-secondary)] group-hover:text-[var(--accent)] group-hover:translate-x-1 transition-all">
+              →
+            </span>
+          </a>
+        ))}
+      </div>
+    </div>
+
+  </div>
+</BaseLayout>
+
+<script>
+  // Share Linkhub 1-click clipboard button
+  const shareBtn = document.getElementById('share-linkhub-btn');
+  shareBtn?.addEventListener('click', async () => {
+    const shareUrl = window.location.href;
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: "H. Kapginlian | Social & Academic Linkhub",
+          url: shareUrl,
+        });
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
+        const textSpan = document.getElementById('share-btn-text');
+        if (textSpan) {
+          textSpan.textContent = 'Link Copied!';
+          setTimeout(() => {
+            textSpan.textContent = 'Share Linkhub';
+          }, 2000);
+        }
+      }
+    } catch (err) {
+      console.log('Share canceled or failed:', err);
+    }
+  });
+</script>

@@ -1,0 +1,3176 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { samplePosts, getPostUrl } from '../data/posts';
+import { url } from '../utils/url';
+import { PRESET_TIPS, PRESET_THEMES, plateConfigs } from '../data/plateConfigs';
+import { siteConfig, defaultSiteConfig } from '../data/siteConfig';
+
+// Provide initial data for existing posts to the client
+const existingPostsData = samplePosts.map((p) => {
+  const plate = plateConfigs[p.slug];
+  return {
+    slug: p.slug,
+    title: p.title,
+    subtitle: p.subtitle || "",
+    excerpt: p.excerpt,
+    postType: p.postType,
+    category: p.category,
+    date: p.date,
+    year: p.year,
+    readingTime: p.readingTime,
+    language: p.language || "English",
+    tags: p.tags,
+    coverImage: p.coverImage || "",
+    journal: p.journal || "",
+    volume: p.volume || "",
+    issn: p.issn || "",
+    doi: p.doi || "",
+    authors: p.authors || "H. Kapginlian",
+    abstract: p.abstract || "",
+    featuredCouplet: p.sections?.[0]?.blockquote?.text || "",
+    pullQuote: p.sections?.[0]?.blockquote?.text || "",
+    themeClass: p.themeClass || plate?.themeClass || "from-slate-950 via-purple-950 to-stone-950 text-purple-100",
+    accentBarClass: p.accentBarClass || plate?.accentBarClass || "bg-purple-500",
+    headerLabel: p.headerLabel || plate?.headerLabel || "",
+    formula: p.formula || plate?.formula || "",
+    formulaSub: p.formulaSub || plate?.formulaSub || "",
+    body: p.sections?.flatMap((s) => {
+      const list: string[] = [];
+      if (s.heading && s.heading !== p.title) list.push(`## ${s.heading}`);
+      if (s.blockquote?.text) list.push(`> ${s.blockquote.text.replace(/\n/g, '\n> ')}`);
+      if (s.paragraphs) list.push(...s.paragraphs);
+      return list;
+    }).join("\n\n") || p.excerpt || "",
+  };
+});
+---
+
+<BaseLayout
+  title="Admin CMS Studio | H. Kapginlian"
+  description="Local Content Management Studio with Markdown Composer, Live Preview, and Content Catalog."
+>
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 pb-28 md:pb-16 font-sans">
+    
+    <!-- Top Header Bar -->
+    <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[var(--border-color)]">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span class="text-xs font-mono uppercase tracking-wider text-[var(--accent)] font-semibold">
+            Content Management Studio
+          </span>
+          <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-[var(--bg-secondary)] border border-[var(--border-color)] text-[var(--text-secondary)]">
+            Local Mode
+          </span>
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--text-primary)] mt-1">
+          Admin CMS
+        </h1>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <a
+          href={url("/")}
+          class="min-h-[44px] px-3.5 py-2 text-xs rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] hover:bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors inline-flex items-center gap-1.5"
+        >
+          <span>View Live Site</span>
+          <span aria-hidden="true">&rarr;</span>
+        </a>
+        <button
+          type="button"
+          id="btn-save-draft"
+          class="min-h-[44px] px-3.5 py-2 text-xs rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] hover:bg-[var(--bg-primary)] text-[var(--text-secondary)] font-medium transition-colors inline-flex items-center gap-1.5 cursor-pointer"
+        >
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+          <span>Save Draft</span>
+        </button>
+        <button
+          type="button"
+          id="btn-publish-top"
+          class="min-h-[44px] px-4 py-2 text-xs rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition-colors inline-flex items-center gap-1.5 cursor-pointer shadow-xs"
+        >
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+          <span>Publish Post</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Desktop Navigation Tabs -->
+    <div class="hidden md:flex items-center gap-2 py-4 border-b border-[var(--border-color)] overflow-x-auto text-sm font-medium">
+      <button
+        type="button"
+        class="nav-tab-btn px-4 py-2 rounded-xl transition-all cursor-pointer bg-[var(--text-primary)] text-[var(--bg-primary)] font-semibold min-h-[44px] flex items-center gap-1.5"
+        data-target="tab-write"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+        <span>Write Content</span>
+      </button>
+      <button
+        type="button"
+        class="nav-tab-btn px-4 py-2 rounded-xl transition-all cursor-pointer text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] min-h-[44px] flex items-center gap-1.5"
+        data-target="tab-preview"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+        <span>Live Preview</span>
+      </button>
+      <button
+        type="button"
+        class="nav-tab-btn px-4 py-2 rounded-xl transition-all cursor-pointer text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] min-h-[44px] flex items-center gap-1.5"
+        data-target="tab-existing"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+        <span>Catalog (<span id="catalog-count-badge">{samplePosts.length}</span>)</span>
+      </button>
+      <button
+        type="button"
+        class="nav-tab-btn px-4 py-2 rounded-xl transition-all cursor-pointer text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] min-h-[44px] flex items-center gap-1.5"
+        data-target="tab-drafts"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
+        <span>Local Drafts <span id="drafts-count-badge" class="ml-1 text-xs opacity-75 font-mono">(0)</span></span>
+      </button>
+      <button
+        type="button"
+        class="nav-tab-btn px-4 py-2 rounded-xl transition-all cursor-pointer text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] min-h-[44px] flex items-center gap-1.5"
+        data-target="tab-code"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+        <span>Publish &amp; Code</span>
+      </button>
+      <button
+        type="button"
+        class="nav-tab-btn px-4 py-2 rounded-xl transition-all cursor-pointer text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] min-h-[44px] flex items-center gap-1.5"
+        data-target="tab-site-config"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+        <span>Site Settings</span>
+      </button>
+    </div>
+
+    <!-- MAIN VIEW PANELS -->
+    <main class="pt-6">
+
+      <!-- ================= TAB 1: WRITE CONTENT ================= -->
+      <section id="tab-write" class="tab-panel space-y-6">
+        
+        <!-- Content Type Selector Pills -->
+        <div class="p-3.5 rounded-2xl bg-[var(--bg-secondary)]/60 border border-[var(--border-color)] space-y-2">
+          <label class="block text-xs font-mono uppercase tracking-wider text-[var(--text-secondary)] font-semibold">
+            Publication Type:
+          </label>
+          <div class="grid grid-cols-3 gap-2">
+            <button
+              type="button"
+              class="type-pill-btn p-3 rounded-xl border border-[var(--border-color)] bg-[var(--text-primary)] text-[var(--bg-primary)] font-semibold text-xs sm:text-sm text-center transition-all cursor-pointer"
+              data-type="poem"
+            >
+              <span class="block font-semibold">Poem</span>
+            </button>
+            <button
+              type="button"
+              class="type-pill-btn p-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-primary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium text-xs sm:text-sm text-center transition-all cursor-pointer"
+              data-type="essay"
+            >
+              <span class="block font-semibold">Essay / Dispatch</span>
+            </button>
+            <button
+              type="button"
+              class="type-pill-btn p-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-primary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium text-xs sm:text-sm text-center transition-all cursor-pointer"
+              data-type="academic_paper"
+            >
+              <span class="block font-semibold">Research Paper</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Form Fields -->
+        <form id="content-form" class="space-y-5">
+          <!-- Title & Slug -->
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-4">
+            <div class="sm:col-span-8 space-y-1.5">
+              <label for="post-title" class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
+                Title <span class="text-rose-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="post-title"
+                name="title"
+                required
+                placeholder="e.g. Whispers of the High Mountains"
+                class="w-full px-4 py-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 focus:bg-[var(--bg-primary)] focus:border-[var(--accent)] focus:outline-none text-[var(--text-primary)] text-base font-medium transition-all"
+              />
+            </div>
+
+            <div class="sm:col-span-4 space-y-1.5">
+              <label for="post-slug" class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
+                Slug (URL identifier)
+              </label>
+              <input
+                type="text"
+                id="post-slug"
+                name="slug"
+                placeholder="whispers-high-mountains"
+                class="w-full px-4 py-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 focus:bg-[var(--bg-primary)] focus:border-[var(--accent)] focus:outline-none text-[var(--text-primary)] font-mono text-xs transition-all"
+              />
+            </div>
+          </div>
+
+          <!-- Subtitle / Overview -->
+          <div class="space-y-1.5">
+            <label for="post-subtitle" class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
+              Subtitle / Summary Excerpt
+            </label>
+            <input
+              type="text"
+              id="post-subtitle"
+              name="subtitle"
+              placeholder="A lyrical poem on morning mist, mountain ridges, and stillness"
+              class="w-full px-4 py-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 focus:bg-[var(--bg-primary)] focus:border-[var(--accent)] focus:outline-none text-[var(--text-primary)] text-sm transition-all"
+            />
+          </div>
+
+          <!-- Metadata Row: Category, Date, Reading Time -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="space-y-1.5">
+              <label for="post-category" class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
+                Category
+              </label>
+              <input
+                type="text"
+                id="post-category"
+                name="category"
+                value="Poetry & Literature"
+                class="w-full px-4 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 focus:bg-[var(--bg-primary)] focus:border-[var(--accent)] focus:outline-none text-[var(--text-primary)] text-sm"
+              />
+            </div>
+
+            <div class="space-y-1.5">
+              <label for="post-date" class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
+                Date
+              </label>
+              <input
+                type="text"
+                id="post-date"
+                name="date"
+                placeholder="October 2026"
+                class="w-full px-4 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 focus:bg-[var(--bg-primary)] focus:border-[var(--accent)] focus:outline-none text-[var(--text-primary)] text-sm font-mono"
+              />
+            </div>
+
+            <div class="space-y-1.5">
+              <label for="post-reading-time" class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
+                Reading Time
+              </label>
+              <input
+                type="text"
+                id="post-reading-time"
+                name="readingTime"
+                value="3 min read"
+                class="w-full px-4 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 focus:bg-[var(--bg-primary)] focus:border-[var(--accent)] focus:outline-none text-[var(--text-primary)] text-sm font-mono"
+              />
+            </div>
+          </div>
+
+          <!-- Tags -->
+          <div class="space-y-1.5">
+            <label for="post-tags" class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
+              Tags (Comma separated)
+            </label>
+            <input
+              type="text"
+              id="post-tags"
+              name="tags"
+              value="Poetry, Nature, Reflections"
+              placeholder="Poetry, Nature, Mountains, Solitude"
+              class="w-full px-4 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 focus:bg-[var(--bg-primary)] focus:border-[var(--accent)] focus:outline-none text-[var(--text-primary)] text-sm font-mono"
+            />
+          </div>
+
+          <!-- Cover Image & Media Section -->
+          <div class="p-4 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 space-y-3">
+            <div class="flex items-center justify-between">
+              <label for="post-cover" class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
+                Cover Image or Photo
+              </label>
+              <span class="text-[11px] text-[var(--text-secondary)]">Optional</span>
+            </div>
+            
+            <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+              <input
+                type="text"
+                id="post-cover"
+                name="coverImage"
+                placeholder="https://example.com/photo.jpg or /images/author.jpg"
+                class="flex-1 w-full px-4 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-primary)] text-[var(--text-primary)] text-xs font-mono focus:outline-none"
+              />
+              
+              <label class="min-h-[40px] px-3.5 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] hover:bg-[var(--bg-primary)] text-xs font-medium text-[var(--text-primary)] transition-colors cursor-pointer inline-flex items-center gap-1.5 shrink-0">
+                <svg class="w-4 h-4 text-[var(--accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                <span>Upload Device Image</span>
+                <input type="file" id="image-file-input" accept="image/*" class="hidden" />
+              </label>
+            </div>
+
+            <!-- Image thumbnail preview -->
+            <div id="image-preview-box" class="hidden items-center gap-3 pt-2">
+              <img id="image-preview-thumb" src="" alt="Thumbnail" class="w-16 h-12 object-cover rounded-lg border border-[var(--border-color)]" />
+              <div class="text-xs text-[var(--text-secondary)]">
+                <span class="font-medium text-[var(--text-primary)] block" id="image-preview-name">Selected image</span>
+                <button type="button" id="btn-remove-image" class="text-rose-500 hover:underline text-[11px] cursor-pointer">Remove image</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Preview Card Styling & Colors Section -->
+          <div class="p-4 sm:p-5 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+              <div>
+                <span class="text-xs font-mono font-bold uppercase tracking-wider text-[var(--accent)] block">
+                  Preview Card Styling &amp; Colors
+                </span>
+                <p class="text-xs text-[var(--text-secondary)] mt-0.5">
+                  Configure the top tip spine color and background gradient theme for feed listings and monograph plates.
+                </p>
+              </div>
+              <span class="self-start sm:self-auto text-[10px] font-mono px-2 py-0.5 rounded bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-secondary)]">
+                Card Plate
+              </span>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+              <!-- Selectors (Left 7 cols on desktop) -->
+              <div class="lg:col-span-7 space-y-4">
+                <!-- Tip Accent Color Selector -->
+                <div class="space-y-2">
+                  <div class="flex items-center justify-between">
+                    <label class="text-xs font-semibold text-[var(--text-primary)]">
+                      Top Tip / Spine Color
+                    </label>
+                    <span id="label-selected-tip" class="font-mono text-[11px] text-[var(--accent)] font-medium">Purple</span>
+                  </div>
+
+                  <div class="flex flex-wrap gap-2" id="tip-swatches-container">
+                    {PRESET_TIPS.map((tip) => (
+                      <button
+                        type="button"
+                        class={`tip-swatch-btn min-h-[38px] px-2.5 py-1.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-primary)] flex items-center gap-2 cursor-pointer transition-all hover:scale-103 text-xs font-mono ${tip.id === "purple" ? "ring-2 ring-[var(--accent)] border-transparent font-bold" : ""}`}
+                        data-tip-id={tip.id}
+                        data-tip-name={tip.name}
+                        data-tip-class={tip.accentBarClass}
+                        title={tip.name}
+                      >
+                        <span class={`w-3.5 h-3.5 rounded-full ${tip.accentBarClass} shrink-0 shadow-xs`}></span>
+                        <span class="text-[11px] text-[var(--text-primary)]">{tip.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                  <input type="hidden" id="post-tip-class" name="accentBarClass" value="bg-purple-500" />
+                </div>
+
+                <!-- Card Background Gradient Theme Selector -->
+                <div class="space-y-2">
+                  <div class="flex items-center justify-between">
+                    <label class="text-xs font-semibold text-[var(--text-primary)]">
+                      Card Background Gradient Theme
+                    </label>
+                    <span id="label-selected-theme" class="font-mono text-[11px] text-[var(--accent)] font-medium">Poetic Violet</span>
+                  </div>
+
+                  <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="theme-tiles-container">
+                    {PRESET_THEMES.map((theme) => (
+                      <button
+                        type="button"
+                        class={`theme-tile-btn relative p-2.5 rounded-xl border text-left cursor-pointer transition-all hover:scale-102 active:scale-98 overflow-hidden bg-gradient-to-br ${theme.previewBg} ${theme.id === "violet" ? "ring-2 ring-[var(--accent)] border-transparent" : "border-stone-800"}`}
+                        data-theme-id={theme.id}
+                        data-theme-name={theme.name}
+                        data-theme-class={theme.themeClass}
+                        title={theme.name}
+                      >
+                        <div class={`h-1 w-full rounded-full ${theme.accentTip} mb-1.5`}></div>
+                        <span class="block text-[11px] font-semibold text-white truncate leading-tight">{theme.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                  <input type="hidden" id="post-theme-class" name="themeClass" value="from-slate-950 via-purple-950 to-stone-950 text-purple-100" />
+                </div>
+              </div>
+
+              <!-- Live Mini Card Simulation (Right 5 cols on desktop) -->
+              <div class="lg:col-span-5 flex flex-col items-start w-full">
+                <div class="w-full flex items-center justify-between mb-2">
+                  <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--text-secondary)] font-semibold">
+                    Live Card Simulation
+                  </span>
+                  <span class="text-[10px] font-mono text-[var(--text-secondary)]">Aspect 16:9</span>
+                </div>
+
+                <div
+                  id="mini-card-preview"
+                  class="w-full relative flex flex-col justify-between overflow-hidden rounded-xl border border-stone-800 p-4 select-none bg-gradient-to-br from-slate-950 via-purple-950 to-stone-950 text-purple-100 aspect-video shadow-md transition-all duration-300"
+                >
+                  <!-- Fine Top Accent Color Spine -->
+                  <div id="mini-card-tip" class="absolute top-0 left-0 right-0 h-1.5 bg-purple-500 transition-colors duration-300"></div>
+
+                  <!-- Subtle Watermark Grid -->
+                  <div class="absolute inset-0 opacity-[0.08] pointer-events-none" aria-hidden="true">
+                    <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                      <defs>
+                        <pattern id="mini-card-grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                          <path d="M 20 0 L 0 0 0 20" fill="none" stroke="currentColor" stroke-width="0.5" />
+                        </pattern>
+                      </defs>
+                      <rect width="100%" height="100%" fill="url(#mini-card-grid)" />
+                    </svg>
+                  </div>
+
+                  <!-- Top Header Row -->
+                  <div class="relative z-10 flex items-center justify-between gap-1 text-[10px] font-mono tracking-wider text-stone-300 uppercase">
+                    <div class="flex items-center gap-1.5 truncate">
+                      <span class="inline-block w-1.5 h-1.5 rounded-full bg-stone-400"></span>
+                      <span id="mini-card-header" class="truncate font-semibold">POETRY MONOGRAPH</span>
+                    </div>
+                    <span id="mini-card-year" class="shrink-0 px-1.5 py-0.5 rounded bg-white/10 text-[9px] text-stone-200 font-medium font-mono">
+                      2026
+                    </span>
+                  </div>
+
+                  <!-- Center Typography Block -->
+                  <div class="relative z-10 my-auto py-1 text-center space-y-0.5">
+                    <span id="mini-card-subcat" class="block text-[9px] font-mono tracking-widest uppercase text-stone-400 font-bold">
+                      POETRY
+                    </span>
+                    <div id="mini-card-title" class="text-sm font-bold font-serif tracking-tight text-white line-clamp-1 drop-shadow-xs">
+                      Untitled Publication
+                    </div>
+                    <div id="mini-card-subtitle" class="text-[10px] font-mono text-stone-300 tracking-tight truncate">
+                      3 min read
+                    </div>
+                  </div>
+
+                  <!-- Bottom Row -->
+                  <div class="relative z-10 flex items-center justify-between text-[10px] font-mono pt-2 border-t border-white/10 text-stone-300">
+                    <span class="inline-flex items-center gap-1 font-medium">
+                      <span class="text-stone-400">#</span>
+                      <span id="mini-card-lang">English Verse</span>
+                    </span>
+                    <span class="text-[9px] text-stone-400 font-sans tracking-wide">
+                      H. Kapginlian
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ================= 1. POEM TAILORED FIELDS ================= -->
+          <div id="section-poem-fields" class="p-4 sm:p-5 rounded-2xl border border-purple-500/30 bg-purple-500/5 space-y-4">
+            <div class="flex items-center justify-between pb-2 border-b border-[var(--border-color)]">
+              <div>
+                <span class="text-xs font-mono font-bold uppercase tracking-wider text-purple-400 block">
+                  Poetic Structure &amp; Lyrical Monograph Settings
+                </span>
+                <p class="text-xs text-[var(--text-secondary)] mt-0.5">
+                  Tailored fields for verses, featured stanza hook, meter form, and mood reflections.
+                </p>
+              </div>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-500/10 border border-purple-500/30 text-purple-400 font-semibold">
+                Poem Mode
+              </span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div class="space-y-1">
+                <label class="block text-[11px] font-semibold text-[var(--text-secondary)]">Poetic Form</label>
+                <input type="text" id="poem-form-input" placeholder="e.g. Couplet, Free Verse, Rhymed Quatrain" class="w-full px-3 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)]" value="Couplet &amp; Quatrain" />
+              </div>
+              <div class="space-y-1">
+                <label class="block text-[11px] font-semibold text-[var(--text-secondary)]">Poetic Theme / Mood</label>
+                <input type="text" id="poem-theme-input" placeholder="e.g. Memory, Highland Mist, Solitude" class="w-full px-3 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)]" value="Memory &amp; Longing" />
+              </div>
+              <div class="space-y-1">
+                <label class="block text-[11px] font-semibold text-[var(--text-secondary)]">Language Tradition</label>
+                <input type="text" id="poem-lang-input" placeholder="e.g. English Verse, Simte with Gloss" class="w-full px-3 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)] font-mono" value="English Verse" />
+              </div>
+            </div>
+
+            <!-- Featured Couplet / Key Stanza Field -->
+            <div class="space-y-1.5 p-3.5 rounded-xl border border-purple-500/20 bg-[var(--bg-primary)]">
+              <div class="flex items-center justify-between">
+                <label for="poem-couplet-input" class="block text-xs font-bold text-purple-400">
+                  Featured Couplet / Key Stanza
+                </label>
+                <span class="text-[10px] font-mono text-[var(--text-secondary)]">Opening stanza hook &amp; card excerpt</span>
+              </div>
+              <textarea
+                id="poem-couplet-input"
+                rows="2"
+                placeholder="Where the quiet river winds through evening light,&#10;The shadow of the mountains meets the night."
+                class="w-full p-2.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 text-xs font-serif italic text-[var(--text-primary)] leading-relaxed focus:outline-none"
+              ></textarea>
+            </div>
+
+            <!-- Poet's Reflection / Background Context -->
+            <div class="space-y-1">
+              <label for="poem-reflection-input" class="block text-[11px] font-semibold text-[var(--text-secondary)]">
+                Poet's Reflection / Background Note
+              </label>
+              <textarea
+                id="poem-reflection-input"
+                rows="2"
+                placeholder="Composed along the river plain at sundown; meditating on evening mist and quiet pathways..."
+                class="w-full p-2.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)] font-serif"
+              ></textarea>
+            </div>
+          </div>
+
+          <!-- ================= 2. ESSAY TAILORED FIELDS ================= -->
+          <div id="section-essay-fields" class="hidden p-4 sm:p-5 rounded-2xl border border-amber-500/30 bg-amber-500/5 space-y-4">
+            <div class="flex items-center justify-between pb-2 border-b border-[var(--border-color)]">
+              <div>
+                <span class="text-xs font-mono font-bold uppercase tracking-wider text-amber-500 block">
+                  Essay &amp; Cultural Dispatch Settings
+                </span>
+                <p class="text-xs text-[var(--text-secondary)] mt-0.5">
+                  Tailored fields for fieldwork context, pull quotes, and narrative reflections.
+                </p>
+              </div>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-amber-500 font-semibold">
+                Essay Mode
+              </span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div class="space-y-1">
+                <label class="block text-[11px] font-semibold text-[var(--text-secondary)]">Fieldwork Location / Context</label>
+                <input type="text" id="essay-location-input" placeholder="e.g. Pamjal Village, Pherzawl District, Manipur" class="w-full px-3 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)]" />
+              </div>
+              <div class="space-y-1">
+                <label class="block text-[11px] font-semibold text-[var(--text-secondary)]">Primary Topic / Pillar</label>
+                <input type="text" id="essay-topic-input" placeholder="e.g. Indigenous Knowledge Systems, Oral History" class="w-full px-3 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)]" value="Indigenous Knowledge" />
+              </div>
+            </div>
+
+            <!-- Featured Pull Quote -->
+            <div class="space-y-1.5 p-3.5 rounded-xl border border-amber-500/20 bg-[var(--bg-primary)]">
+              <div class="flex items-center justify-between">
+                <label for="essay-pullquote-input" class="block text-xs font-bold text-amber-500">
+                  Featured Pull Quote
+                </label>
+                <span class="text-[10px] font-mono text-[var(--text-secondary)]">Central thesis or highlight quote</span>
+              </div>
+              <textarea
+                id="essay-pullquote-input"
+                rows="2"
+                placeholder="Language is more than a system of words and grammar—it is a repository of memory, identity, knowledge, and lived experience."
+                class="w-full p-2.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 text-xs font-serif italic text-[var(--text-primary)] leading-relaxed focus:outline-none"
+              ></textarea>
+              <div class="pt-1">
+                <input
+                  type="text"
+                  id="essay-quote-author"
+                  placeholder="Attribution (e.g. H. Kapginlian, Research Philosophy)"
+                  class="w-full px-2.5 py-1.5 rounded-md border border-[var(--border-color)] bg-[var(--bg-primary)] text-[11px] text-[var(--text-secondary)] font-mono"
+                  value="H. Kapginlian, Research Philosophy"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- ================= 3. RESEARCH PAPER TAILORED FIELDS ================= -->
+          <div id="section-paper-fields" class="hidden p-4 sm:p-5 rounded-2xl border border-indigo-500/30 bg-indigo-500/5 space-y-4">
+            <div class="flex items-center justify-between pb-2 border-b border-[var(--border-color)]">
+              <div>
+                <span class="text-xs font-mono font-bold uppercase tracking-wider text-indigo-400 block">
+                  Academic Monograph &amp; Journal Specifications
+                </span>
+                <p class="text-xs text-[var(--text-secondary)] mt-0.5">
+                  Peer-reviewed citations, ISSN/DOI, linguistic taxonomy, and interlinear gloss examples.
+                </p>
+              </div>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 font-semibold">
+                Research Mode
+              </span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+              <div class="space-y-1">
+                <label class="block text-[11px] font-semibold text-[var(--text-secondary)]">Journal / Publication</label>
+                <input type="text" id="paper-journal" placeholder="Language in India" class="w-full px-3 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)]" />
+              </div>
+              <div class="space-y-1">
+                <label class="block text-[11px] font-semibold text-[var(--text-secondary)]">Volume / Issue / Pages</label>
+                <input type="text" id="paper-volume" placeholder="Vol. 23:6, pp. 172-187" class="w-full px-3 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)]" />
+              </div>
+              <div class="space-y-1">
+                <label class="block text-[11px] font-semibold text-[var(--text-secondary)]">ISSN</label>
+                <input type="text" id="paper-issn" placeholder="1930-2940" class="w-full px-3 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)] font-mono" />
+              </div>
+              <div class="space-y-1">
+                <label class="block text-[11px] font-semibold text-[var(--text-secondary)]">DOI / Resolver</label>
+                <input type="text" id="paper-doi" placeholder="10.1234/example" class="w-full px-3 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)] font-mono" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div class="space-y-1">
+                <label class="block text-[11px] font-semibold text-[var(--text-secondary)]">Authors &amp; Affiliation</label>
+                <input type="text" id="paper-authors" placeholder="H. Kapginlian (NEHU, Shillong)" class="w-full px-3 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)]" value="H. Kapginlian (NEHU, Shillong)" />
+              </div>
+              <div class="space-y-1">
+                <label class="block text-[11px] font-semibold text-[var(--text-secondary)]">Target Language &amp; ISO</label>
+                <input type="text" id="paper-lang" placeholder="Simte (smt)" class="w-full px-3 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)] font-mono" value="Simte (smt)" />
+              </div>
+              <div class="space-y-1">
+                <label class="block text-[11px] font-semibold text-[var(--text-secondary)]">Linguistic Subdiscipline</label>
+                <input type="text" id="paper-subdiscipline" placeholder="Morphosyntax, Typology" class="w-full px-3 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)]" value="Morphosyntax &amp; Typology" />
+              </div>
+            </div>
+
+            <!-- Peer-Reviewed Abstract -->
+            <div class="space-y-1">
+              <label for="paper-abstract" class="block text-[11px] font-semibold text-[var(--text-secondary)]">
+                Peer-Reviewed Abstract Summary
+              </label>
+              <textarea
+                id="paper-abstract"
+                rows="3"
+                placeholder="Structured abstract detailing grammatical investigation, elder consultant elicitation methodology, and typological findings..."
+                class="w-full p-2.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)] font-serif"
+              ></textarea>
+            </div>
+          </div>
+
+          <!-- Main Content / Inbuilt Markdown Composer -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <label for="post-body" id="composer-label" class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
+                Verses &amp; Stanzas Composer
+              </label>
+              <span class="text-[11px] text-[var(--text-secondary)] font-mono">Markdown syntax supported</span>
+            </div>
+
+            <!-- Markdown Quick Toolbar -->
+            <div class="flex flex-wrap items-center gap-1 p-2 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-color)]">
+              <button type="button" class="md-tool-btn px-2.5 py-1 text-xs font-bold rounded-md bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] hover:bg-[var(--accent-light)] transition-colors cursor-pointer" data-syntax="**" title="Bold">
+                B
+              </button>
+              <button type="button" class="md-tool-btn px-2.5 py-1 text-xs italic font-serif rounded-md bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] hover:bg-[var(--accent-light)] transition-colors cursor-pointer" data-syntax="*" title="Italic">
+                I
+              </button>
+              <button type="button" class="md-tool-btn px-2.5 py-1 text-xs font-mono rounded-md bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] hover:bg-[var(--accent-light)] transition-colors cursor-pointer" data-action="h2" title="Section Heading">
+                H2
+              </button>
+              <button type="button" class="md-tool-btn px-2.5 py-1 text-xs font-mono rounded-md bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] hover:bg-[var(--accent-light)] transition-colors cursor-pointer" data-action="h3" title="Subheading">
+                H3
+              </button>
+              <button type="button" class="md-tool-btn px-2.5 py-1 text-xs font-serif rounded-md bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] hover:bg-[var(--accent-light)] transition-colors cursor-pointer" data-action="quote" title="Blockquote">
+                &ldquo; Quote
+              </button>
+              <button type="button" class="md-tool-btn px-2.5 py-1 text-xs font-mono rounded-md bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] hover:bg-[var(--accent-light)] transition-colors cursor-pointer" data-action="list" title="Bullet List">
+                &bull; List
+              </button>
+              <button type="button" class="md-tool-btn px-2.5 py-1 text-xs font-mono rounded-md bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] hover:bg-[var(--accent-light)] transition-colors cursor-pointer" data-action="divider" title="Stanza Break">
+                &mdash; Stanza Break
+              </button>
+              <button type="button" class="md-tool-btn px-2.5 py-1 text-xs font-mono rounded-md bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] hover:bg-[var(--accent-light)] transition-colors cursor-pointer" data-action="image" title="Insert Image Link">
+                Image
+              </button>
+            </div>
+
+            <textarea
+              id="post-body"
+              name="body"
+              rows="12"
+              placeholder="Write your stanzas or verses here. Use double line-breaks to separate stanzas."
+              class="w-full p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 focus:bg-[var(--bg-primary)] focus:border-[var(--accent)] focus:outline-none text-[var(--text-primary)] font-serif text-base leading-relaxed"
+            ></textarea>
+          </div>
+
+          <!-- Bottom Action Buttons -->
+          <div class="pt-4 flex flex-wrap items-center justify-between gap-3">
+            <button
+              type="button"
+              id="btn-clear-form"
+              class="min-h-[44px] px-4 py-2 rounded-xl border border-[var(--border-color)] text-xs text-[var(--text-secondary)] hover:text-rose-500 hover:border-rose-400 transition-colors cursor-pointer"
+            >
+              Clear Form
+            </button>
+
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                id="btn-goto-preview"
+                class="min-h-[44px] px-4 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-primary)] transition-colors cursor-pointer inline-flex items-center gap-1.5"
+              >
+                <span>Live Preview &rarr;</span>
+              </button>
+              <button
+                type="button"
+                id="btn-publish-post"
+                class="min-h-[44px] px-5 py-2 rounded-xl bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition-colors cursor-pointer inline-flex items-center gap-1.5 shadow-xs"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                <span>Publish Post</span>
+              </button>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <!-- ================= TAB 2: LIVE PREVIEW ================= -->
+      <section id="tab-preview" class="tab-panel hidden space-y-6">
+        <div class="p-4 rounded-xl bg-[var(--bg-secondary)]/50 border border-[var(--border-color)] flex items-center justify-between text-xs text-[var(--text-secondary)]">
+          <span>Live Markdown simulation with site typography and dark mode styling.</span>
+          <button
+            type="button"
+            class="text-[var(--accent)] hover:underline font-semibold cursor-pointer"
+            data-target="tab-write"
+          >
+            &larr; Back to Editor
+          </button>
+        </div>
+
+        <!-- Catalog & Feed Card Plate Preview -->
+        <div class="max-w-2xl mx-auto p-5 sm:p-6 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold uppercase tracking-wider text-[var(--accent)]">
+              Card Plate View (Feed &amp; Catalog Appearance)
+            </span>
+            <span class="text-[10px] font-mono text-[var(--text-secondary)]">Aspect 16:9</span>
+          </div>
+
+          <div class="max-w-md mx-auto">
+            <div
+              id="full-card-preview"
+              class="relative flex flex-col justify-between overflow-hidden rounded-xl border border-stone-800 p-5 select-none bg-gradient-to-br from-slate-950 via-purple-950 to-stone-950 text-purple-100 aspect-video shadow-md transition-all duration-300"
+            >
+              <!-- Fine Top Accent Color Spine -->
+              <div id="full-card-tip" class="absolute top-0 left-0 right-0 h-1.5 bg-purple-500 transition-colors duration-300"></div>
+
+              <!-- Background Subtle Watermark Grid -->
+              <div class="absolute inset-0 opacity-[0.08] pointer-events-none" aria-hidden="true">
+                <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <pattern id="full-card-grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                      <path d="M 20 0 L 0 0 0 20" fill="none" stroke="currentColor" stroke-width="0.5" />
+                    </pattern>
+                  </defs>
+                  <rect width="100%" height="100%" fill="url(#full-card-grid)" />
+                </svg>
+              </div>
+
+              <!-- Top Header Row -->
+              <div class="relative z-10 flex items-center justify-between gap-1 text-[11px] font-mono tracking-wider text-stone-300 uppercase">
+                <div class="flex items-center gap-1.5 truncate">
+                  <span class="inline-block w-2 h-2 rounded-full bg-stone-400"></span>
+                  <span id="full-card-header" class="truncate font-semibold">POETRY MONOGRAPH</span>
+                </div>
+                <span id="full-card-year" class="shrink-0 px-2 py-0.5 rounded bg-white/10 text-[10px] text-stone-200 font-medium font-mono">
+                  2026
+                </span>
+              </div>
+
+              <!-- Center Typography Block -->
+              <div class="relative z-10 my-auto py-2 space-y-1 text-center">
+                <span id="full-card-subcat" class="block text-[10px] font-mono tracking-widest uppercase text-stone-400 font-bold">
+                  POETRY
+                </span>
+                <div id="full-card-title" class="text-base sm:text-lg font-bold font-serif tracking-tight text-white line-clamp-1 drop-shadow-xs">
+                  Untitled Publication
+                </div>
+                <div id="full-card-subtitle" class="text-xs font-mono text-stone-300 tracking-tight truncate">
+                  3 min read
+                </div>
+              </div>
+
+              <!-- Bottom Row -->
+              <div class="relative z-10 flex items-center justify-between text-[11px] font-mono pt-2.5 border-t border-white/10 text-stone-300">
+                <span class="inline-flex items-center gap-1 font-medium">
+                  <span class="text-stone-400">#</span>
+                  <span id="full-card-lang">English Verse</span>
+                </span>
+                <span class="text-[10px] text-stone-400 font-sans tracking-wide">
+                  H. Kapginlian
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Simulated Post Layout -->
+        <article class="max-w-2xl mx-auto rounded-2xl border border-[var(--border-color)] bg-[var(--bg-primary)] p-6 sm:p-10 shadow-sm space-y-6">
+          <!-- Badges -->
+          <div class="flex flex-wrap items-center gap-2 text-xs font-sans text-[var(--text-secondary)]">
+            <span id="prev-category-badge" class="px-2.5 py-0.5 rounded-full font-mono font-semibold uppercase tracking-wider bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 text-[11px]">
+              Poetry
+            </span>
+            <span>&bull;</span>
+            <span id="prev-date" class="font-mono">October 2026</span>
+            <span>&bull;</span>
+            <span id="prev-reading-time">3 min read</span>
+          </div>
+
+          <!-- Title & Subtitle -->
+          <h1 id="prev-title" class="text-2xl sm:text-4xl font-bold font-sans tracking-tight text-[var(--text-primary)] leading-snug">
+            Untitled Publication
+          </h1>
+
+          <p id="prev-subtitle" class="text-base font-serif italic text-[var(--text-secondary)] leading-relaxed">
+            Overview / subtitle preview
+          </p>
+
+          <!-- Simulated Author Info -->
+          <div class="flex items-center gap-3 pt-3 border-t border-[var(--border-color)]/60 text-xs">
+            <img src="/images/author-avatar.jpg" alt="Author" class="w-10 h-10 rounded-full object-cover border border-[var(--border-color)]" />
+            <div>
+              <span class="block font-bold text-[var(--text-primary)]">H. Kapginlian</span>
+              <span class="text-[var(--text-secondary)] font-mono text-[11px]">NEHU, Shillong</span>
+            </div>
+          </div>
+
+          <!-- Cover Image in Preview (if provided) -->
+          <div id="prev-cover-container" class="hidden overflow-hidden rounded-xl border border-[var(--border-color)]">
+            <img id="prev-cover-img" src="" alt="Cover" class="w-full max-h-72 object-cover" />
+          </div>
+
+          <!-- Rendered Markdown Body -->
+          <div id="prev-markdown-rendered" class="text-base font-serif text-[var(--text-primary)] leading-relaxed space-y-4 pt-2 border-t border-[var(--border-color)]/60">
+            <!-- Dynamically rendered markdown -->
+          </div>
+
+          <!-- Tags Preview -->
+          <div id="prev-tags-container" class="flex flex-wrap gap-1.5 pt-4 border-t border-[var(--border-color)]/40 font-mono text-xs text-[var(--text-secondary)]">
+            <span>#poetry</span>
+          </div>
+        </article>
+      </section>
+
+      <!-- ================= TAB 3: EXISTING WORKS & DELETION ================= -->
+      <section id="tab-existing" class="tab-panel hidden space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 class="text-lg font-bold text-[var(--text-primary)]">Catalog &amp; Content Management</h2>
+            <p class="text-xs text-[var(--text-secondary)]">Manage published poems, essays, and research papers.</p>
+          </div>
+          <input
+            type="text"
+            id="existing-search"
+            placeholder="Search catalog..."
+            class="px-3.5 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/50 text-xs text-[var(--text-primary)] max-w-xs focus:outline-none"
+          />
+        </div>
+
+        <div class="space-y-3" id="existing-posts-list">
+          {samplePosts.map((post) => (
+            <div class="catalog-item p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-primary)] hover:border-[var(--accent)]/40 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs" data-slug={post.slug} data-title={post.title}>
+              <div class="space-y-1">
+                <div class="flex items-center gap-2 font-mono text-[10px]">
+                  <span class={`px-2 py-0.5 rounded font-bold uppercase ${
+                    post.postType === "poem" ? "bg-purple-500/10 text-purple-600 dark:text-purple-400" :
+                    post.postType === "academic_paper" ? "bg-blue-500/10 text-blue-600 dark:text-blue-400" :
+                    "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                  }`}>
+                    {post.postType.replace("_", " ")}
+                  </span>
+                  <span class="text-[var(--text-secondary)]">{post.date}</span>
+                </div>
+                <h3 class="font-bold font-sans text-sm text-[var(--text-primary)] line-clamp-1">{post.title}</h3>
+                <span class="font-mono text-[11px] text-[var(--text-secondary)]">src/data/posts/{post.slug}.ts</span>
+              </div>
+
+              <div class="flex items-center gap-2 shrink-0">
+                <a
+                  href={getPostUrl(post)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="px-3 py-1.5 rounded-lg border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors min-h-[36px] inline-flex items-center gap-1"
+                >
+                  <span>View</span>
+                  <span aria-hidden="true">&rarr;</span>
+                </a>
+                <button
+                  type="button"
+                  class="btn-load-existing px-3 py-1.5 rounded-lg bg-[var(--bg-secondary)] hover:bg-[var(--accent-light)] text-[var(--text-primary)] font-semibold transition-colors min-h-[36px] cursor-pointer"
+                  data-slug={post.slug}
+                >
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  class="btn-delete-post px-3 py-1.5 rounded-lg border border-rose-300 dark:border-rose-900/60 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors min-h-[36px] cursor-pointer"
+                  data-slug={post.slug}
+                  data-title={post.title}
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- ================= TAB 4: SAVED DRAFTS ================= -->
+      <section id="tab-drafts" class="tab-panel hidden space-y-6">
+        <div>
+          <h2 class="text-lg font-bold text-[var(--text-primary)]">Local Browser Drafts</h2>
+          <p class="text-xs text-[var(--text-secondary)]">Drafts saved in your device's browser storage. They persist across browser refreshes.</p>
+        </div>
+
+        <div id="drafts-container" class="space-y-3">
+          <div id="no-drafts-msg" class="text-center py-12 border border-dashed border-[var(--border-color)] rounded-2xl text-xs text-[var(--text-secondary)]">
+            No saved drafts found. Write something and tap "Save Draft".
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB 5: EXPORT CODE ================= -->
+      <section id="tab-code" class="tab-panel hidden space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 class="text-lg font-bold text-[var(--text-primary)]">Ready-to-Commit TypeScript File</h2>
+            <p class="text-xs text-[var(--text-secondary)]">Save this directly into your repository at <code class="font-mono bg-[var(--bg-secondary)] px-1 py-0.5 rounded text-[11px]" id="target-filename-label">src/data/posts/new-post.ts</code></p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button
+              type="button"
+              id="btn-copy-code"
+              class="min-h-[44px] px-4 py-2 rounded-xl bg-[var(--text-primary)] text-[var(--bg-primary)] font-semibold text-xs hover:opacity-90 transition-opacity cursor-pointer inline-flex items-center gap-1.5"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+              <span>Copy Code</span>
+            </button>
+            <button
+              type="button"
+              id="btn-download-file"
+              class="min-h-[44px] px-4 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] hover:bg-[var(--bg-primary)] text-xs font-medium text-[var(--text-primary)] transition-colors cursor-pointer inline-flex items-center gap-1.5"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+              <span>Download .ts</span>
+            </button>
+          </div>
+        </div>
+
+        <pre
+          id="code-output"
+          class="p-4 sm:p-5 rounded-2xl bg-[var(--bg-secondary)]/70 border border-[var(--border-color)] font-mono text-xs text-[var(--text-primary)] overflow-x-auto leading-relaxed select-all"
+        ><code>// Tap 'Generate TypeScript Code' in the editor to view generated code here.</code></pre>
+      </section>
+
+      <!-- ================= TAB 6: SITE SETTINGS STUDIO ================= -->
+      <section id="tab-site-config" class="tab-panel hidden space-y-6">
+        
+        <!-- Header Banner & Action Bar -->
+        <div class="p-5 rounded-2xl bg-[var(--bg-secondary)]/70 border border-[var(--border-color)] flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
+              <span class="text-xs font-mono font-bold uppercase tracking-wider text-[var(--accent)]">
+                Site Settings Studio
+              </span>
+              <span id="config-storage-status" class="text-[10px] font-mono px-2 py-0.5 rounded bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-secondary)]">
+                Default Loaded
+              </span>
+            </div>
+            <h2 class="text-lg font-bold text-[var(--text-primary)]">Configure Website &amp; Navigation</h2>
+            <p class="text-xs text-[var(--text-secondary)] leading-relaxed">
+              Edit author profile, header navigation tabs &amp; order, fieldwork spotlight, social links, page leads, and footer.
+            </p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              id="btn-save-site-config"
+              class="min-h-[44px] px-4 py-2 rounded-xl bg-[var(--text-primary)] text-[var(--bg-primary)] font-semibold text-xs hover:opacity-90 transition-opacity cursor-pointer inline-flex items-center gap-1.5 shadow-xs"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+              <span>Save Settings Locally</span>
+            </button>
+            <button
+              type="button"
+              id="btn-reset-site-config"
+              class="min-h-[44px] px-3.5 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] hover:bg-[var(--bg-primary)] text-xs text-[var(--text-secondary)] hover:text-rose-500 transition-colors cursor-pointer inline-flex items-center gap-1.5"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+              <span>Reset Defaults</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Section Navigation Pills (Quick scroll or jump) -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs font-medium">
+          <a href="#sec-cfg-header" class="px-3 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-secondary)]/50 hover:bg-[var(--bg-secondary)] text-[var(--text-primary)] whitespace-nowrap min-h-[44px] inline-flex items-center">
+            Header &amp; Navigation
+          </a>
+          <a href="#sec-cfg-author" class="px-3 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-secondary)]/50 hover:bg-[var(--bg-secondary)] text-[var(--text-primary)] whitespace-nowrap min-h-[44px] inline-flex items-center">
+            Author &amp; Bio
+          </a>
+          <a href="#sec-cfg-spotlight" class="px-3 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-secondary)]/50 hover:bg-[var(--bg-secondary)] text-[var(--text-primary)] whitespace-nowrap min-h-[44px] inline-flex items-center">
+            Fieldwork Spotlight
+          </a>
+          <a href="#sec-cfg-socials" class="px-3 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-secondary)]/50 hover:bg-[var(--bg-secondary)] text-[var(--text-primary)] whitespace-nowrap min-h-[44px] inline-flex items-center">
+            Socials &amp; Academic
+          </a>
+          <a href="#sec-cfg-pages" class="px-3 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-secondary)]/50 hover:bg-[var(--bg-secondary)] text-[var(--text-primary)] whitespace-nowrap min-h-[44px] inline-flex items-center">
+            Page Leads
+          </a>
+          <a href="#sec-cfg-footer" class="px-3 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-secondary)]/50 hover:bg-[var(--bg-secondary)] text-[var(--text-primary)] whitespace-nowrap min-h-[44px] inline-flex items-center">
+            Footer &amp; Standards
+          </a>
+          <a href="#sec-cfg-export" class="px-3 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-secondary)]/50 hover:bg-[var(--bg-secondary)] text-[var(--text-primary)] whitespace-nowrap min-h-[44px] inline-flex items-center">
+            Export siteConfig.ts
+          </a>
+        </div>
+
+        <div id="site-config-form" class="space-y-8">
+          
+          <!-- 1. Header & Navigation -->
+          <div id="sec-cfg-header" class="p-5 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-primary)] space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-[var(--border-color)]">
+              <div>
+                <h3 class="text-sm font-bold text-[var(--text-primary)]">Header Navigation &amp; Tab Order</h3>
+                <p class="text-xs text-[var(--text-secondary)]">Reorder buttons, change button labels, or toggle tab visibility on the header.</p>
+              </div>
+              <span class="text-xs font-mono text-[var(--accent)] font-semibold">7 Tabs</span>
+            </div>
+
+            <!-- List rendered dynamically by JavaScript -->
+            <div id="cfg-nav-list" class="space-y-2.5">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+
+          <!-- 2. Author Profile & Bio -->
+          <div id="sec-cfg-author" class="p-5 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-primary)] space-y-4">
+            <div class="pb-3 border-b border-[var(--border-color)]">
+              <h3 class="text-sm font-bold text-[var(--text-primary)]">Author Profile &amp; Bio Information</h3>
+              <p class="text-xs text-[var(--text-secondary)]">Primary academic identity, affiliations, degrees, and bio texts displayed across Home and About.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              <div class="space-y-1.5">
+                <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">Full Name</label>
+                <input type="text" id="cfg-author-name" class="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 text-xs font-medium text-[var(--text-primary)]" />
+              </div>
+              <div class="space-y-1.5">
+                <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">Short / Brand Name</label>
+                <input type="text" id="cfg-author-shortname" class="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 text-xs font-medium text-[var(--text-primary)]" />
+              </div>
+              <div class="space-y-1.5">
+                <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">Academic Title</label>
+                <input type="text" id="cfg-author-title" class="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 text-xs font-medium text-[var(--text-primary)]" />
+              </div>
+              <div class="space-y-1.5">
+                <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">Qualification</label>
+                <input type="text" id="cfg-author-qualification" class="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 text-xs font-medium text-[var(--text-primary)]" />
+              </div>
+              <div class="space-y-1.5">
+                <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">Affiliation</label>
+                <input type="text" id="cfg-author-affiliation" class="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 text-xs font-medium text-[var(--text-primary)]" />
+              </div>
+              <div class="space-y-1.5">
+                <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">Location</label>
+                <input type="text" id="cfg-author-location" class="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 text-xs font-medium text-[var(--text-primary)]" />
+              </div>
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">Short Bio (Hero Section)</label>
+              <textarea id="cfg-author-shortbio" rows="2" class="w-full p-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 text-xs text-[var(--text-primary)]"></textarea>
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">Full Biography (About Page - Paragraphs separated by blank line)</label>
+              <textarea id="cfg-author-fullbio" rows="4" class="w-full p-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 text-xs text-[var(--text-primary)]"></textarea>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="space-y-1.5">
+                <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">Avatar Image Path</label>
+                <input type="text" id="cfg-author-avatar" class="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 text-xs font-mono text-[var(--text-primary)]" />
+              </div>
+              <div class="space-y-1.5">
+                <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">Full Photo Path</label>
+                <input type="text" id="cfg-author-photo" class="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 text-xs font-mono text-[var(--text-primary)]" />
+              </div>
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">Research Areas (Comma separated)</label>
+              <input type="text" id="cfg-author-research-areas" class="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 text-xs font-medium text-[var(--text-primary)]" />
+            </div>
+
+            <!-- Metrics & Action Buttons -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+              <div class="p-3.5 rounded-xl bg-[var(--bg-secondary)]/50 border border-[var(--border-color)] space-y-2">
+                <span class="text-xs font-bold text-[var(--text-primary)] block">Hero Metrics</span>
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="text-[10px] text-[var(--text-secondary)] block">Metric 1 Value</label>
+                    <input type="text" id="cfg-metric-papers-val" class="w-full px-2 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)]" />
+                  </div>
+                  <div>
+                    <label class="text-[10px] text-[var(--text-secondary)] block">Metric 1 Label</label>
+                    <input type="text" id="cfg-metric-papers-lbl" class="w-full px-2 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)]" />
+                  </div>
+                  <div>
+                    <label class="text-[10px] text-[var(--text-secondary)] block">Metric 2 Value</label>
+                    <input type="text" id="cfg-metric-langs-val" class="w-full px-2 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)]" />
+                  </div>
+                  <div>
+                    <label class="text-[10px] text-[var(--text-secondary)] block">Metric 2 Label</label>
+                    <input type="text" id="cfg-metric-langs-lbl" class="w-full px-2 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)]" />
+                  </div>
+                </div>
+              </div>
+
+              <div class="p-3.5 rounded-xl bg-[var(--bg-secondary)]/50 border border-[var(--border-color)] space-y-2">
+                <span class="text-xs font-bold text-[var(--text-primary)] block">Hero Action Buttons</span>
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="text-[10px] text-[var(--text-secondary)] block">Primary Button Label</label>
+                    <input type="text" id="cfg-btn1-label" class="w-full px-2 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)]" />
+                  </div>
+                  <div>
+                    <label class="text-[10px] text-[var(--text-secondary)] block">Primary Button URL</label>
+                    <input type="text" id="cfg-btn1-href" class="w-full px-2 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)]" />
+                  </div>
+                  <div>
+                    <label class="text-[10px] text-[var(--text-secondary)] block">Secondary Button Label</label>
+                    <input type="text" id="cfg-btn2-label" class="w-full px-2 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)]" />
+                  </div>
+                  <div>
+                    <label class="text-[10px] text-[var(--text-secondary)] block">Secondary Button URL</label>
+                    <input type="text" id="cfg-btn2-href" class="w-full px-2 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)]" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Fieldwork Spotlight -->
+          <div id="sec-cfg-spotlight" class="p-5 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-primary)] space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-[var(--border-color)]">
+              <div>
+                <h3 class="text-sm font-bold text-[var(--text-primary)]">Fieldwork Spotlight Card (Homepage)</h3>
+                <p class="text-xs text-[var(--text-secondary)]">Interlinear glossed linguistic demonstration featured on the home page.</p>
+              </div>
+              <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+                <input type="checkbox" id="cfg-spotlight-enabled" class="rounded border-[var(--border-color)] w-4 h-4 text-[var(--accent)]" />
+                <span class="text-xs font-semibold text-[var(--text-primary)]">Enable on Homepage</span>
+              </label>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+              <div class="space-y-1">
+                <label class="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-secondary)] block">Badge Label</label>
+                <input type="text" id="cfg-spotlight-badge" class="w-full px-3 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 text-xs text-[var(--text-primary)]" />
+              </div>
+              <div class="space-y-1">
+                <label class="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-secondary)] block">Subtitle / Language</label>
+                <input type="text" id="cfg-spotlight-sub" class="w-full px-3 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 text-xs text-[var(--text-primary)]" />
+              </div>
+              <div class="space-y-1">
+                <label class="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-secondary)] block">Study Link Text</label>
+                <input type="text" id="cfg-spotlight-link-text" class="w-full px-3 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 text-xs text-[var(--text-primary)]" />
+              </div>
+              <div class="space-y-1">
+                <label class="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-secondary)] block">Study Link URL</label>
+                <input type="text" id="cfg-spotlight-link-href" class="w-full px-3 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 text-xs text-[var(--text-primary)]" />
+              </div>
+            </div>
+
+            <!-- Gloss Word Units -->
+            <div class="space-y-2">
+              <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
+                Interlinear Gloss Pairs (Source Morpheme + Gloss Annotation)
+              </label>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                <div class="p-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/20 space-y-1.5">
+                  <span class="text-[10px] font-mono text-[var(--accent)] block font-semibold">Word 1</span>
+                  <input type="text" id="cfg-spotlight-w1-src" placeholder="Source" class="w-full px-2 py-1 rounded bg-[var(--bg-primary)] border border-[var(--border-color)] text-xs font-serif" />
+                  <input type="text" id="cfg-spotlight-w1-gloss" placeholder="Gloss" class="w-full px-2 py-1 rounded bg-[var(--bg-primary)] border border-[var(--border-color)] text-[11px] font-mono text-[var(--text-secondary)]" />
+                </div>
+                <div class="p-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/20 space-y-1.5">
+                  <span class="text-[10px] font-mono text-[var(--accent)] block font-semibold">Word 2</span>
+                  <input type="text" id="cfg-spotlight-w2-src" placeholder="Source" class="w-full px-2 py-1 rounded bg-[var(--bg-primary)] border border-[var(--border-color)] text-xs font-serif" />
+                  <input type="text" id="cfg-spotlight-w2-gloss" placeholder="Gloss" class="w-full px-2 py-1 rounded bg-[var(--bg-primary)] border border-[var(--border-color)] text-[11px] font-mono text-[var(--text-secondary)]" />
+                </div>
+                <div class="p-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/20 space-y-1.5">
+                  <span class="text-[10px] font-mono text-[var(--accent)] block font-semibold">Word 3</span>
+                  <input type="text" id="cfg-spotlight-w3-src" placeholder="Source" class="w-full px-2 py-1 rounded bg-[var(--bg-primary)] border border-[var(--border-color)] text-xs font-serif" />
+                  <input type="text" id="cfg-spotlight-w3-gloss" placeholder="Gloss" class="w-full px-2 py-1 rounded bg-[var(--bg-primary)] border border-[var(--border-color)] text-[11px] font-mono text-[var(--text-secondary)]" />
+                </div>
+                <div class="p-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/20 space-y-1.5">
+                  <span class="text-[10px] font-mono text-[var(--accent)] block font-semibold">Word 4</span>
+                  <input type="text" id="cfg-spotlight-w4-src" placeholder="Source" class="w-full px-2 py-1 rounded bg-[var(--bg-primary)] border border-[var(--border-color)] text-xs font-serif" />
+                  <input type="text" id="cfg-spotlight-w4-gloss" placeholder="Gloss" class="w-full px-2 py-1 rounded bg-[var(--bg-primary)] border border-[var(--border-color)] text-[11px] font-mono text-[var(--text-secondary)]" />
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">Free English Translation</label>
+              <input type="text" id="cfg-spotlight-trans" class="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 text-xs font-serif text-[var(--text-primary)]" />
+            </div>
+          </div>
+
+          <!-- 4. Social & Academic Links -->
+          <div id="sec-cfg-socials" class="p-5 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-primary)] space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-[var(--border-color)]">
+              <div>
+                <h3 class="text-sm font-bold text-[var(--text-primary)]">Social &amp; Academic Directory Links</h3>
+                <p class="text-xs text-[var(--text-secondary)]">Enable or disable specific profiles, adjust usernames, handles, and URLs.</p>
+              </div>
+              <span class="text-xs font-mono text-[var(--accent)] font-semibold">8 Profiles</span>
+            </div>
+
+            <div id="cfg-socials-list" class="space-y-3">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+
+          <!-- 5. Page Leads & Headers -->
+          <div id="sec-cfg-pages" class="p-5 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-primary)] space-y-5">
+            <div class="pb-3 border-b border-[var(--border-color)]">
+              <h3 class="text-sm font-bold text-[var(--text-primary)]">Page Leads &amp; Header Introductions</h3>
+              <p class="text-xs text-[var(--text-secondary)]">Customizable title, eyebrow, and introductory description for each page.</p>
+            </div>
+
+            <div class="space-y-4">
+              <!-- Research Page -->
+              <div class="p-3.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 space-y-2">
+                <span class="text-xs font-bold text-[var(--text-primary)] block">Research Page</span>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <input type="text" id="cfg-page-research-eyebrow" placeholder="Eyebrow" class="px-3 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)]" />
+                  <input type="text" id="cfg-page-research-title" placeholder="Title" class="px-3 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)] font-bold" />
+                </div>
+                <textarea id="cfg-page-research-desc" rows="2" placeholder="Description" class="w-full p-2.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)]"></textarea>
+              </div>
+
+              <!-- Writing / Feed Page -->
+              <div class="p-3.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 space-y-2">
+                <span class="text-xs font-bold text-[var(--text-primary)] block">Writing &amp; Feed Page</span>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <input type="text" id="cfg-page-feed-eyebrow" placeholder="Eyebrow" class="px-3 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)]" />
+                  <input type="text" id="cfg-page-feed-title" placeholder="Title" class="px-3 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)] font-bold" />
+                </div>
+                <textarea id="cfg-page-feed-desc" rows="2" placeholder="Description" class="w-full p-2.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)]"></textarea>
+              </div>
+
+              <!-- Poems Page -->
+              <div class="p-3.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 space-y-2">
+                <span class="text-xs font-bold text-[var(--text-primary)] block">Poetry Monograph Page</span>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <input type="text" id="cfg-page-poems-eyebrow" placeholder="Eyebrow" class="px-3 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)]" />
+                  <input type="text" id="cfg-page-poems-title" placeholder="Title" class="px-3 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)] font-bold" />
+                </div>
+                <textarea id="cfg-page-poems-desc" rows="2" placeholder="Description" class="w-full p-2.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)]"></textarea>
+              </div>
+
+              <!-- Archive Page -->
+              <div class="p-3.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 space-y-2">
+                <span class="text-xs font-bold text-[var(--text-primary)] block">Archive &amp; Index Page</span>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <input type="text" id="cfg-page-archive-eyebrow" placeholder="Eyebrow" class="px-3 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)]" />
+                  <input type="text" id="cfg-page-archive-title" placeholder="Title" class="px-3 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)] font-bold" />
+                </div>
+                <textarea id="cfg-page-archive-desc" rows="2" placeholder="Description" class="w-full p-2.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)]"></textarea>
+              </div>
+
+              <!-- About Page -->
+              <div class="p-3.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 space-y-2">
+                <span class="text-xs font-bold text-[var(--text-primary)] block">About Page</span>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <input type="text" id="cfg-page-about-eyebrow" placeholder="Eyebrow" class="px-3 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)]" />
+                  <input type="text" id="cfg-page-about-title" placeholder="Title" class="px-3 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)] font-bold" />
+                </div>
+                <textarea id="cfg-page-about-sub" rows="2" placeholder="Subtitle" class="w-full p-2.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)]"></textarea>
+              </div>
+
+              <!-- Socials Page -->
+              <div class="p-3.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 space-y-2">
+                <span class="text-xs font-bold text-[var(--text-primary)] block">Socials &amp; Linkhub Page</span>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <input type="text" id="cfg-page-socials-head" placeholder="Headline" class="px-3 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)] font-bold" />
+                  <input type="text" id="cfg-page-socials-sub" placeholder="Subheadline" class="px-3 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)]" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 6. Footer & Colophon -->
+          <div id="sec-cfg-footer" class="p-5 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-primary)] space-y-4">
+            <div class="pb-3 border-b border-[var(--border-color)]">
+              <h3 class="text-sm font-bold text-[var(--text-primary)]">Footer, Colophon &amp; Notice Details</h3>
+              <p class="text-xs text-[var(--text-secondary)]">Manage the global site footer notices, copyright line, and admin link visibility.</p>
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">Footer Bio Blurb</label>
+              <textarea id="cfg-footer-bio" rows="2" class="w-full p-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 text-xs text-[var(--text-primary)]"></textarea>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="space-y-1.5">
+                <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">Documented Languages Footnote</label>
+                <input type="text" id="cfg-footer-langs" class="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 text-xs text-[var(--text-primary)]" />
+              </div>
+              <div class="space-y-1.5">
+                <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">Copyright Notice</label>
+                <input type="text" id="cfg-footer-copy" class="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 text-xs text-[var(--text-primary)]" />
+              </div>
+              <div class="space-y-1.5">
+                <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">Standards / Compliance Notice</label>
+                <input type="text" id="cfg-footer-standards" class="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 text-xs text-[var(--text-primary)]" />
+              </div>
+              <div class="space-y-1.5">
+                <label class="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">Back to Top Text</label>
+                <input type="text" id="cfg-footer-backtotop" class="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 text-xs text-[var(--text-primary)]" />
+              </div>
+            </div>
+
+            <div class="pt-2 flex flex-wrap items-center gap-6">
+              <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+                <input type="checkbox" id="cfg-footer-show-admin" class="rounded border-[var(--border-color)] w-4 h-4 text-[var(--accent)]" />
+                <span class="text-xs font-medium text-[var(--text-primary)]">Display Admin CMS entry point in footer</span>
+              </label>
+
+              <div class="flex items-center gap-2">
+                <label class="text-xs text-[var(--text-secondary)]">Admin Label:</label>
+                <input type="text" id="cfg-footer-admin-label" class="px-2.5 py-1 rounded-lg border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 text-xs text-[var(--text-primary)]" />
+              </div>
+            </div>
+          </div>
+
+          <!-- 7. Export TypeScript Panel -->
+          <div id="sec-cfg-export" class="p-5 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-primary)] space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 class="text-sm font-bold text-[var(--text-primary)]">Export siteConfig.ts File</h3>
+                <p class="text-xs text-[var(--text-secondary)]">Copy or download this file to replace <code class="font-mono bg-[var(--bg-secondary)] px-1 py-0.5 rounded text-[11px]">src/data/siteConfig.ts</code>.</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <button
+                  type="button"
+                  id="btn-copy-site-config-code"
+                  class="min-h-[44px] px-4 py-2 rounded-xl bg-[var(--text-primary)] text-[var(--bg-primary)] font-semibold text-xs hover:opacity-90 transition-opacity cursor-pointer inline-flex items-center gap-1.5"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                  <span>Copy siteConfig.ts</span>
+                </button>
+                <button
+                  type="button"
+                  id="btn-download-site-config-file"
+                  class="min-h-[44px] px-4 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] hover:bg-[var(--bg-primary)] text-xs font-medium text-[var(--text-primary)] transition-colors cursor-pointer inline-flex items-center gap-1.5"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                  <span>Download File</span>
+                </button>
+              </div>
+            </div>
+
+            <pre
+              id="site-config-code-output"
+              class="p-4 sm:p-5 rounded-2xl bg-[var(--bg-secondary)]/70 border border-[var(--border-color)] font-mono text-xs text-[var(--text-primary)] overflow-x-auto max-h-[400px] leading-relaxed select-all"
+            ><code>// Generated siteConfig.ts will appear here</code></pre>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+
+    <!-- MOBILE BOTTOM NAVIGATION DOCK (Sticky on phone screens) -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[var(--bg-primary)] border-t border-[var(--border-color)] px-2 py-1.5 flex items-center justify-around shadow-lg">
+      <button
+        type="button"
+        class="mobile-dock-btn flex flex-col items-center justify-center p-1 rounded-lg text-[var(--accent)] font-semibold min-w-[44px] min-h-[44px]"
+        data-target="tab-write"
+      >
+        <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+        <span class="text-[9px] font-sans">Write</span>
+      </button>
+      <button
+        type="button"
+        class="mobile-dock-btn flex flex-col items-center justify-center p-1 rounded-lg text-[var(--text-secondary)] min-w-[44px] min-h-[44px]"
+        data-target="tab-preview"
+      >
+        <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+        <span class="text-[9px] font-sans">Preview</span>
+      </button>
+      <button
+        type="button"
+        class="mobile-dock-btn flex flex-col items-center justify-center p-1 rounded-lg text-[var(--text-secondary)] min-w-[44px] min-h-[44px]"
+        data-target="tab-existing"
+      >
+        <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+        <span class="text-[9px] font-sans">Catalog</span>
+      </button>
+      <button
+        type="button"
+        class="mobile-dock-btn flex flex-col items-center justify-center p-1 rounded-lg text-[var(--text-secondary)] min-w-[44px] min-h-[44px]"
+        data-target="tab-drafts"
+      >
+        <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
+        <span class="text-[9px] font-sans">Drafts</span>
+      </button>
+      <button
+        type="button"
+        class="mobile-dock-btn flex flex-col items-center justify-center p-1 rounded-lg text-[var(--text-secondary)] min-w-[44px] min-h-[44px]"
+        data-target="tab-code"
+      >
+        <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+        <span class="text-[9px] font-sans">Publish</span>
+      </button>
+      <button
+        type="button"
+        class="mobile-dock-btn flex flex-col items-center justify-center p-1 rounded-lg text-[var(--text-secondary)] min-w-[44px] min-h-[44px]"
+        data-target="tab-site-config"
+      >
+        <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+        <span class="text-[9px] font-sans">Settings</span>
+      </button>
+    </nav>
+
+    <!-- Publish Success Modal -->
+    <div id="publish-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+      <div class="bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span class="text-xs font-mono font-bold uppercase tracking-wider text-emerald-500">
+            Post Published Successfully
+          </span>
+        </div>
+        <h3 class="text-base font-bold text-[var(--text-primary)]" id="pub-modal-title"></h3>
+        <p class="text-xs text-[var(--text-secondary)] leading-relaxed">
+          Your post has been published into the local catalog. To persist it permanently in your Git repository, commit the generated file.
+        </p>
+
+        <div class="p-3.5 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-color)] text-xs font-mono space-y-1.5 text-[var(--text-secondary)]">
+          <span class="text-[10px] font-bold uppercase tracking-wider block text-[var(--accent)]">Target Repository File:</span>
+          <code id="pub-modal-filename" class="block text-emerald-500 font-bold select-all">src/data/posts/slug.ts</code>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-end gap-2 pt-2">
+          <button
+            type="button"
+            id="pub-modal-close"
+            class="min-h-[44px] px-3.5 py-2 rounded-xl border border-[var(--border-color)] text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer"
+          >
+            Close
+          </button>
+          <button
+            type="button"
+            id="pub-modal-copy-code"
+            class="min-h-[44px] px-3.5 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] hover:bg-[var(--bg-primary)] text-xs font-semibold text-[var(--text-primary)] transition-colors cursor-pointer"
+          >
+            Copy Code
+          </button>
+          <button
+            type="button"
+            id="pub-modal-view-catalog"
+            class="min-h-[44px] px-4 py-2 rounded-xl bg-emerald-600 text-white font-semibold text-xs hover:bg-emerald-700 cursor-pointer shadow-xs"
+          >
+            View in Catalog
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+      <div class="bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
+        <h3 class="text-base font-bold text-[var(--text-primary)]">Delete Post from Site?</h3>
+        <p class="text-xs text-[var(--text-secondary)] leading-relaxed">
+          You are about to delete <span id="del-modal-title" class="font-bold text-[var(--text-primary)]"></span>.
+        </p>
+
+        <div class="p-3.5 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-color)] text-xs font-mono space-y-1.5 text-[var(--text-secondary)]">
+          <span class="text-[10px] font-bold uppercase tracking-wider block text-[var(--accent)]">Local Removal Command:</span>
+          <code id="del-modal-command" class="block text-rose-500 font-bold select-all">rm src/data/posts/slug.ts</code>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button
+            type="button"
+            id="del-modal-cancel"
+            class="px-4 py-2 rounded-xl border border-[var(--border-color)] text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            id="del-modal-confirm"
+            class="px-4 py-2 rounded-xl bg-rose-600 text-white font-semibold text-xs hover:bg-rose-700 cursor-pointer"
+          >
+            Hide from Catalog
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Feedback Notification -->
+    <div
+      id="cms-toast"
+      class="fixed top-5 right-5 z-50 transform translate-y-[-100px] opacity-0 transition-all duration-300 pointer-events-none px-4 py-3 rounded-xl bg-[var(--text-primary)] text-[var(--bg-primary)] text-xs font-semibold shadow-xl flex items-center gap-2"
+    >
+      <span id="cms-toast-msg">Saved!</span>
+    </div>
+
+  </div>
+</BaseLayout>
+
+<script is:inline define:vars={{ existingPostsData, PRESET_TIPS, PRESET_THEMES, siteConfig, defaultSiteConfig }}>
+  let currentType = "poem";
+  let existingPosts = existingPostsData || [];
+  let currentTipClass = "bg-purple-500";
+  let currentTipName = "Purple";
+  let currentThemeClass = "from-slate-950 via-purple-950 to-stone-950 text-purple-100";
+  let currentThemeName = "Poetic Violet";
+
+  // DOM Elements
+  const titleInput = document.getElementById('post-title');
+  const slugInput = document.getElementById('post-slug');
+  const subtitleInput = document.getElementById('post-subtitle');
+  const categoryInput = document.getElementById('post-category');
+  const dateInput = document.getElementById('post-date');
+  const readingTimeInput = document.getElementById('post-reading-time');
+  const tagsInput = document.getElementById('post-tags');
+  const coverInput = document.getElementById('post-cover');
+  const bodyInput = document.getElementById('post-body');
+  const imageFileInput = document.getElementById('image-file-input');
+
+  // Tip Color & Theme Switchers
+  function setTipColor(cls, name) {
+    if (!cls) return;
+    currentTipClass = cls;
+    if (!name) {
+      const found = PRESET_TIPS.find(t => t.accentBarClass === cls);
+      name = found ? found.name : "Custom";
+    }
+    currentTipName = name;
+
+    const hiddenTip = document.getElementById('post-tip-class');
+    if (hiddenTip) hiddenTip.value = cls;
+
+    const label = document.getElementById('label-selected-tip');
+    if (label) label.textContent = name;
+
+    // Update swatches ring
+    document.querySelectorAll('.tip-swatch-btn').forEach(btn => {
+      if (btn.dataset.tipClass === cls) {
+        btn.classList.add('ring-2', 'ring-[var(--accent)]', 'border-transparent', 'font-bold');
+      } else {
+        btn.classList.remove('ring-2', 'ring-[var(--accent)]', 'border-transparent', 'font-bold');
+      }
+    });
+
+    // Update mini card & full card tip spines
+    const miniTip = document.getElementById('mini-card-tip');
+    if (miniTip) {
+      miniTip.className = `absolute top-0 left-0 right-0 h-1.5 transition-colors duration-300 ${cls}`;
+    }
+    const fullTip = document.getElementById('full-card-tip');
+    if (fullTip) {
+      fullTip.className = `absolute top-0 left-0 right-0 h-1.5 transition-colors duration-300 ${cls}`;
+    }
+  }
+
+  function setThemeClass(cls, name) {
+    if (!cls) return;
+    currentThemeClass = cls;
+    if (!name) {
+      const found = PRESET_THEMES.find(t => t.themeClass === cls);
+      name = found ? found.name : "Custom";
+    }
+    currentThemeName = name;
+
+    const hiddenTheme = document.getElementById('post-theme-class');
+    if (hiddenTheme) hiddenTheme.value = cls;
+
+    const label = document.getElementById('label-selected-theme');
+    if (label) label.textContent = name;
+
+    // Update tiles ring
+    document.querySelectorAll('.theme-tile-btn').forEach(btn => {
+      if (btn.dataset.themeClass === cls) {
+        btn.classList.add('ring-2', 'ring-[var(--accent)]', 'border-transparent');
+        btn.classList.remove('border-stone-800');
+      } else {
+        btn.classList.remove('ring-2', 'ring-[var(--accent)]', 'border-transparent');
+        btn.classList.add('border-stone-800');
+      }
+    });
+
+    // Update mini card & full card background gradients
+    const miniCard = document.getElementById('mini-card-preview');
+    if (miniCard) {
+      miniCard.className = `w-full relative flex flex-col justify-between overflow-hidden rounded-xl border border-stone-800 p-4 select-none bg-gradient-to-br ${cls} aspect-video shadow-md transition-all duration-300`;
+    }
+    const fullCard = document.getElementById('full-card-preview');
+    if (fullCard) {
+      fullCard.className = `relative flex flex-col justify-between overflow-hidden rounded-xl border border-stone-800 p-5 select-none bg-gradient-to-br ${cls} aspect-video shadow-md transition-all duration-300`;
+    }
+  }
+
+  // Bind Swatch & Tile Clicks
+  document.querySelectorAll('.tip-swatch-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      setTipColor(btn.dataset.tipClass, btn.dataset.tipName);
+      showToast(`Tip color: ${btn.dataset.tipName}`);
+    });
+  });
+
+  document.querySelectorAll('.theme-tile-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      setThemeClass(btn.dataset.themeClass, btn.dataset.themeName);
+      showToast(`Card theme: ${btn.dataset.themeName}`);
+    });
+  });
+
+  // Simple, rock-solid client-side Markdown parser for live preview
+  function renderMarkdown(md) {
+    if (!md) return '<p class="text-[var(--text-secondary)] italic">Start typing in the composer to view rendered markdown preview...</p>';
+
+    // Escape raw HTML entities
+    let html = md
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+
+    // Headings
+    html = html.replace(/^### (.*$)/gim, '<h3 class="text-lg font-bold font-sans tracking-tight text-[var(--text-primary)] mt-4 mb-1">$1</h3>');
+    html = html.replace(/^## (.*$)/gim, '<h2 class="text-xl font-bold font-sans tracking-tight text-[var(--text-primary)] mt-6 mb-2 border-b border-[var(--border-color)]/60 pb-1">$1</h2>');
+    html = html.replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold font-sans tracking-tight text-[var(--text-primary)] mt-6 mb-2">$1</h1>');
+
+    // Horizontal Rule / Stanza Divider
+    html = html.replace(/^---$/gim, '<hr class="my-6 border-[var(--border-color)]" />');
+
+    // Images: ![alt](url)
+    html = html.replace(/!\[(.*?)\]\((.*?)\)/gim, '<div class="my-4 rounded-xl overflow-hidden border border-[var(--border-color)]"><img src="$2" alt="$1" class="w-full object-cover max-h-80" /><span class="block p-2 text-center text-xs text-[var(--text-secondary)] font-sans italic">$1</span></div>');
+
+    // Links: [text](url)
+    html = html.replace(/\[(.*?)\]\((.*?)\)/gim, '<a href="$2" class="text-[var(--accent)] underline underline-offset-2">$1</a>');
+
+    // Bold & Italics
+    html = html.replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>');
+    html = html.replace(/\*(.*?)\*/gim, '<em>$1</em>');
+
+    // Blockquotes: > quote
+    html = html.replace(/^> (.*$)/gim, '<blockquote class="p-3.5 my-3 rounded-xl bg-[var(--bg-secondary)]/60 border-l-4 border-[var(--accent)] font-serif italic text-sm text-[var(--text-primary)] leading-relaxed">$1</blockquote>');
+
+    // Paragraphs / Stanzas (split on double newlines)
+    const blocks = html.split(/\n\s*\n/);
+    return blocks.map(block => {
+      block = block.trim();
+      if (!block) return '';
+      if (block.startsWith('<h') || block.startsWith('<blockquote') || block.startsWith('<div') || block.startsWith('<hr')) {
+        return block;
+      }
+      return `<p class="whitespace-pre-line text-base font-serif leading-relaxed text-[var(--text-primary)]">${block}</p>`;
+    }).join('\n');
+  }
+
+  // Live Preview update
+  function updateLivePreview() {
+    const title = titleInput.value.trim() || "Untitled Publication";
+    const subtitle = subtitleInput.value.trim() || "Overview / subtitle preview";
+    const category = categoryInput.value.trim() || "Poetry";
+    const date = dateInput.value.trim() || "October 2026";
+    const readingTime = readingTimeInput.value.trim() || "3 min read";
+    const body = bodyInput.value.trim();
+    const coverUrl = coverInput.value.trim();
+    const tags = tagsInput.value.split(',').map(t => t.trim()).filter(Boolean);
+
+    // Article View
+    document.getElementById('prev-title').textContent = title;
+    document.getElementById('prev-subtitle').textContent = subtitle;
+    document.getElementById('prev-category-badge').textContent = category;
+    document.getElementById('prev-date').textContent = date;
+    document.getElementById('prev-reading-time').textContent = readingTime;
+
+    // Cover image preview
+    const coverContainer = document.getElementById('prev-cover-container');
+    const coverImg = document.getElementById('prev-cover-img');
+    if (coverUrl) {
+      coverImg.src = coverUrl;
+      coverContainer.classList.remove('hidden');
+    } else {
+      coverContainer.classList.add('hidden');
+    }
+
+    // Rendered markdown body
+    document.getElementById('prev-markdown-rendered').innerHTML = renderMarkdown(body);
+
+    // Tags
+    const tagsContainer = document.getElementById('prev-tags-container');
+    tagsContainer.innerHTML = tags.map(t => `<span>#${t.toLowerCase()}</span>`).join(' &bull; ');
+
+    // Sync Cards (Mini in editor & Full in Live Preview Tab)
+    const journalVal = document.getElementById('paper-journal')?.value.trim();
+    const headerLabel = currentType === 'academic_paper'
+      ? (journalVal ? journalVal.slice(0, 24).toUpperCase() : 'ACADEMIC MONOGRAPH')
+      : (currentType === 'poem' ? 'POETRY MONOGRAPH' : 'ESSAY & REFLECTION');
+    const subcategory = category.toUpperCase();
+    const yearDigits = date.replace(/\D/g, '');
+    const yearStr = (yearDigits && yearDigits.length >= 4) ? yearDigits.slice(-4) : "2026";
+    const langBadge = currentType === 'poem' ? "English Verse" : "Simte / English";
+
+    // Mini card simulation in Write tab
+    const miniHeader = document.getElementById('mini-card-header');
+    if (miniHeader) miniHeader.textContent = headerLabel;
+    const miniYear = document.getElementById('mini-card-year');
+    if (miniYear) miniYear.textContent = yearStr;
+    const miniSubcat = document.getElementById('mini-card-subcat');
+    if (miniSubcat) miniSubcat.textContent = subcategory;
+    const miniTitle = document.getElementById('mini-card-title');
+    if (miniTitle) miniTitle.textContent = title;
+    const miniSub = document.getElementById('mini-card-subtitle');
+    if (miniSub) miniSub.textContent = subtitle || readingTime;
+    const miniLang = document.getElementById('mini-card-lang');
+    if (miniLang) miniLang.textContent = langBadge;
+
+    // Full card preview in Live Preview tab
+    const fullHeader = document.getElementById('full-card-header');
+    if (fullHeader) fullHeader.textContent = headerLabel;
+    const fullYear = document.getElementById('full-card-year');
+    if (fullYear) fullYear.textContent = yearStr;
+    const fullSubcat = document.getElementById('full-card-subcat');
+    if (fullSubcat) fullSubcat.textContent = subcategory;
+    const fullTitle = document.getElementById('full-card-title');
+    if (fullTitle) fullTitle.textContent = title;
+    const fullSub = document.getElementById('full-card-subtitle');
+    if (fullSub) fullSub.textContent = subtitle || readingTime;
+    const fullLang = document.getElementById('full-card-lang');
+    if (fullLang) fullLang.textContent = langBadge;
+  }
+
+  // Live input listeners
+  [titleInput, subtitleInput, categoryInput, dateInput, readingTimeInput, tagsInput, coverInput, bodyInput].forEach(el => {
+    el?.addEventListener('input', updateLivePreview);
+  });
+
+  [
+    'paper-journal', 'paper-volume', 'paper-issn', 'paper-doi', 'paper-authors', 'paper-lang', 'paper-subdiscipline', 'paper-abstract',
+    'poem-form-input', 'poem-theme-input', 'poem-lang-input', 'poem-couplet-input', 'poem-reflection-input',
+    'essay-location-input', 'essay-topic-input', 'essay-pullquote-input', 'essay-quote-author'
+  ].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', updateLivePreview);
+  });
+
+  // Tab switching logic
+  function switchTab(targetId) {
+    document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.add('hidden'));
+    const activePanel = document.getElementById(targetId);
+    if (activePanel) activePanel.classList.remove('hidden');
+
+    document.querySelectorAll('.nav-tab-btn').forEach(btn => {
+      if (btn.dataset.target === targetId) {
+        btn.classList.add('bg-[var(--text-primary)]', 'text-[var(--bg-primary)]', 'font-semibold');
+        btn.classList.remove('text-[var(--text-secondary)]');
+      } else {
+        btn.classList.remove('bg-[var(--text-primary)]', 'text-[var(--bg-primary)]', 'font-semibold');
+        btn.classList.add('text-[var(--text-secondary)]');
+      }
+    });
+
+    document.querySelectorAll('.mobile-dock-btn').forEach(btn => {
+      if (btn.dataset.target === targetId) {
+        btn.classList.add('text-[var(--accent)]', 'font-semibold');
+        btn.classList.remove('text-[var(--text-secondary)]');
+      } else {
+        btn.classList.remove('text-[var(--accent)]', 'font-semibold');
+        btn.classList.add('text-[var(--text-secondary)]');
+      }
+    });
+
+    if (targetId === 'tab-preview') updateLivePreview();
+    if (targetId === 'tab-code') generateCode();
+    if (targetId === 'tab-drafts') renderDrafts();
+    if (targetId === 'tab-site-config') updateSiteConfigCodeOutput();
+  }
+
+  document.querySelectorAll('.nav-tab-btn, .mobile-dock-btn, [data-target]').forEach(el => {
+    el.addEventListener('click', () => {
+      const target = el.dataset.target;
+      if (target) switchTab(target);
+    });
+  });
+
+  // Type selection logic
+  document.querySelectorAll('.type-pill-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.type-pill-btn').forEach(b => {
+        b.classList.remove('bg-[var(--text-primary)]', 'text-[var(--bg-primary)]', 'font-semibold');
+        b.classList.add('bg-[var(--bg-primary)]', 'text-[var(--text-secondary)]');
+      });
+      btn.classList.add('bg-[var(--text-primary)]', 'text-[var(--bg-primary)]', 'font-semibold');
+      btn.classList.remove('bg-[var(--bg-primary)]', 'text-[var(--text-secondary)]');
+      
+      currentType = btn.dataset.type;
+      
+      const poemFields = document.getElementById('section-poem-fields');
+      const essayFields = document.getElementById('section-essay-fields');
+      const paperFields = document.getElementById('section-paper-fields');
+      const composerLabel = document.getElementById('composer-label');
+
+      if (currentType === 'poem') {
+        poemFields?.classList.remove('hidden');
+        essayFields?.classList.add('hidden');
+        paperFields?.classList.add('hidden');
+        if (composerLabel) composerLabel.textContent = "Verses & Stanzas Composer";
+        bodyInput.placeholder = "Write your verses, couplets, or stanzas here. Use double line-breaks to separate stanzas.";
+        titleInput.placeholder = "e.g. Whispers Along the River Plain";
+        subtitleInput.placeholder = "A lyrical poem of twilight mist, flowing water, and quiet valleys";
+        categoryInput.value = "Poetry & Literature";
+        readingTimeInput.value = "3 min read";
+        setTipColor("bg-purple-500", "Purple");
+        setThemeClass("from-slate-950 via-purple-950 to-stone-950 text-purple-100", "Poetic Violet");
+      } else if (currentType === 'essay') {
+        poemFields?.classList.add('hidden');
+        essayFields?.classList.remove('hidden');
+        paperFields?.classList.add('hidden');
+        if (composerLabel) composerLabel.textContent = "Essay Body (Markdown Composer)";
+        bodyInput.placeholder = "Write your essay in Markdown with section headings (##), reflections, and blockquotes.";
+        titleInput.placeholder = "e.g. Language as a Repository of Lived Experience";
+        subtitleInput.placeholder = "Why grammatical documentation must encompass folklore and cultural memory";
+        categoryInput.value = "Cultural Dispatches";
+        readingTimeInput.value = "5 min read";
+        setTipColor("bg-amber-500", "Amber");
+        setThemeClass("from-amber-950 via-stone-900 to-amber-950 text-amber-100", "Autumn Amber");
+      } else if (currentType === 'academic_paper') {
+        poemFields?.classList.add('hidden');
+        essayFields?.classList.add('hidden');
+        paperFields?.classList.remove('hidden');
+        if (composerLabel) composerLabel.textContent = "Monograph Body & Linguistic Analysis";
+        bodyInput.placeholder = "Write or paste your academic monograph sections, numbered linguistic examples, and references.";
+        titleInput.placeholder = "e.g. Pronouns in Simte";
+        subtitleInput.placeholder = "A morphological and syntactic investigation of pronominal forms and clusivity";
+        categoryInput.value = "Linguistic Research";
+        readingTimeInput.value = "12 min read";
+        setTipColor("bg-indigo-500", "Indigo");
+        setThemeClass("from-slate-900 via-slate-800 to-indigo-950 text-slate-100", "Scholarly Indigo");
+      }
+      updateLivePreview();
+    });
+  });
+
+  // Auto-slug generator
+  titleInput?.addEventListener('input', () => {
+    if (!slugInput.dataset.manuallyEdited) {
+      slugInput.value = titleInput.value
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '');
+    }
+  });
+  slugInput?.addEventListener('input', () => {
+    slugInput.dataset.manuallyEdited = "true";
+  });
+
+  // Markdown Toolbar actions
+  function wrapSelection(before, after = before) {
+    const start = bodyInput.selectionStart;
+    const end = bodyInput.selectionEnd;
+    const text = bodyInput.value;
+    const selected = text.substring(start, end) || "text";
+    bodyInput.value = text.substring(0, start) + before + selected + after + text.substring(end);
+    bodyInput.focus();
+    bodyInput.setSelectionRange(start + before.length, start + before.length + selected.length);
+    updateLivePreview();
+  }
+
+  function insertLinePrefix(prefix) {
+    const start = bodyInput.selectionStart;
+    const text = bodyInput.value;
+    const lineStart = text.lastIndexOf('\n', start - 1) + 1;
+    bodyInput.value = text.substring(0, lineStart) + prefix + text.substring(lineStart);
+    bodyInput.focus();
+    updateLivePreview();
+  }
+
+  document.querySelectorAll('.md-tool-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const syntax = btn.dataset.syntax;
+      const action = btn.dataset.action;
+
+      if (syntax) {
+        wrapSelection(syntax);
+      } else if (action === 'h2') {
+        insertLinePrefix('## ');
+      } else if (action === 'h3') {
+        insertLinePrefix('### ');
+      } else if (action === 'quote') {
+        insertLinePrefix('> ');
+      } else if (action === 'list') {
+        insertLinePrefix('- ');
+      } else if (action === 'divider') {
+        wrapSelection('\n\n---\n\n', '');
+      } else if (action === 'image') {
+        const url = prompt("Enter Image URL:", "https://");
+        if (url) {
+          const caption = prompt("Enter Image Caption:", "Photo Description") || "Photo";
+          wrapSelection(`![${caption}](${url})\n`, '');
+        }
+      }
+    });
+  });
+
+  // Device Image file picker
+  imageFileInput?.addEventListener('change', (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const dataUrl = event.target?.result;
+        coverInput.value = dataUrl;
+        document.getElementById('image-preview-thumb').src = dataUrl;
+        document.getElementById('image-preview-name').textContent = file.name;
+        document.getElementById('image-preview-box').classList.remove('hidden');
+        document.getElementById('image-preview-box').classList.add('flex');
+        updateLivePreview();
+        showToast("Image selected");
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  document.getElementById('btn-remove-image')?.addEventListener('click', () => {
+    coverInput.value = '';
+    imageFileInput.value = '';
+    document.getElementById('image-preview-box').classList.add('hidden');
+    document.getElementById('image-preview-box').classList.remove('flex');
+    updateLivePreview();
+    showToast("Image removed");
+  });
+
+  // Toast utility
+  function showToast(msg) {
+    const toast = document.getElementById('cms-toast');
+    const toastMsg = document.getElementById('cms-toast-msg');
+    toastMsg.textContent = msg;
+    toast.classList.remove('translate-y-[-100px]', 'opacity-0');
+    toast.classList.add('translate-y-0', 'opacity-100');
+    setTimeout(() => {
+      toast.classList.add('translate-y-[-100px]', 'opacity-0');
+      toast.classList.remove('translate-y-0', 'opacity-100');
+    }, 2500);
+  }
+
+  // Generate code utility
+  function generateCode() {
+    const title = titleInput.value.trim() || "Untitled Publication";
+    const slug = slugInput.value.trim() || "untitled-publication";
+    const subtitle = subtitleInput.value.trim();
+    const category = categoryInput.value.trim() || "Poetry & Literature";
+    const date = dateInput.value.trim() || "October 2026";
+    const yearDigits = date.replace(/\D/g, '');
+    const year = parseInt(yearDigits && yearDigits.length >= 4 ? yearDigits.slice(-4) : "2026") || 2026;
+    const readingTime = readingTimeInput.value.trim() || "3 min read";
+    const coverImage = coverInput.value.trim() || "https://placehold.co/800x450/1c1917/ffffff?text=Publication";
+    const body = bodyInput.value.trim();
+    const tags = tagsInput.value.split(',').map(t => t.trim()).filter(Boolean);
+
+    const paragraphs = body ? body.split(/\n\s*\n/).map(p => `        ${JSON.stringify(p.trim())}`) : [];
+    const varName = slug.replace(/-([a-z0-9])/g, (_, g) => g.toUpperCase()) + "Post";
+
+    let code = `import type { Post } from '../posts';\n\n`;
+    code += `export const ${varName}: Post = {\n`;
+    code += `  slug: ${JSON.stringify(slug)},\n`;
+    code += `  title: ${JSON.stringify(title)},\n`;
+    if (subtitle) code += `  subtitle: ${JSON.stringify(subtitle)},\n`;
+    code += `  excerpt: ${JSON.stringify(subtitle || title)},\n`;
+    code += `  date: ${JSON.stringify(date)},\n`;
+    code += `  year: ${year},\n`;
+    code += `  readingTime: ${JSON.stringify(readingTime)},\n`;
+    code += `  category: ${JSON.stringify(category)},\n`;
+    
+    // Tailored fields based on type
+    if (currentType === 'poem') {
+      const poemLang = document.getElementById('poem-lang-input')?.value.trim() || "English Verse";
+      const poemReflection = document.getElementById('poem-reflection-input')?.value.trim();
+      code += `  languageFamily: ${JSON.stringify(poemLang)},\n`;
+      code += `  language: "English",\n`;
+      code += `  articleLanguage: "English",\n`;
+      if (poemReflection) code += `  abstract: ${JSON.stringify(poemReflection)},\n`;
+    } else if (currentType === 'essay') {
+      const essayTopic = document.getElementById('essay-topic-input')?.value.trim() || "Indigenous Knowledge";
+      code += `  languageFamily: "Tibeto-Burman",\n`;
+      code += `  language: "Simte",\n`;
+      code += `  articleLanguage: "English",\n`;
+    } else if (currentType === 'academic_paper') {
+      const journal = document.getElementById('paper-journal')?.value.trim();
+      const volume = document.getElementById('paper-volume')?.value.trim();
+      const issn = document.getElementById('paper-issn')?.value.trim();
+      const doi = document.getElementById('paper-doi')?.value.trim();
+      const authors = document.getElementById('paper-authors')?.value.trim() || "H. Kapginlian";
+      const paperLang = document.getElementById('paper-lang')?.value.trim() || "Simte";
+      const abstract = document.getElementById('paper-abstract')?.value.trim();
+      
+      code += `  languageFamily: "Tibeto-Burman",\n`;
+      code += `  language: ${JSON.stringify(paperLang)},\n`;
+      code += `  articleLanguage: "English",\n`;
+      if (journal) code += `  journal: ${JSON.stringify(journal)},\n`;
+      if (volume) code += `  volume: ${JSON.stringify(volume)},\n`;
+      if (issn) code += `  issn: ${JSON.stringify(issn)},\n`;
+      if (doi) code += `  doi: ${JSON.stringify(doi)},\n`;
+      if (authors) code += `  authors: ${JSON.stringify(authors)},\n`;
+      if (abstract) code += `  abstract: ${JSON.stringify(abstract)},\n`;
+    } else {
+      code += `  language: "English",\n`;
+      code += `  articleLanguage: "English",\n`;
+    }
+
+    code += `  tags: ${JSON.stringify(tags)},\n`;
+    code += `  coverImage: ${JSON.stringify(coverImage)},\n`;
+    code += `  featured: false,\n`;
+    code += `  postType: ${JSON.stringify(currentType)},\n`;
+    code += `  authors: "H. Kapginlian",\n`;
+    code += `  themeClass: ${JSON.stringify(currentThemeClass)},\n`;
+    code += `  accentBarClass: ${JSON.stringify(currentTipClass)},\n`;
+
+    // Sections construction
+    code += `  sections: [\n`;
+    code += `    {\n`;
+    code += `      heading: ${JSON.stringify(title)},\n`;
+    
+    // Highlight quote / featured couplet
+    if (currentType === 'poem') {
+      const poemCouplet = document.getElementById('poem-couplet-input')?.value.trim();
+      if (poemCouplet) {
+        code += `      blockquote: {\n`;
+        code += `        text: ${JSON.stringify(poemCouplet)},\n`;
+        code += `        source: "H. Kapginlian"\n`;
+        code += `      },\n`;
+      }
+    } else if (currentType === 'essay') {
+      const essayPullquote = document.getElementById('essay-pullquote-input')?.value.trim();
+      const essayAuthor = document.getElementById('essay-quote-author')?.value.trim() || "H. Kapginlian";
+      if (essayPullquote) {
+        code += `      blockquote: {\n`;
+        code += `        text: ${JSON.stringify(essayPullquote)},\n`;
+        code += `        source: ${JSON.stringify(essayAuthor)}\n`;
+        code += `      },\n`;
+      }
+    }
+
+    if (paragraphs.length > 0) {
+      code += `      paragraphs: [\n${paragraphs.join(',\n')}\n      ]\n`;
+    }
+    code += `    }\n`;
+
+    // Extra reflection section for poem if provided
+    if (currentType === 'poem') {
+      const poemReflection = document.getElementById('poem-reflection-input')?.value.trim();
+      if (poemReflection) {
+        code += `    ,\n    {\n`;
+        code += `      heading: "Poet's Reflection & Context",\n`;
+        code += `      paragraphs: [\n        ${JSON.stringify(poemReflection)}\n      ]\n`;
+        code += `    }\n`;
+      }
+    }
+
+    code += `  ]\n`;
+    code += `};\n`;
+
+    document.getElementById('code-output').querySelector('code').textContent = code;
+    document.getElementById('target-filename-label').textContent = `src/data/posts/${slug}.ts`;
+  }
+
+  // Render published item into the catalog list DOM
+  function renderPublishedItemToCatalog(post) {
+    const listContainer = document.getElementById('existing-posts-list');
+    if (!listContainer) return;
+    let itemEl = listContainer.querySelector(`.catalog-item[data-slug="${post.slug}"]`);
+    if (!itemEl) {
+      itemEl = document.createElement('div');
+      itemEl.className = 'catalog-item p-4 rounded-xl border border-emerald-500/40 bg-emerald-500/5 hover:border-emerald-500 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs';
+      itemEl.dataset.slug = post.slug;
+      itemEl.dataset.title = post.title;
+      listContainer.prepend(itemEl);
+    }
+    const typeLabel = (post.postType || "poem").replace("_", " ");
+    const typeClass = post.postType === "poem" ? "bg-purple-500/10 text-purple-600 dark:text-purple-400" :
+      post.postType === "academic_paper" ? "bg-blue-500/10 text-blue-600 dark:text-blue-400" :
+      "bg-amber-500/10 text-amber-600 dark:text-amber-400";
+    itemEl.innerHTML = `
+      <div class="space-y-1">
+        <div class="flex items-center gap-2 font-mono text-[10px]">
+          <span class="px-2 py-0.5 rounded font-bold uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+            Published
+          </span>
+          <span class="px-2 py-0.5 rounded font-bold uppercase ${typeClass}">
+            ${typeLabel}
+          </span>
+          <span class="text-[var(--text-secondary)]">${post.date || 'Oct 2026'}</span>
+        </div>
+        <h3 class="font-bold font-sans text-sm text-[var(--text-primary)] line-clamp-1">${post.title}</h3>
+        <span class="font-mono text-[11px] text-[var(--text-secondary)]">src/data/posts/${post.slug}.ts</span>
+      </div>
+      <div class="flex items-center gap-2 shrink-0">
+        <button
+          type="button"
+          class="btn-load-existing px-3 py-1.5 rounded-lg bg-[var(--bg-secondary)] hover:bg-[var(--accent-light)] text-[var(--text-primary)] font-semibold transition-colors min-h-[36px] cursor-pointer"
+          data-slug="${post.slug}"
+        >
+          Edit
+        </button>
+        <button
+          type="button"
+          class="btn-delete-post px-3 py-1.5 rounded-lg border border-rose-300 dark:border-rose-900/60 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors min-h-[36px] cursor-pointer"
+          data-slug="${post.slug}"
+          data-title="${post.title}"
+        >
+          Delete
+        </button>
+      </div>
+    `;
+
+    itemEl.querySelector('.btn-load-existing')?.addEventListener('click', () => {
+      const found = existingPosts.find(p => p.slug === post.slug);
+      if (found) loadIntoForm(found);
+    });
+
+    itemEl.querySelector('.btn-delete-post')?.addEventListener('click', () => {
+      postToDelete = {
+        slug: post.slug,
+        title: post.title
+      };
+      delModalTitle.textContent = `"${post.title}"`;
+      delModalCommand.textContent = `rm src/data/posts/${post.slug}.ts`;
+      deleteModal.classList.remove('hidden');
+    });
+  }
+
+  // Publish Post Handler
+  function publishCurrentPost() {
+    const title = titleInput.value.trim();
+    if (!title) {
+      showToast("Please enter a title before publishing");
+      titleInput.focus();
+      return;
+    }
+
+    generateCode();
+    const slug = slugInput.value.trim() || title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const category = categoryInput.value.trim() || (currentType === 'poem' ? 'Poetry & Literature' : (currentType === 'academic_paper' ? 'Linguistic Research' : 'Cultural Dispatches'));
+    const date = dateInput.value.trim() || new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    const readingTime = readingTimeInput.value.trim() || '3 min read';
+    const body = bodyInput.value;
+    const coverImage = coverInput.value.trim();
+    const tags = tagsInput.value.split(',').map(t => t.trim()).filter(Boolean);
+
+    const postItem = {
+      slug,
+      title,
+      subtitle: subtitleInput.value.trim(),
+      category,
+      date,
+      year: parseInt(date.replace(/\D/g, '').slice(-4)) || 2026,
+      readingTime,
+      tags,
+      coverImage,
+      body,
+      postType: currentType,
+      themeClass: currentThemeClass,
+      accentBarClass: currentTipClass,
+      isPublished: true,
+      publishedAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+    };
+
+    // Store in localStorage published posts
+    try {
+      const stored = JSON.parse(localStorage.getItem('hk_cms_published_posts') || '[]');
+      const existIdx = stored.findIndex(p => p.slug === slug);
+      if (existIdx >= 0) stored[existIdx] = postItem;
+      else stored.unshift(postItem);
+      localStorage.setItem('hk_cms_published_posts', JSON.stringify(stored));
+    } catch (e) {
+      console.error(e);
+    }
+
+    // Add or update in active memory catalog
+    const catIdx = existingPosts.findIndex(p => p.slug === slug);
+    if (catIdx >= 0) {
+      existingPosts[catIdx] = postItem;
+    } else {
+      existingPosts.unshift(postItem);
+    }
+    const catBadge = document.getElementById('catalog-count-badge');
+    if (catBadge) catBadge.textContent = existingPosts.length;
+
+    // Render immediately into catalog DOM
+    renderPublishedItemToCatalog(postItem);
+
+    // Show publish success modal
+    const pubModal = document.getElementById('publish-modal');
+    if (pubModal) {
+      document.getElementById('pub-modal-title').textContent = `"${title}"`;
+      document.getElementById('pub-modal-filename').textContent = `src/data/posts/${slug}.ts`;
+      pubModal.classList.remove('hidden');
+    }
+
+    showToast(`Published "${title}" to catalog!`);
+  }
+
+  // Publish button triggers
+  document.getElementById('btn-publish-post')?.addEventListener('click', publishCurrentPost);
+  document.getElementById('btn-publish-top')?.addEventListener('click', publishCurrentPost);
+  document.getElementById('btn-goto-preview')?.addEventListener('click', () => switchTab('tab-preview'));
+
+  // Publish Modal handlers
+  document.getElementById('pub-modal-close')?.addEventListener('click', () => {
+    document.getElementById('publish-modal')?.classList.add('hidden');
+  });
+
+  document.getElementById('pub-modal-copy-code')?.addEventListener('click', () => {
+    const code = document.getElementById('code-output').querySelector('code').textContent;
+    navigator.clipboard.writeText(code).then(() => showToast("TypeScript code copied!"));
+  });
+
+  document.getElementById('pub-modal-view-catalog')?.addEventListener('click', () => {
+    document.getElementById('publish-modal')?.classList.add('hidden');
+    switchTab('tab-existing');
+  });
+
+  // Copy code button in tab-code
+  document.getElementById('btn-copy-code')?.addEventListener('click', () => {
+    const code = document.getElementById('code-output').querySelector('code').textContent;
+    navigator.clipboard.writeText(code).then(() => showToast("Code copied to clipboard!"));
+  });
+
+  // Download file button in tab-code
+  document.getElementById('btn-download-file')?.addEventListener('click', () => {
+    const slug = slugInput.value.trim() || "new-post";
+    const code = document.getElementById('code-output').querySelector('code').textContent;
+    const blob = new Blob([code], { type: "text/typescript;charset=utf-8" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `${slug}.ts`;
+    link.click();
+    showToast(`Downloaded ${slug}.ts`);
+  });
+
+  // Drafts Management (LocalStorage)
+  function getDrafts() {
+    try {
+      return JSON.parse(localStorage.getItem('hk_cms_drafts') || "[]");
+    } catch {
+      return [];
+    }
+  }
+
+  function saveCurrentDraft() {
+    const title = titleInput.value.trim();
+    if (!title) {
+      showToast("Enter a title before saving draft");
+      return;
+    }
+
+    const draft = {
+      id: Date.now(),
+      savedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      title,
+      slug: slugInput.value.trim(),
+      subtitle: subtitleInput.value,
+      category: categoryInput.value,
+      date: dateInput.value,
+      readingTime: readingTimeInput.value,
+      tags: tagsInput.value,
+      coverImage: coverInput.value,
+      body: bodyInput.value,
+      type: currentType,
+      themeClass: currentThemeClass,
+      accentBarClass: currentTipClass,
+      featuredCouplet: document.getElementById('poem-couplet-input')?.value || "",
+      abstract: document.getElementById('paper-abstract')?.value || document.getElementById('poem-reflection-input')?.value || "",
+      pullQuote: document.getElementById('essay-pullquote-input')?.value || "",
+      journal: document.getElementById('paper-journal')?.value || "",
+      volume: document.getElementById('paper-volume')?.value || "",
+      doi: document.getElementById('paper-doi')?.value || "",
+      issn: document.getElementById('paper-issn')?.value || "",
+      authors: document.getElementById('paper-authors')?.value || "",
+    };
+
+    const drafts = getDrafts();
+    const existingIndex = drafts.findIndex(d => d.slug === draft.slug);
+    if (existingIndex >= 0) {
+      drafts[existingIndex] = draft;
+    } else {
+      drafts.unshift(draft);
+    }
+    localStorage.setItem('hk_cms_drafts', JSON.stringify(drafts));
+    updateDraftsBadge();
+    showToast("Draft saved locally!");
+  }
+
+  document.getElementById('btn-save-draft')?.addEventListener('click', saveCurrentDraft);
+
+  function updateDraftsBadge() {
+    const count = getDrafts().length;
+    const badge = document.getElementById('drafts-count-badge');
+    if (badge) badge.textContent = `(${count})`;
+  }
+
+  function renderDrafts() {
+    const drafts = getDrafts();
+    const container = document.getElementById('drafts-container');
+    const noMsg = document.getElementById('no-drafts-msg');
+
+    if (drafts.length === 0) {
+      container.innerHTML = '';
+      container.appendChild(noMsg);
+      noMsg.classList.remove('hidden');
+      return;
+    }
+
+    noMsg.classList.add('hidden');
+    container.innerHTML = drafts.map(d => `
+      <div class="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-primary)] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+        <div class="space-y-1">
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded font-mono font-bold uppercase bg-[var(--accent-light)] text-[var(--accent)] text-[10px]">
+              ${d.type}
+            </span>
+            <span class="text-[var(--text-secondary)] font-mono">Saved ${d.savedAt}</span>
+          </div>
+          <h3 class="font-bold text-sm text-[var(--text-primary)]">${d.title}</h3>
+          <p class="text-[var(--text-secondary)] font-serif line-clamp-1">${d.subtitle || d.body || ""}</p>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <button type="button" class="btn-load-draft px-3 py-1.5 rounded-lg bg-[var(--text-primary)] text-[var(--bg-primary)] font-semibold cursor-pointer" data-id="${d.id}">
+            Load Draft
+          </button>
+          <button type="button" class="btn-del-draft px-3 py-1.5 rounded-lg border border-[var(--border-color)] text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 cursor-pointer" data-id="${d.id}">
+            Delete
+          </button>
+        </div>
+      </div>
+    `).join('');
+
+    container.querySelectorAll('.btn-load-draft').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const d = drafts.find(x => x.id === parseInt(btn.dataset.id));
+        if (d) loadIntoForm(d);
+      });
+    });
+
+    container.querySelectorAll('.btn-del-draft').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = parseInt(btn.dataset.id);
+        const filtered = drafts.filter(x => x.id !== id);
+        localStorage.setItem('hk_cms_drafts', JSON.stringify(filtered));
+        renderDrafts();
+        updateDraftsBadge();
+        showToast("Draft deleted");
+      });
+    });
+  }
+
+  function loadIntoForm(data) {
+    titleInput.value = data.title || "";
+    slugInput.value = data.slug || "";
+    subtitleInput.value = data.subtitle || "";
+    categoryInput.value = data.category || "Poetry";
+    dateInput.value = data.date || "";
+    readingTimeInput.value = data.readingTime || "3 min read";
+    tagsInput.value = Array.isArray(data.tags) ? data.tags.join(', ') : (data.tags || "");
+    coverInput.value = data.coverImage || "";
+    bodyInput.value = data.body || "";
+
+    if (data.type) {
+      const typeBtn = document.querySelector(`.type-pill-btn[data-type="${data.type}"]`);
+      typeBtn?.click();
+    }
+
+    if (data.type === 'poem') {
+      const coupletInput = document.getElementById('poem-couplet-input');
+      if (coupletInput) coupletInput.value = data.featuredCouplet || "";
+      const reflInput = document.getElementById('poem-reflection-input');
+      if (reflInput) reflInput.value = data.abstract || "";
+      const formInput = document.getElementById('poem-form-input');
+      if (formInput && data.formula) formInput.value = data.formula;
+    } else if (data.type === 'essay') {
+      const pullquoteInput = document.getElementById('essay-pullquote-input');
+      if (pullquoteInput) pullquoteInput.value = data.pullQuote || "";
+    } else if (data.type === 'academic_paper') {
+      const journalInput = document.getElementById('paper-journal');
+      if (journalInput) journalInput.value = data.journal || "";
+      const volumeInput = document.getElementById('paper-volume');
+      if (volumeInput) volumeInput.value = data.volume || "";
+      const doiInput = document.getElementById('paper-doi');
+      if (doiInput) doiInput.value = data.doi || "";
+      const issnInput = document.getElementById('paper-issn');
+      if (issnInput) issnInput.value = data.issn || "";
+      const authorsInput = document.getElementById('paper-authors');
+      if (authorsInput) authorsInput.value = data.authors || "";
+      const abstractInput = document.getElementById('paper-abstract');
+      if (abstractInput) abstractInput.value = data.abstract || "";
+    }
+
+    if (data.accentBarClass) {
+      setTipColor(data.accentBarClass);
+    } else {
+      setTipColor("bg-purple-500", "Purple");
+    }
+
+    if (data.themeClass) {
+      setThemeClass(data.themeClass);
+    } else {
+      setThemeClass("from-slate-950 via-purple-950 to-stone-950 text-purple-100", "Poetic Violet");
+    }
+
+    updateLivePreview();
+    switchTab('tab-write');
+    showToast(`Loaded "${data.title}"`);
+  }
+
+  // Load existing post button
+  document.querySelectorAll('.btn-load-existing').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const slug = btn.dataset.slug;
+      const found = existingPosts.find(p => p.slug === slug);
+      if (found) {
+        loadIntoForm({
+          title: found.title,
+          slug: found.slug,
+          subtitle: found.subtitle,
+          category: found.category,
+          date: found.date,
+          readingTime: found.readingTime,
+          tags: found.tags,
+          coverImage: found.coverImage,
+          body: found.body,
+          type: found.postType,
+          themeClass: found.themeClass,
+          accentBarClass: found.accentBarClass,
+          journal: found.journal,
+          volume: found.volume,
+          issn: found.issn,
+          doi: found.doi,
+          authors: found.authors,
+          abstract: found.abstract,
+          featuredCouplet: found.featuredCouplet,
+          pullQuote: found.pullQuote,
+          formula: found.formula,
+        });
+      }
+    });
+  });
+
+  // Post Deletion Logic
+  let postToDelete = null;
+  const deleteModal = document.getElementById('delete-modal');
+  const delModalTitle = document.getElementById('del-modal-title');
+  const delModalCommand = document.getElementById('del-modal-command');
+  const delModalCancel = document.getElementById('del-modal-cancel');
+  const delModalConfirm = document.getElementById('del-modal-confirm');
+
+  document.querySelectorAll('.btn-delete-post').forEach(btn => {
+    btn.addEventListener('click', () => {
+      postToDelete = {
+        slug: btn.dataset.slug,
+        title: btn.dataset.title
+      };
+      delModalTitle.textContent = `"${postToDelete.title}"`;
+      delModalCommand.textContent = `rm src/data/posts/${postToDelete.slug}.ts`;
+      deleteModal.classList.remove('hidden');
+    });
+  });
+
+  delModalCancel?.addEventListener('click', () => {
+    deleteModal.classList.add('hidden');
+    postToDelete = null;
+  });
+
+  delModalConfirm?.addEventListener('click', () => {
+    if (!postToDelete) return;
+    const item = document.querySelector(`.catalog-item[data-slug="${postToDelete.slug}"]`);
+    if (item) {
+      item.remove();
+      existingPosts = existingPosts.filter(p => p.slug !== postToDelete.slug);
+      document.getElementById('catalog-count-badge').textContent = existingPosts.length;
+      showToast(`Removed "${postToDelete.title}" from catalog view`);
+    }
+    deleteModal.classList.add('hidden');
+    postToDelete = null;
+  });
+
+  // Filter Catalog
+  document.getElementById('existing-search')?.addEventListener('input', (e) => {
+    const q = e.target.value.toLowerCase();
+    document.querySelectorAll('.catalog-item').forEach(item => {
+      const match = item.dataset.title.toLowerCase().includes(q) || item.dataset.slug.toLowerCase().includes(q);
+      item.style.display = match ? '' : 'none';
+    });
+  });
+
+  // Clear form
+  document.getElementById('btn-clear-form')?.addEventListener('click', () => {
+    if (confirm("Clear all fields in this form?")) {
+      document.getElementById('content-form').reset();
+      slugInput.dataset.manuallyEdited = "";
+      setTipColor("bg-purple-500", "Purple");
+      setThemeClass("from-slate-950 via-purple-950 to-stone-950 text-purple-100", "Poetic Violet");
+      updateLivePreview();
+      showToast("Form cleared");
+    }
+  });
+
+  // -------------------------------------------------------------
+  // SITE SETTINGS STUDIO (Local Configuration & Export)
+  // -------------------------------------------------------------
+  const initialSiteConfig = (typeof siteConfig !== 'undefined' && siteConfig) ? siteConfig : defaultSiteConfig;
+  let activeSiteConfig = null;
+  const cfgStorageKey = 'hk_cms_site_config';
+
+  function updateStorageStatusBadge(isSavedLocally) {
+    const badge = document.getElementById('config-storage-status');
+    if (!badge) return;
+    if (isSavedLocally) {
+      badge.textContent = "Saved Locally (localStorage)";
+      badge.className = "text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 font-semibold";
+    } else {
+      badge.textContent = "Default Loaded";
+      badge.className = "text-[10px] font-mono px-2 py-0.5 rounded bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-secondary)]";
+    }
+  }
+
+  function loadStoredSiteConfig() {
+    try {
+      const stored = localStorage.getItem(cfgStorageKey);
+      if (stored) {
+        return JSON.parse(stored);
+      }
+    } catch (e) {
+      console.error("Could not parse saved site config", e);
+    }
+    return null;
+  }
+
+  const storedCfg = loadStoredSiteConfig();
+  if (storedCfg) {
+    activeSiteConfig = storedCfg;
+    updateStorageStatusBadge(true);
+  } else {
+    activeSiteConfig = JSON.parse(JSON.stringify(initialSiteConfig));
+    updateStorageStatusBadge(false);
+  }
+
+  function renderNavList() {
+    const container = document.getElementById('cfg-nav-list');
+    if (!container || !activeSiteConfig.navigation) return;
+
+    activeSiteConfig.navigation.sort((a, b) => a.order - b.order);
+
+    container.innerHTML = activeSiteConfig.navigation.map((item, idx) => `
+      <div class="p-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs" data-id="${item.id}">
+        <div class="flex items-center gap-3">
+          <div class="flex flex-col gap-1 shrink-0">
+            <button
+              type="button"
+              class="btn-nav-up min-h-[30px] min-w-[30px] p-1.5 rounded hover:bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors ${idx === 0 ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'}"
+              data-idx="${idx}"
+              ${idx === 0 ? 'disabled' : ''}
+              title="Move Up"
+              aria-label="Move Up"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+            </button>
+            <button
+              type="button"
+              class="btn-nav-down min-h-[30px] min-w-[30px] p-1.5 rounded hover:bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors ${idx === activeSiteConfig.navigation.length - 1 ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'}"
+              data-idx="${idx}"
+              ${idx === activeSiteConfig.navigation.length - 1 ? 'disabled' : ''}
+              title="Move Down"
+              aria-label="Move Down"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </button>
+          </div>
+          <span class="w-6 text-center font-mono text-[10px] text-[var(--text-secondary)] font-bold">#${item.order}</span>
+          <div class="space-y-0.5">
+            <span class="font-mono text-[10px] text-[var(--accent)] font-semibold block">${item.href}</span>
+            <input
+              type="text"
+              class="nav-label-input px-2.5 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)] font-semibold w-36 sm:w-48"
+              value="${item.label}"
+              data-id="${item.id}"
+            />
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              class="nav-enabled-toggle rounded border-[var(--border-color)] w-4 h-4 text-[var(--accent)]"
+              data-id="${item.id}"
+              ${item.enabled !== false ? 'checked' : ''}
+            />
+            <span class="text-xs text-[var(--text-secondary)]">Visible in Header</span>
+          </label>
+        </div>
+      </div>
+    `).join('');
+
+    container.querySelectorAll('.btn-nav-up').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = parseInt(btn.dataset.idx);
+        if (idx > 0) {
+          const prev = activeSiteConfig.navigation[idx - 1];
+          const curr = activeSiteConfig.navigation[idx];
+          const tmpOrder = prev.order;
+          prev.order = curr.order;
+          curr.order = tmpOrder;
+          renderNavList();
+          updateSiteConfigCodeOutput();
+        }
+      });
+    });
+
+    container.querySelectorAll('.btn-nav-down').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = parseInt(btn.dataset.idx);
+        if (idx < activeSiteConfig.navigation.length - 1) {
+          const next = activeSiteConfig.navigation[idx + 1];
+          const curr = activeSiteConfig.navigation[idx];
+          const tmpOrder = next.order;
+          next.order = curr.order;
+          curr.order = tmpOrder;
+          renderNavList();
+          updateSiteConfigCodeOutput();
+        }
+      });
+    });
+
+    container.querySelectorAll('.nav-label-input').forEach(input => {
+      input.addEventListener('input', () => {
+        const id = input.dataset.id;
+        const item = activeSiteConfig.navigation.find(x => x.id === id);
+        if (item) {
+          item.label = input.value;
+          updateSiteConfigCodeOutput();
+        }
+      });
+    });
+
+    container.querySelectorAll('.nav-enabled-toggle').forEach(chk => {
+      chk.addEventListener('change', () => {
+        const id = chk.dataset.id;
+        const item = activeSiteConfig.navigation.find(x => x.id === id);
+        if (item) {
+          item.enabled = chk.checked;
+          updateSiteConfigCodeOutput();
+        }
+      });
+    });
+  }
+
+  function renderSocialsList() {
+    const container = document.getElementById('cfg-socials-list');
+    if (!container || !activeSiteConfig.socialLinks) return;
+
+    container.innerHTML = activeSiteConfig.socialLinks.map((s) => `
+      <div class="p-3.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 space-y-2 text-xs" data-id="${s.id}">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-[var(--text-primary)]">${s.title}</span>
+            <span class="px-2 py-0.5 rounded bg-[var(--bg-primary)] border border-[var(--border-color)] text-[10px] font-mono text-[var(--accent)]">${s.category}</span>
+          </div>
+          <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              class="social-active-toggle rounded border-[var(--border-color)] w-4 h-4 text-[var(--accent)]"
+              data-id="${s.id}"
+              ${s.isActive !== false ? 'checked' : ''}
+            />
+            <span class="text-xs text-[var(--text-secondary)]">Active Profile</span>
+          </label>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <input
+            type="text"
+            placeholder="URL"
+            value="${s.href || ''}"
+            class="social-href-input px-2.5 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)] font-mono"
+            data-id="${s.id}"
+          />
+          <input
+            type="text"
+            placeholder="Handle / Username"
+            value="${s.handle || ''}"
+            class="social-handle-input px-2.5 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)]"
+            data-id="${s.id}"
+          />
+        </div>
+
+        <input
+          type="text"
+          placeholder="Description"
+          value="${s.description || ''}"
+          class="social-desc-input w-full px-2.5 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-secondary)]"
+          data-id="${s.id}"
+        />
+      </div>
+    `).join('');
+
+    container.querySelectorAll('.social-active-toggle').forEach(chk => {
+      chk.addEventListener('change', () => {
+        const item = activeSiteConfig.socialLinks.find(x => x.id === chk.dataset.id);
+        if (item) {
+          item.isActive = chk.checked;
+          updateSiteConfigCodeOutput();
+        }
+      });
+    });
+
+    container.querySelectorAll('.social-href-input').forEach(input => {
+      input.addEventListener('input', () => {
+        const item = activeSiteConfig.socialLinks.find(x => x.id === input.dataset.id);
+        if (item) {
+          item.href = input.value;
+          updateSiteConfigCodeOutput();
+        }
+      });
+    });
+
+    container.querySelectorAll('.social-handle-input').forEach(input => {
+      input.addEventListener('input', () => {
+        const item = activeSiteConfig.socialLinks.find(x => x.id === input.dataset.id);
+        if (item) {
+          item.handle = input.value;
+          updateSiteConfigCodeOutput();
+        }
+      });
+    });
+
+    container.querySelectorAll('.social-desc-input').forEach(input => {
+      input.addEventListener('input', () => {
+        const item = activeSiteConfig.socialLinks.find(x => x.id === input.dataset.id);
+        if (item) {
+          item.description = input.value;
+          updateSiteConfigCodeOutput();
+        }
+      });
+    });
+  }
+
+  function populateSiteConfigForm() {
+    const c = activeSiteConfig;
+    const setVal = (id, val) => {
+      const el = document.getElementById(id);
+      if (el) el.value = val !== undefined && val !== null ? val : "";
+    };
+    const setChk = (id, val) => {
+      const el = document.getElementById(id);
+      if (el) el.checked = !!val;
+    };
+
+    // Author Identity & Bio
+    setVal('cfg-author-name', c.author?.name);
+    setVal('cfg-author-shortname', c.author?.shortName);
+    setVal('cfg-author-title', c.author?.title);
+    setVal('cfg-author-qualification', c.author?.qualification);
+    setVal('cfg-author-affiliation', c.author?.affiliation);
+    setVal('cfg-author-location', c.author?.location);
+    setVal('cfg-author-shortbio', c.author?.shortBio);
+    setVal('cfg-author-fullbio', Array.isArray(c.author?.fullBio) ? c.author.fullBio.join('\n\n') : (c.author?.fullBio || ''));
+    setVal('cfg-author-avatar', c.author?.avatar);
+    setVal('cfg-author-photo', c.author?.fullPhoto);
+    setVal('cfg-author-research-areas', Array.isArray(c.author?.researchAreas) ? c.author.researchAreas.join(', ') : (c.author?.researchAreas || ''));
+
+    // Metrics
+    setVal('cfg-metric-papers-val', c.author?.metrics?.papersCountValue);
+    setVal('cfg-metric-papers-lbl', c.author?.metrics?.papersCountLabel);
+    setVal('cfg-metric-langs-val', c.author?.metrics?.documentedLanguagesValue);
+    setVal('cfg-metric-langs-lbl', c.author?.metrics?.documentedLanguagesLabel);
+
+    // Hero Action Buttons
+    if (c.author?.actionButtons && c.author.actionButtons.length >= 2) {
+      setVal('cfg-btn1-label', c.author.actionButtons[0]?.label);
+      setVal('cfg-btn1-href', c.author.actionButtons[0]?.href);
+      setVal('cfg-btn2-label', c.author.actionButtons[1]?.label);
+      setVal('cfg-btn2-href', c.author.actionButtons[1]?.href);
+    }
+
+    // Fieldwork Spotlight
+    setChk('cfg-spotlight-enabled', c.fieldworkSpotlight?.enabled);
+    setVal('cfg-spotlight-badge', c.fieldworkSpotlight?.badge);
+    setVal('cfg-spotlight-sub', c.fieldworkSpotlight?.subtitle);
+    setVal('cfg-spotlight-link-text', c.fieldworkSpotlight?.studyLinkText);
+    setVal('cfg-spotlight-link-href', c.fieldworkSpotlight?.studyLinkHref);
+    if (c.fieldworkSpotlight?.words && c.fieldworkSpotlight.words.length >= 4) {
+      setVal('cfg-spotlight-w1-src', c.fieldworkSpotlight.words[0]?.src);
+      setVal('cfg-spotlight-w1-gloss', c.fieldworkSpotlight.words[0]?.gloss);
+      setVal('cfg-spotlight-w2-src', c.fieldworkSpotlight.words[1]?.src);
+      setVal('cfg-spotlight-w2-gloss', c.fieldworkSpotlight.words[1]?.gloss);
+      setVal('cfg-spotlight-w3-src', c.fieldworkSpotlight.words[2]?.src);
+      setVal('cfg-spotlight-w3-gloss', c.fieldworkSpotlight.words[2]?.gloss);
+      setVal('cfg-spotlight-w4-src', c.fieldworkSpotlight.words[3]?.src);
+      setVal('cfg-spotlight-w4-gloss', c.fieldworkSpotlight.words[3]?.gloss);
+    }
+    setVal('cfg-spotlight-trans', c.fieldworkSpotlight?.translation);
+
+    // Page Leads
+    setVal('cfg-page-research-eyebrow', c.pages?.research?.eyebrow);
+    setVal('cfg-page-research-title', c.pages?.research?.title);
+    setVal('cfg-page-research-desc', c.pages?.research?.description);
+
+    setVal('cfg-page-feed-eyebrow', c.pages?.feed?.eyebrow);
+    setVal('cfg-page-feed-title', c.pages?.feed?.title);
+    setVal('cfg-page-feed-desc', c.pages?.feed?.description);
+
+    setVal('cfg-page-poems-eyebrow', c.pages?.poems?.eyebrow);
+    setVal('cfg-page-poems-title', c.pages?.poems?.title);
+    setVal('cfg-page-poems-desc', c.pages?.poems?.description);
+
+    setVal('cfg-page-archive-eyebrow', c.pages?.archive?.eyebrow);
+    setVal('cfg-page-archive-title', c.pages?.archive?.title);
+    setVal('cfg-page-archive-desc', c.pages?.archive?.description);
+
+    setVal('cfg-page-about-eyebrow', c.pages?.about?.eyebrow);
+    setVal('cfg-page-about-title', c.pages?.about?.title);
+    setVal('cfg-page-about-sub', c.pages?.about?.subtitle);
+
+    setVal('cfg-page-socials-head', c.pages?.socials?.headline);
+    setVal('cfg-page-socials-sub', c.pages?.socials?.subheadline);
+
+    // Footer
+    setVal('cfg-footer-bio', c.footer?.bio);
+    setVal('cfg-footer-langs', c.footer?.documentedLanguages);
+    setVal('cfg-footer-copy', c.footer?.copyright);
+    setVal('cfg-footer-standards', c.footer?.standardsNotice);
+    setVal('cfg-footer-backtotop', c.footer?.backToTopText);
+    setChk('cfg-footer-show-admin', c.footer?.showAdminLink);
+    setVal('cfg-footer-admin-label', c.footer?.adminLinkLabel);
+
+    renderNavList();
+    renderSocialsList();
+    updateSiteConfigCodeOutput();
+  }
+
+  function syncSiteConfigFromForm() {
+    const getVal = (id) => document.getElementById(id)?.value.trim() || "";
+    const getChk = (id) => !!document.getElementById(id)?.checked;
+
+    if (!activeSiteConfig.author) activeSiteConfig.author = {};
+    activeSiteConfig.author.name = getVal('cfg-author-name');
+    activeSiteConfig.author.shortName = getVal('cfg-author-shortname');
+    activeSiteConfig.author.title = getVal('cfg-author-title');
+    activeSiteConfig.author.qualification = getVal('cfg-author-qualification');
+    activeSiteConfig.author.affiliation = getVal('cfg-author-affiliation');
+    activeSiteConfig.author.location = getVal('cfg-author-location');
+    activeSiteConfig.author.shortBio = getVal('cfg-author-shortbio');
+    
+    const fullBioRaw = document.getElementById('cfg-author-fullbio')?.value || "";
+    activeSiteConfig.author.fullBio = fullBioRaw.split(/\n\s*\n/).map(s => s.trim()).filter(Boolean);
+    activeSiteConfig.author.avatar = getVal('cfg-author-avatar');
+    activeSiteConfig.author.fullPhoto = getVal('cfg-author-photo');
+    activeSiteConfig.author.researchAreas = getVal('cfg-author-research-areas').split(',').map(s => s.trim()).filter(Boolean);
+
+    if (!activeSiteConfig.author.metrics) activeSiteConfig.author.metrics = {};
+    activeSiteConfig.author.metrics.papersCountValue = getVal('cfg-metric-papers-val');
+    activeSiteConfig.author.metrics.papersCountLabel = getVal('cfg-metric-papers-lbl');
+    activeSiteConfig.author.metrics.documentedLanguagesValue = getVal('cfg-metric-langs-val');
+    activeSiteConfig.author.metrics.documentedLanguagesLabel = getVal('cfg-metric-langs-lbl');
+
+    if (!activeSiteConfig.author.actionButtons) activeSiteConfig.author.actionButtons = [];
+    if (activeSiteConfig.author.actionButtons.length >= 1) {
+      activeSiteConfig.author.actionButtons[0].label = getVal('cfg-btn1-label');
+      activeSiteConfig.author.actionButtons[0].href = getVal('cfg-btn1-href');
+    }
+    if (activeSiteConfig.author.actionButtons.length >= 2) {
+      activeSiteConfig.author.actionButtons[1].label = getVal('cfg-btn2-label');
+      activeSiteConfig.author.actionButtons[1].href = getVal('cfg-btn2-href');
+    }
+
+    if (!activeSiteConfig.fieldworkSpotlight) activeSiteConfig.fieldworkSpotlight = {};
+    activeSiteConfig.fieldworkSpotlight.enabled = getChk('cfg-spotlight-enabled');
+    activeSiteConfig.fieldworkSpotlight.badge = getVal('cfg-spotlight-badge');
+    activeSiteConfig.fieldworkSpotlight.subtitle = getVal('cfg-spotlight-sub');
+    activeSiteConfig.fieldworkSpotlight.studyLinkText = getVal('cfg-spotlight-link-text');
+    activeSiteConfig.fieldworkSpotlight.studyLinkHref = getVal('cfg-spotlight-link-href');
+    activeSiteConfig.fieldworkSpotlight.words = [
+      { src: getVal('cfg-spotlight-w1-src'), gloss: getVal('cfg-spotlight-w1-gloss') },
+      { src: getVal('cfg-spotlight-w2-src'), gloss: getVal('cfg-spotlight-w2-gloss') },
+      { src: getVal('cfg-spotlight-w3-src'), gloss: getVal('cfg-spotlight-w3-gloss') },
+      { src: getVal('cfg-spotlight-w4-src'), gloss: getVal('cfg-spotlight-w4-gloss') },
+    ];
+    activeSiteConfig.fieldworkSpotlight.translation = getVal('cfg-spotlight-trans');
+
+    if (!activeSiteConfig.pages) activeSiteConfig.pages = {};
+    if (!activeSiteConfig.pages.research) activeSiteConfig.pages.research = {};
+    activeSiteConfig.pages.research.eyebrow = getVal('cfg-page-research-eyebrow');
+    activeSiteConfig.pages.research.title = getVal('cfg-page-research-title');
+    activeSiteConfig.pages.research.description = getVal('cfg-page-research-desc');
+
+    if (!activeSiteConfig.pages.feed) activeSiteConfig.pages.feed = {};
+    activeSiteConfig.pages.feed.eyebrow = getVal('cfg-page-feed-eyebrow');
+    activeSiteConfig.pages.feed.title = getVal('cfg-page-feed-title');
+    activeSiteConfig.pages.feed.description = getVal('cfg-page-feed-desc');
+
+    if (!activeSiteConfig.pages.poems) activeSiteConfig.pages.poems = {};
+    activeSiteConfig.pages.poems.eyebrow = getVal('cfg-page-poems-eyebrow');
+    activeSiteConfig.pages.poems.title = getVal('cfg-page-poems-title');
+    activeSiteConfig.pages.poems.description = getVal('cfg-page-poems-desc');
+
+    if (!activeSiteConfig.pages.archive) activeSiteConfig.pages.archive = {};
+    activeSiteConfig.pages.archive.eyebrow = getVal('cfg-page-archive-eyebrow');
+    activeSiteConfig.pages.archive.title = getVal('cfg-page-archive-title');
+    activeSiteConfig.pages.archive.description = getVal('cfg-page-archive-desc');
+
+    if (!activeSiteConfig.pages.about) activeSiteConfig.pages.about = {};
+    activeSiteConfig.pages.about.eyebrow = getVal('cfg-page-about-eyebrow');
+    activeSiteConfig.pages.about.title = getVal('cfg-page-about-title');
+    activeSiteConfig.pages.about.subtitle = getVal('cfg-page-about-sub');
+
+    if (!activeSiteConfig.pages.socials) activeSiteConfig.pages.socials = {};
+    activeSiteConfig.pages.socials.headline = getVal('cfg-page-socials-head');
+    activeSiteConfig.pages.socials.subheadline = getVal('cfg-page-socials-sub');
+
+    if (!activeSiteConfig.footer) activeSiteConfig.footer = {};
+    activeSiteConfig.footer.bio = getVal('cfg-footer-bio');
+    activeSiteConfig.footer.documentedLanguages = getVal('cfg-footer-langs');
+    activeSiteConfig.footer.copyright = getVal('cfg-footer-copy');
+    activeSiteConfig.footer.standardsNotice = getVal('cfg-footer-standards');
+    activeSiteConfig.footer.backToTopText = getVal('cfg-footer-backtotop');
+    activeSiteConfig.footer.showAdminLink = getChk('cfg-footer-show-admin');
+    activeSiteConfig.footer.adminLinkLabel = getVal('cfg-footer-admin-label');
+
+    updateSiteConfigCodeOutput();
+  }
+
+  function generateSiteConfigTs(cfg) {
+    return `import { url } from '../utils/url';
+
+export interface NavItemConfig {
+  id: string;
+  label: string;
+  href: string;
+  enabled: boolean;
+  order: number;
+}
+
+export interface ActionButtonConfig {
+  id: string;
+  label: string;
+  href: string;
+  icon: string;
+  enabled: boolean;
+}
+
+export interface GlossWordUnit {
+  src: string;
+  gloss: string;
+}
+
+export interface FieldworkSpotlightConfig {
+  enabled: boolean;
+  badge: string;
+  subtitle: string;
+  studyLinkText: string;
+  studyLinkHref: string;
+  words: GlossWordUnit[];
+  translation: string;
+}
+
+export interface SocialLinkConfig {
+  id: string;
+  title: string;
+  handle: string;
+  description: string;
+  category: "academic" | "social" | "direct";
+  badge: string;
+  href: string;
+  icon: string;
+  colorTheme: string;
+  isActive: boolean;
+  order: number;
+}
+
+export interface DocumentedLanguageInfo {
+  name: string;
+  iso: string;
+  branch: string;
+  focus: string;
+  region: string;
+}
+
+export interface PoeticThemeInfo {
+  title: string;
+  theme: string;
+  desc: string;
+}
+
+export interface SiteConfig {
+  meta: {
+    siteTitle: string;
+    siteDescription: string;
+    authorName: string;
+  };
+  author: {
+    name: string;
+    shortName: string;
+    title: string;
+    affiliation: string;
+    qualification: string;
+    location: string;
+    locationDetail: string;
+    email: string;
+    orcid: string;
+    scholar: string;
+    github: string;
+    bluesky: string;
+    avatar: string;
+    fullPhoto: string;
+    shortBio: string;
+    fullBio: string[];
+    researchAreas: string[];
+    metrics: {
+      papersCountLabel: string;
+      papersCountValue: string;
+      documentedLanguagesLabel: string;
+      documentedLanguagesValue: string;
+    };
+    actionButtons: ActionButtonConfig[];
+  };
+  navigation: NavItemConfig[];
+  fieldworkSpotlight: FieldworkSpotlightConfig;
+  socialLinks: SocialLinkConfig[];
+  pages: {
+    home: {
+      recentHeading: string;
+      recentDesc: string;
+      allPostsText: string;
+    };
+    research: {
+      eyebrow: string;
+      title: string;
+      description: string;
+      specializations: string[];
+    };
+    feed: {
+      eyebrow: string;
+      title: string;
+      description: string;
+      researchNoticeText: string;
+      researchNoticeBtnText: string;
+    };
+    poems: {
+      eyebrow: string;
+      title: string;
+      description: string;
+      themes: PoeticThemeInfo[];
+    };
+    archive: {
+      eyebrow: string;
+      title: string;
+      description: string;
+      researchNoticeText: string;
+      researchNoticeBtnText: string;
+    };
+    about: {
+      eyebrow: string;
+      title: string;
+      subtitle: string;
+      languagesDocumented: DocumentedLanguageInfo[];
+      contactNote: string;
+    };
+    socials: {
+      headline: string;
+      subheadline: string;
+      note: string;
+    };
+  };
+  footer: {
+    bio: string;
+    documentedLanguages: string;
+    copyright: string;
+    standardsNotice: string;
+    backToTopText: string;
+    showAdminLink: boolean;
+    adminLinkLabel: string;
+  };
+}
+
+export const defaultSiteConfig: SiteConfig = ${JSON.stringify(cfg, null, 2)};
+
+export const siteConfig: SiteConfig = defaultSiteConfig;
+`;
+  }
+
+  function updateSiteConfigCodeOutput() {
+    const el = document.getElementById('site-config-code-output');
+    if (el) {
+      el.querySelector('code').textContent = generateSiteConfigTs(activeSiteConfig);
+    }
+  }
+
+  // Site Config Form listeners
+  document.getElementById('site-config-form')?.addEventListener('input', syncSiteConfigFromForm);
+  document.getElementById('site-config-form')?.addEventListener('change', syncSiteConfigFromForm);
+
+  // Save Settings Locally button
+  document.getElementById('btn-save-site-config')?.addEventListener('click', () => {
+    syncSiteConfigFromForm();
+    localStorage.setItem(cfgStorageKey, JSON.stringify(activeSiteConfig));
+    updateStorageStatusBadge(true);
+    showToast("Site configuration saved locally!");
+  });
+
+  // Reset to Defaults button
+  document.getElementById('btn-reset-site-config')?.addEventListener('click', () => {
+    if (confirm("Reset all site settings back to default configurations? Any unsaved local overrides will be removed.")) {
+      localStorage.removeItem(cfgStorageKey);
+      activeSiteConfig = JSON.parse(JSON.stringify(defaultSiteConfig));
+      populateSiteConfigForm();
+      updateStorageStatusBadge(false);
+      showToast("Reset to default configuration!");
+    }
+  });
+
+  // Copy siteConfig.ts code
+  document.getElementById('btn-copy-site-config-code')?.addEventListener('click', () => {
+    syncSiteConfigFromForm();
+    const code = generateSiteConfigTs(activeSiteConfig);
+    navigator.clipboard.writeText(code).then(() => showToast("siteConfig.ts copied to clipboard!"));
+  });
+
+  // Download siteConfig.ts file
+  document.getElementById('btn-download-site-config-file')?.addEventListener('click', () => {
+    syncSiteConfigFromForm();
+    const code = generateSiteConfigTs(activeSiteConfig);
+    const blob = new Blob([code], { type: "text/typescript;charset=utf-8" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "siteConfig.ts";
+    link.click();
+    showToast("Downloaded siteConfig.ts");
+  });
+
+  // Merge locally published posts into catalog
+  try {
+    const published = JSON.parse(localStorage.getItem('hk_cms_published_posts') || '[]');
+    if (Array.isArray(published) && published.length > 0) {
+      published.forEach(pub => {
+        if (!existingPosts.some(p => p.slug === pub.slug)) {
+          existingPosts.unshift(pub);
+        }
+        renderPublishedItemToCatalog(pub);
+      });
+      const catBadge = document.getElementById('catalog-count-badge');
+      if (catBadge) catBadge.textContent = existingPosts.length;
+    }
+  } catch (e) {
+    console.error("Failed to load locally published posts", e);
+  }
+
+  // Init
+  updateDraftsBadge();
+  updateLivePreview();
+  populateSiteConfigForm();
+</script>
+

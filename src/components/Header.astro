@@ -1,0 +1,158 @@
+---
+import { url } from '../utils/url';
+import { siteConfig } from '../data/siteConfig';
+
+const navItems = siteConfig.navigation
+  .filter((item) => item.enabled)
+  .sort((a, b) => a.order - b.order)
+  .map((item) => ({
+    href: url(item.href),
+    label: item.label,
+  }));
+
+const currentPath = Astro.url.pathname;
+const homeHref = url("/");
+
+function checkIsActive(itemHref: string): boolean {
+  const normCurrent = currentPath.replace(/\/$/, "");
+  const normItem = itemHref.replace(/\/$/, "");
+  const normHome = homeHref.replace(/\/$/, "");
+
+  if (normItem === normHome) {
+    return normCurrent === normHome;
+  }
+  return normCurrent === normItem || normCurrent.startsWith(`${normItem}/`);
+}
+---
+
+<header class="sticky top-0 z-50 backdrop-blur-md bg-[var(--bg-primary)]/90 border-b border-[var(--border-color)] transition-colors duration-200">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+    <!-- Brand / Logo -->
+    <a href={url("/")} class="group flex items-baseline gap-2 min-h-[44px] items-center">
+      <span class="font-sans font-bold text-xl tracking-tight text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors">
+        {siteConfig.author.name}
+      </span>
+    </a>
+
+    <!-- Desktop Navigation -->
+    <nav class="hidden md:flex items-center gap-1 font-sans text-sm font-medium">
+      {navItems.map((item) => {
+        const isActive = checkIsActive(item.href);
+        return (
+          <a
+            href={item.href}
+            class={`px-3.5 py-2 rounded-md transition-all duration-150 min-h-[44px] inline-flex items-center ${
+              isActive
+                ? "bg-[var(--accent-light)] text-[var(--accent)] font-semibold"
+                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]"
+            }`}
+          >
+            {item.label}
+          </a>
+        );
+      })}
+
+      <!-- Theme Toggle -->
+      <button
+        id="theme-toggle"
+        type="button"
+        class="ml-3 p-2.5 rounded-md text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition-colors cursor-pointer min-h-[44px] min-w-[44px] inline-flex items-center justify-center"
+        aria-label="Toggle Dark Mode"
+      >
+        <!-- Sun icon -->
+        <svg id="theme-toggle-light-icon" class="hidden w-4.5 h-4.5" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path>
+        </svg>
+        <!-- Moon icon -->
+        <svg id="theme-toggle-dark-icon" class="hidden w-4.5 h-4.5" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+        </svg>
+      </button>
+    </nav>
+
+    <!-- Mobile Menu Button & Toggle (44px touch targets) -->
+    <div class="flex items-center gap-1 md:hidden">
+      <button
+        id="theme-toggle-mobile"
+        type="button"
+        class="min-h-[44px] min-w-[44px] inline-flex items-center justify-center p-2 rounded-md text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)]"
+        aria-label="Toggle Dark Mode"
+      >
+        <svg class="w-4.5 h-4.5" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+        </svg>
+      </button>
+
+      <button
+        id="mobile-menu-btn"
+        type="button"
+        class="min-h-[44px] min-w-[44px] inline-flex items-center justify-center p-2 rounded-md text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] cursor-pointer"
+        aria-label="Open mobile menu"
+      >
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Dropdown -->
+  <div id="mobile-menu" class="hidden md:hidden px-4 pt-2 pb-5 space-y-1.5 bg-[var(--bg-primary)] border-b border-[var(--border-color)] shadow-lg">
+    {navItems.map((item) => {
+      const isActive = checkIsActive(item.href);
+      return (
+        <a
+          href={item.href}
+          class={`block px-4 py-3 rounded-lg text-base font-medium font-sans min-h-[44px] flex items-center ${
+            isActive
+              ? "bg-[var(--accent-light)] text-[var(--accent)] font-semibold"
+              : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]"
+          }`}
+        >
+          {item.label}
+        </a>
+      );
+    })}
+  </div>
+</header>
+
+<script>
+  // Mobile menu toggle
+  const menuBtn = document.getElementById('mobile-menu-btn');
+  const mobileMenu = document.getElementById('mobile-menu');
+
+  menuBtn?.addEventListener('click', () => {
+    mobileMenu?.classList.toggle('hidden');
+  });
+
+  // Dark mode toggle
+  const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+  const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+  const themeToggleBtn = document.getElementById('theme-toggle');
+  const themeToggleMobile = document.getElementById('theme-toggle-mobile');
+
+  function updateIcons() {
+    if (document.documentElement.classList.contains('dark')) {
+      themeToggleLightIcon?.classList.remove('hidden');
+      themeToggleDarkIcon?.classList.add('hidden');
+    } else {
+      themeToggleLightIcon?.classList.add('hidden');
+      themeToggleDarkIcon?.classList.remove('hidden');
+    }
+  }
+
+  function toggleTheme() {
+    if (document.documentElement.classList.contains('dark')) {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('color-theme', 'light');
+    } else {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('color-theme', 'dark');
+    }
+    updateIcons();
+  }
+
+  updateIcons();
+  themeToggleBtn?.addEventListener('click', toggleTheme);
+  themeToggleMobile?.addEventListener('click', toggleTheme);
+</script>

@@ -1,0 +1,439 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { samplePosts, getPostUrl } from '../data/posts';
+import { siteConfig } from '../data/siteConfig';
+import { url } from '../utils/url';
+
+// Archive is for feed / blog writings (essays, oral history, reflections, poetry)
+const archivePosts = samplePosts.filter((p) => p.postType !== "academic_paper");
+
+// Article composition languages
+const englishPosts = archivePosts.filter((p) => (p.articleLanguage || 'English').toLowerCase() === "english");
+const simtePosts = archivePosts.filter((p) => (p.articleLanguage || '').toLowerCase() === "simte");
+
+// Extract unique tags and years
+const allTags = Array.from(new Set(archivePosts.flatMap((p) => p.tags))).sort();
+const years = Array.from(new Set(archivePosts.map((p) => p.year))).sort((a, b) => b - a);
+
+const { eyebrow, title, description, researchNoticeText, researchNoticeBtnText } = siteConfig.pages.archive;
+---
+
+<BaseLayout
+  title={`${title} | ${siteConfig.author.name}`}
+  description={description}
+>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
+    <!-- Header -->
+    <div class="border-b border-[var(--border-color)] pb-8 mb-8 space-y-6">
+      <div>
+        <span class="text-xs font-mono uppercase tracking-wider text-[var(--accent)] font-semibold">
+          {eyebrow}
+        </span>
+        <h1 class="text-3xl sm:text-4xl font-bold font-sans tracking-tight text-[var(--text-primary)] mt-1.5 mb-3">
+          {title}
+        </h1>
+        <p class="text-base sm:text-lg font-serif text-[var(--text-secondary)] leading-relaxed">
+          {description}
+        </p>
+      </div>
+
+      <!-- Quick Link to Academic Papers -->
+      <div class="p-3.5 rounded-xl bg-[var(--bg-secondary)]/50 border border-[var(--border-color)] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-sans">
+        <div class="flex items-center gap-2 text-[var(--text-secondary)]">
+          <span>{researchNoticeText}</span>
+        </div>
+        <a href={url("/research")} class="font-semibold text-[var(--accent)] hover:underline inline-flex items-center gap-1 shrink-0">
+          <span>{researchNoticeBtnText}</span>
+          <span>→</span>
+        </a>
+      </div>
+
+      <!-- Article Composition Language (Written In) -->
+      <div class="space-y-2 font-sans pt-1">
+        <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
+          <span>Article Language:</span>
+          <span class="text-[10px] lowercase font-normal italic text-[var(--text-secondary)]">
+            (written medium)
+          </span>
+        </div>
+        <div class="flex flex-wrap items-center gap-2" id="lang-filter-group">
+          <button
+            type="button"
+            class="lang-pill-btn px-3 py-1 text-xs rounded-full border border-[var(--border-color)] bg-[var(--text-primary)] text-[var(--bg-primary)] font-semibold transition-all cursor-pointer focus:ring-2 focus:ring-[var(--accent)] focus:outline-none"
+            data-lang="all"
+          >
+            All Languages <span class="ml-1 opacity-75 font-mono">({archivePosts.length})</span>
+          </button>
+          <button
+            type="button"
+            class="lang-pill-btn px-3 py-1 text-xs rounded-full border border-[var(--border-color)] bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--accent)] transition-all cursor-pointer font-mono focus:ring-2 focus:ring-[var(--accent)] focus:outline-none"
+            data-lang="english"
+          >
+            English <span class="ml-1 opacity-75">({englishPosts.length})</span>
+          </button>
+          <button
+            type="button"
+            class="lang-pill-btn px-3 py-1 text-xs rounded-full border border-[var(--border-color)] bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--accent)] transition-all cursor-pointer font-mono focus:ring-2 focus:ring-[var(--accent)] focus:outline-none"
+            data-lang="simte"
+          >
+            Simte <span class="ml-1 text-[10px] opacity-75 font-sans">(Native Tongue: {simtePosts.length})</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Real-time Search Bar -->
+      <div class="relative font-sans pt-2">
+        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[var(--text-secondary)]">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+        </div>
+        <input
+          type="text"
+          id="archive-search"
+          placeholder="Search by title, topic, folklore, or keyword (e.g. 'Thanlon', 'heritage', 'Christianity')..."
+          class="w-full pl-10 pr-4 py-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/50 focus:bg-[var(--bg-primary)] focus:border-[var(--accent)] focus:outline-none text-sm text-[var(--text-primary)] placeholder-[var(--text-secondary)] transition-all"
+        />
+      </div>
+
+      <!-- Topic Tag Cloud -->
+      <div class="space-y-2.5 font-sans pt-1">
+        <div class="flex items-center justify-between text-xs text-[var(--text-secondary)]">
+          <span class="font-semibold uppercase tracking-wider">Filter by Topic Tag:</span>
+          <button
+            type="button"
+            id="reset-filters"
+            class="text-[var(--accent)] hover:underline hidden cursor-pointer font-medium"
+          >
+            Reset all filters ✕
+          </button>
+        </div>
+        <div class="flex flex-wrap gap-1.5" id="tags-cloud">
+          {allTags.map((tag) => (
+            <button
+              type="button"
+              class="tag-filter-btn px-2.5 py-1 text-xs rounded-md border border-[var(--border-color)] bg-[var(--bg-secondary)]/70 hover:bg-[var(--bg-primary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+              data-tag={tag.toLowerCase()}
+            >
+              #{tag}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    <!-- Results count indicator -->
+    <div id="results-count" class="text-xs font-mono text-[var(--text-secondary)] mb-6 font-sans">
+      Showing all {archivePosts.length} entries
+    </div>
+
+    <!-- Archive List Grouped by Year -->
+    <div id="archive-list" class="space-y-12">
+      {years.map((yr) => {
+        const postsInYear = archivePosts.filter((p) => p.year === yr);
+        return (
+          <div class="year-section" data-year={yr}>
+            <div class="flex items-center gap-3 border-b border-[var(--border-color)] pb-2 mb-6">
+              <span class="text-2xl font-bold font-sans text-[var(--text-primary)]">{yr}</span>
+              <span class="text-xs font-mono text-[var(--text-secondary)]">({postsInYear.length} entries)</span>
+            </div>
+
+            <ul class="space-y-4">
+              {postsInYear.map((post) => {
+                const articleLang = (post.articleLanguage || 'English').toLowerCase();
+                const searchCorpus = `${post.title} ${post.subtitle || ''} ${post.excerpt} ${post.tags.join(' ')} ${post.category} ${post.language || ''} ${post.postType} ${articleLang}`.toLowerCase();
+                const tagsList = post.tags.map((t) => t.toLowerCase()).join(',');
+                
+                return (
+                  <li
+                    class="archive-entry group flex flex-col sm:flex-row sm:items-baseline justify-between p-4 rounded-xl hover:bg-[var(--bg-secondary)] border border-transparent hover:border-[var(--border-color)] transition-all gap-4"
+                    data-search={searchCorpus}
+                    data-article-lang={articleLang}
+                    data-tags={tagsList}
+                  >
+                    <div class="space-y-2 sm:max-w-2xl">
+                      {/* Top Badges */}
+                      <div class="flex flex-wrap items-center gap-2 text-xs font-sans">
+                        <span class="text-[var(--accent)] font-semibold">
+                          {post.category}
+                        </span>
+
+                        {post.language && (
+                          <>
+                            <span class="text-[var(--text-secondary)]">•</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-secondary)] font-medium">
+                              Focus: {post.language}
+                            </span>
+                          </>
+                        )}
+
+                        {post.articleLanguage === "Simte" && (
+                          <span class="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                            Native Simte
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Title */}
+                      <a
+                        href={getPostUrl(post)}
+                        class="text-base sm:text-lg font-bold font-sans text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors block"
+                      >
+                        {post.title}
+                      </a>
+
+                      {/* Subtitle / Excerpt preview */}
+                      {post.subtitle && (
+                        <p class="text-xs sm:text-sm font-serif text-[var(--text-secondary)] leading-relaxed line-clamp-2">
+                          {post.subtitle}
+                        </p>
+                      )}
+
+                      {/* Tags */}
+                      <div class="flex flex-wrap items-center gap-1.5 pt-1 font-sans">
+                        {post.tags.slice(0, 4).map((t) => (
+                          <button
+                            type="button"
+                            class="entry-tag-btn text-[11px] text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors cursor-pointer"
+                            data-tag={t.toLowerCase()}
+                          >
+                            #{t}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div class="sm:text-right shrink-0 font-mono text-xs text-[var(--text-secondary)]">
+                      <time datetime={post.date}>{post.date}</time>
+                      <div class="text-[11px] mt-1 text-[var(--text-secondary)] font-sans">
+                        {post.readingTime}
+                      </div>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        );
+      })}
+    </div>
+
+    <!-- Empty State: Native Simte future placeholder -->
+    <div id="simte-future-notice" class="hidden text-center py-16 px-4 font-sans rounded-2xl border border-dashed border-[var(--border-color)] bg-[var(--bg-secondary)]/30">
+      <div class="w-10 h-10 rounded-full bg-[var(--accent)]/10 text-[var(--accent)] flex items-center justify-center mx-auto mb-4 font-mono font-bold text-xs">
+        smt
+      </div>
+      <h3 class="text-lg font-bold text-[var(--text-primary)]">
+        No writings published in Simte yet
+      </h3>
+      <p class="text-sm font-serif text-[var(--text-secondary)] mt-2 max-w-md mx-auto leading-relaxed">
+        All current essays and dispatches are composed in English. Future dispatches, folklore transcriptions, oral songs, and poetry composed directly in the native Simte language will appear here.
+      </p>
+      <div class="mt-6 flex flex-wrap justify-center gap-3">
+        <button
+          type="button"
+          id="view-english-btn"
+          class="px-4 py-2 rounded-lg bg-[var(--text-primary)] text-[var(--bg-primary)] text-xs font-semibold cursor-pointer hover:opacity-90 transition-opacity"
+        >
+          View English Writings ({englishPosts.length})
+        </button>
+        <button
+          type="button"
+          id="simte-reset-btn"
+          class="px-4 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-medium cursor-pointer"
+        >
+          View All Writings
+        </button>
+      </div>
+    </div>
+
+    <!-- General No Match State -->
+    <div id="no-archive-results" class="hidden text-center py-16 font-sans">
+      <p class="text-base font-bold text-[var(--text-primary)]">No matching writings found.</p>
+      <p class="text-xs text-[var(--text-secondary)] mt-1">Try adjusting the search query or topic tag.</p>
+      <button
+        type="button"
+        id="empty-reset-btn"
+        class="mt-4 px-4 py-2 rounded-lg bg-[var(--accent)] text-white text-xs font-semibold cursor-pointer hover:opacity-90 transition-opacity"
+      >
+        Clear all filters
+      </button>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  const searchInput = document.getElementById('archive-search') as HTMLInputElement | null;
+  const langBtns = document.querySelectorAll<HTMLButtonElement>('.lang-pill-btn');
+  const tagBtns = document.querySelectorAll<HTMLButtonElement>('.tag-filter-btn');
+  const entryTagBtns = document.querySelectorAll<HTMLButtonElement>('.entry-tag-btn');
+  const resetBtn = document.getElementById('reset-filters');
+  const emptyResetBtn = document.getElementById('empty-reset-btn');
+  const viewEnglishBtn = document.getElementById('view-english-btn');
+  const simteResetBtn = document.getElementById('simte-reset-btn');
+  const archiveEntries = document.querySelectorAll<HTMLElement>('.archive-entry');
+  const yearSections = document.querySelectorAll<HTMLElement>('.year-section');
+  const resultsCount = document.getElementById('results-count');
+  const noResults = document.getElementById('no-archive-results');
+  const simteFutureNotice = document.getElementById('simte-future-notice');
+
+  const totalEntriesCount = archiveEntries.length;
+
+  let activeLang = 'all';
+  let activeTag = '';
+
+  // Parse URL query parameters (e.g. ?lang=simte&q=heritage)
+  const urlParams = new URLSearchParams(window.location.search);
+  const initialQuery = urlParams.get('q');
+  const initialLang = urlParams.get('lang');
+
+  if (initialQuery && searchInput) {
+    searchInput.value = initialQuery;
+  }
+  if (initialLang) {
+    activeLang = initialLang.toLowerCase();
+    updateLangButtonsUI();
+  }
+
+  function updateLangButtonsUI() {
+    langBtns.forEach((btn) => {
+      const btnLang = btn.getAttribute('data-lang');
+      if (btnLang === activeLang) {
+        btn.classList.remove('bg-[var(--bg-secondary)]', 'text-[var(--text-secondary)]');
+        btn.classList.add('bg-[var(--text-primary)]', 'text-[var(--bg-primary)]', 'font-semibold');
+      } else {
+        btn.classList.remove('bg-[var(--text-primary)]', 'text-[var(--bg-primary)]', 'font-semibold');
+        btn.classList.add('bg-[var(--bg-secondary)]', 'text-[var(--text-secondary)]');
+      }
+    });
+  }
+
+  function updateTagButtonsUI() {
+    tagBtns.forEach((btn) => {
+      const tag = btn.getAttribute('data-tag') || '';
+      if (tag === activeTag) {
+        btn.classList.add('bg-[var(--accent)]', 'text-white', 'border-[var(--accent)]');
+        btn.classList.remove('bg-[var(--bg-secondary)]/70', 'text-[var(--text-secondary)]');
+      } else {
+        btn.classList.remove('bg-[var(--accent)]', 'text-white', 'border-[var(--accent)]');
+        btn.classList.add('bg-[var(--bg-secondary)]/70', 'text-[var(--text-secondary)]');
+      }
+    });
+  }
+
+  function filterArchive() {
+    const query = searchInput?.value.toLowerCase().trim() || '';
+    let matchesCount = 0;
+
+    archiveEntries.forEach((entry) => {
+      const text = entry.getAttribute('data-search') || '';
+      const entryArticleLang = (entry.getAttribute('data-article-lang') || '').toLowerCase();
+      const entryTags = (entry.getAttribute('data-tags') || '').split(',');
+
+      const matchesSearch = !query || text.includes(query);
+      const matchesLang = activeLang === 'all' || entryArticleLang === activeLang;
+      const matchesTag = !activeTag || entryTags.includes(activeTag);
+
+      if (matchesSearch && matchesLang && matchesTag) {
+        entry.style.display = 'flex';
+        matchesCount++;
+      } else {
+        entry.style.display = 'none';
+      }
+    });
+
+    // Check year sections
+    yearSections.forEach((sec) => {
+      const visibleEntries = Array.from(sec.querySelectorAll<HTMLElement>('.archive-entry')).filter(
+        (el) => el.style.display !== 'none'
+      );
+      sec.style.display = visibleEntries.length === 0 ? 'none' : 'block';
+    });
+
+    const hasActiveFilters = Boolean(query || activeLang !== 'all' || activeTag);
+
+    // Update count indicator
+    if (resultsCount) {
+      if (!hasActiveFilters) {
+        resultsCount.textContent = `Showing all ${totalEntriesCount} entries`;
+      } else {
+        resultsCount.textContent = `Showing ${matchesCount} matching ${matchesCount === 1 ? 'entry' : 'entries'}`;
+      }
+    }
+
+    // Special empty state for Simte native articles vs generic empty state
+    if (matchesCount === 0) {
+      if (activeLang === 'simte' && !query && !activeTag) {
+        if (simteFutureNotice) simteFutureNotice.style.display = 'block';
+        if (noResults) noResults.style.display = 'none';
+      } else {
+        if (simteFutureNotice) simteFutureNotice.style.display = 'none';
+        if (noResults) noResults.style.display = 'block';
+      }
+    } else {
+      if (simteFutureNotice) simteFutureNotice.style.display = 'none';
+      if (noResults) noResults.style.display = 'none';
+    }
+
+    if (resetBtn) {
+      resetBtn.style.display = hasActiveFilters ? 'inline-block' : 'none';
+    }
+  }
+
+  // Article language filter clicks
+  langBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      activeLang = (btn.getAttribute('data-lang') || 'all').toLowerCase();
+      updateLangButtonsUI();
+      filterArchive();
+    });
+  });
+
+  // Tag cloud clicks
+  tagBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const tag = btn.getAttribute('data-tag') || '';
+      activeTag = activeTag === tag ? '' : tag;
+      updateTagButtonsUI();
+      filterArchive();
+    });
+  });
+
+  // Entry internal tag clicks
+  entryTagBtns.forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const tag = btn.getAttribute('data-tag') || '';
+      activeTag = activeTag === tag ? '' : tag;
+      updateTagButtonsUI();
+      filterArchive();
+    });
+  });
+
+  // Search input typing
+  searchInput?.addEventListener('input', filterArchive);
+
+  // Full reset function
+  function resetAllFilters() {
+    if (searchInput) searchInput.value = '';
+    activeLang = 'all';
+    activeTag = '';
+    updateLangButtonsUI();
+    updateTagButtonsUI();
+    filterArchive();
+  }
+
+  resetBtn?.addEventListener('click', resetAllFilters);
+  emptyResetBtn?.addEventListener('click', resetAllFilters);
+  simteResetBtn?.addEventListener('click', resetAllFilters);
+
+  viewEnglishBtn?.addEventListener('click', () => {
+    activeLang = 'english';
+    updateLangButtonsUI();
+    filterArchive();
+  });
+
+  // Initial run
+  filterArchive();
+</script>

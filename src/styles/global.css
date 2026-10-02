@@ -1,0 +1,119 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-primary: #FAF9F6;
+    --bg-secondary: #F3F1EC;
+    --text-primary: #1C1917;
+    --text-secondary: #57534E;
+    --border-color: #E7E5E4;
+    --accent: #B45309;
+    --accent-hover: #92400E;
+    --accent-light: #FEF3C7;
+  }
+
+  .dark {
+    --bg-primary: #121214;
+    --bg-secondary: #1A1A1E;
+    --text-primary: #F5F5F4;
+    --text-secondary: #A8A29E;
+    --border-color: #2E2E33;
+    --accent: #D97706;
+    --accent-hover: #F59E0B;
+    --accent-light: #2A2318;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Newsreader', Georgia, serif;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  /* Prevent iOS automatic zoom on focus by enforcing >= 16px */
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+}
+
+/* IPA and Linguistic Text */
+.ipa, [data-ipa] {
+  font-family: 'Charis SIL', 'Gentium Plus', 'Noto Serif', serif;
+  font-style: normal;
+  letter-spacing: 0.02em;
+}
+
+/* Leipzig Interlinear Glosses: Mobile hardened */
+.gloss-block {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 1rem;
+  margin: 1.25rem 0;
+  border-radius: 0.75rem;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  font-size: 0.95rem;
+  max-width: 100%;
+}
+
+.gloss-line-src {
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.gloss-line-morph {
+  font-family: 'Charis SIL', serif;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.gloss-line-tags {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.gloss-line-trans {
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
+/* Word-aligned gloss table */
+.gloss-words {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  margin-bottom: 0.5rem;
+  min-width: max-content;
+}
+
+.gloss-word-unit {
+  display: inline-flex;
+  flex-direction: column;
+}
+
+.gloss-word-unit .word-src {
+  font-weight: 600;
+}
+
+.gloss-word-unit .word-gloss {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}

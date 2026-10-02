@@ -1,0 +1,412 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { samplePosts, type Post, getPostUrl } from '../../data/posts';
+import { url } from '../../utils/url';
+
+const researchPosts = samplePosts.filter((p) => p.postType === "academic_paper");
+
+export function getStaticPaths() {
+  const papers = samplePosts.filter((post) => post.postType === "academic_paper");
+  return papers.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+interface Props {
+  post: Post;
+}
+
+const { post } = Astro.props;
+
+// Find next and prev posts among research papers
+const currentIndex = researchPosts.findIndex((p) => p.slug === post.slug);
+const prevPost = currentIndex > 0 ? researchPosts[currentIndex - 1] : null;
+const nextPost = currentIndex < researchPosts.length - 1 ? researchPosts[currentIndex + 1] : null;
+---
+
+<BaseLayout
+  title={`${post.title} | Research | H. Kapginlian`}
+  description={post.excerpt}
+  ogImage={post.coverImage}
+>
+  <article class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
+    <!-- Breadcrumb & Back navigation -->
+    <nav class="flex items-center justify-between text-xs font-sans text-[var(--text-secondary)] mb-8">
+      <div class="flex items-center gap-2">
+        <a href={url("/research")} class="hover:text-[var(--accent)] transition-colors min-h-[44px] inline-flex items-center font-medium">
+          ← Back to Research
+        </a>
+        <span>/</span>
+        <span class="text-[var(--accent)] font-medium">{post.category}</span>
+      </div>
+
+      <span class="px-2.5 py-1 rounded-full bg-[var(--bg-secondary)] border border-[var(--border-color)] font-mono text-[11px] text-[var(--accent)] font-semibold uppercase tracking-wider">
+        Peer-Reviewed Publication
+      </span>
+    </nav>
+
+    <!-- POST HEADER -->
+    <header class="border-b border-[var(--border-color)] pb-8 mb-8 space-y-4">
+      {post.journal && (
+        <div class="p-3.5 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-color)] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-sans">
+          <div class="space-y-0.5">
+            <span class="font-bold text-[var(--text-primary)] block sm:inline">{post.journal}</span>
+            {post.volume && <span class="text-[var(--text-secondary)] font-serif italic sm:ml-2">• {post.volume}</span>}
+            {post.issn && <span class="text-[var(--text-secondary)] font-mono sm:ml-2">• ISSN: {post.issn}</span>}
+          </div>
+          {post.doi && (
+            <a href={`https://doi.org/${post.doi}`} target="_blank" rel="noopener noreferrer" class="text-[var(--accent)] font-mono hover:underline shrink-0">
+              DOI: {post.doi} ↗
+            </a>
+          )}
+        </div>
+      )}
+
+      <!-- Category & Date pills -->
+      <div class="flex flex-wrap items-center gap-2.5 text-xs font-sans text-[var(--text-secondary)]">
+        <span class="px-2.5 py-1 rounded-md bg-[var(--accent-light)] text-[var(--accent)] font-semibold">
+          {post.category}
+        </span>
+        <span>•</span>
+        <time datetime={post.date}>{post.date}</time>
+        <span>•</span>
+        <span>{post.readingTime}</span>
+        {post.language && (
+          <>
+            <span>•</span>
+            <span class="font-mono bg-[var(--bg-secondary)] px-2 py-0.5 rounded text-[11px] text-[var(--text-primary)] font-medium">
+              Language Focus: {post.language}
+            </span>
+          </>
+        )}
+      </div>
+
+      <!-- Main Title -->
+      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold font-sans tracking-tight text-[var(--text-primary)] leading-tight">
+        {post.title}
+      </h1>
+
+      {post.subtitle && (
+        <p class="text-lg sm:text-xl font-serif italic text-[var(--text-secondary)] leading-relaxed">
+          {post.subtitle}
+        </p>
+      )}
+
+      <!-- Author Line -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-3 font-sans border-t border-[var(--border-color)]/60">
+        <div class="flex items-center gap-3">
+          <img
+            src="/images/author-avatar.jpg"
+            alt="H. Kapginlian"
+            class="w-12 h-12 rounded-full object-cover border border-[var(--border-color)] shadow-xs"
+          />
+          <div>
+            <span class="block text-sm font-bold text-[var(--text-primary)]">
+              {post.authors || "H. Kapginlian"}
+            </span>
+            <span class="block text-xs text-[var(--text-secondary)]">
+              North-Eastern Hill University (NEHU), Shillong
+            </span>
+          </div>
+        </div>
+
+        {/* Action Buttons: PDF Download + Cite Jump */}
+        {post.pdfUrl && (
+          <div class="flex flex-wrap items-center gap-2">
+            <a
+              href={post.pdfUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="min-h-[44px] px-4 py-2.5 rounded-xl bg-[var(--text-primary)] text-[var(--bg-primary)] font-bold text-xs hover:opacity-90 transition-opacity inline-flex items-center gap-2 shadow-xs cursor-pointer"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              <span>Download Original PDF</span>
+            </a>
+
+            <a
+              href="#cite-publication"
+              class="min-h-[44px] px-3.5 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] hover:border-[var(--accent)] hover:text-[var(--accent)] text-xs font-mono font-medium transition-colors inline-flex items-center gap-1.5"
+            >
+              <span>Cite (BibTeX)</span>
+            </a>
+          </div>
+        )}
+      </div>
+    </header>
+
+    <!-- ABSTRACT (Special Callout for Academic Papers) -->
+    {post.abstract && (
+      <div class="mb-10 p-6 rounded-2xl bg-[var(--bg-secondary)]/50 border border-[var(--border-color)] space-y-3 font-serif">
+        <h2 class="text-xs font-sans font-bold uppercase tracking-wider text-[var(--accent)]">
+          Abstract
+        </h2>
+        <p class="text-base sm:text-lg text-[var(--text-primary)] leading-relaxed italic">
+          {post.abstract}
+        </p>
+        {post.keywords && post.keywords.length > 0 && (
+          <div class="pt-2 flex flex-wrap items-center gap-1.5 font-sans text-xs">
+            <span class="font-bold text-[var(--text-secondary)]">Keywords:</span>
+            {post.keywords.map((kw) => (
+              <span class="px-2 py-0.5 rounded bg-[var(--bg-primary)] border border-[var(--border-color)] font-mono text-[11px] text-[var(--text-primary)]">
+                {kw}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+    )}
+
+    <!-- ARTICLE BODY SECTIONS (UNABRIDGED LINGUISTIC TEXT) -->
+    <div class="prose max-w-none space-y-10 text-base sm:text-lg font-serif text-[var(--text-primary)] leading-relaxed">
+      {post.sections && post.sections.map((section, idx) => (
+        <section class="space-y-4">
+          <h2 class="text-2xl sm:text-3xl font-bold font-sans tracking-tight text-[var(--text-primary)] pt-4 border-t border-[var(--border-color)]/60">
+            {section.heading}
+          </h2>
+
+          {section.paragraphs && section.paragraphs.map((p) => (
+            <p class="text-[var(--text-secondary)] leading-relaxed font-serif">
+              {p}
+            </p>
+          ))}
+
+          {/* Blockquote with optional oral history/field source */}
+          {section.blockquote && (
+            <blockquote class="my-6 pl-4 border-l-2 border-[var(--accent)] italic text-[var(--text-primary)] bg-[var(--bg-secondary)]/30 py-3 pr-4 rounded-r-lg">
+              <p class="mb-2">"{section.blockquote.text}"</p>
+              {section.blockquote.source && (
+                <cite class="block text-xs font-sans not-italic text-[var(--text-secondary)] font-medium">
+                  — {section.blockquote.source}
+                </cite>
+              )}
+            </blockquote>
+          )}
+
+          {/* Multi-table support (e.g. Comparative Numerals Kaipeng vs Simte) */}
+          {section.tables && section.tables.map((tbl) => (
+            <div class="my-6 overflow-x-auto rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/20 p-4">
+              {tbl.caption && (
+                <h4 class="text-xs font-sans font-bold uppercase tracking-wider text-[var(--accent)] mb-3 text-center">
+                  {tbl.caption}
+                </h4>
+              )}
+              <table class="w-full text-left text-sm font-sans">
+                <thead>
+                  <tr class="border-b border-[var(--border-color)] text-[var(--text-primary)]">
+                    {tbl.headers.map((h) => (
+                      <th class="py-2 px-3 font-bold">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-[var(--border-color)]/50 font-serif">
+                  {tbl.rows.map((row) => (
+                    <tr class="hover:bg-[var(--bg-secondary)]/40 transition-colors">
+                      {row.map((cell) => (
+                        <td class="py-2 px-3 text-[var(--text-secondary)] ipa">{cell}</td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ))}
+
+          {/* Single Table Support */}
+          {section.table && (
+            <div class="my-6 overflow-x-auto rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/20 p-4">
+              {section.table.caption && (
+                <h4 class="text-xs font-sans font-bold uppercase tracking-wider text-[var(--accent)] mb-3 text-center">
+                  {section.table.caption}
+                </h4>
+              )}
+              <table class="w-full text-left text-sm font-sans">
+                <thead>
+                  <tr class="border-b border-[var(--border-color)] text-[var(--text-primary)]">
+                    {section.table.headers.map((h) => (
+                      <th class="py-2 px-3 font-bold">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-[var(--border-color)]/50 font-serif">
+                  {section.table.rows.map((row) => (
+                    <tr class="hover:bg-[var(--bg-secondary)]/40 transition-colors">
+                      {row.map((cell) => (
+                        <td class="py-2 px-3 text-[var(--text-secondary)] ipa">{cell}</td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* Leipzig Gloss Examples */}
+          {section.glossExamples && section.glossExamples.map((ex) => (
+            <div class="gloss-block text-sm my-4 bg-[var(--bg-primary)] border border-[var(--border-color)] p-4 rounded-xl">
+              <span class="text-xs font-sans font-bold text-[var(--accent)] block mb-2">
+                {ex.label}
+              </span>
+              <div class="gloss-words">
+                {ex.words.map((w) => (
+                  <div class="gloss-word-unit">
+                    <span class="word-src ipa">{w.src}</span>
+                    <span class="word-gloss">{w.gloss}</span>
+                  </div>
+                ))}
+              </div>
+              <p class="gloss-line-trans mt-3 text-xs sm:text-sm text-[var(--text-secondary)] italic">
+                '{ex.trans}'
+              </p>
+            </div>
+          ))}
+        </section>
+      ))}
+    </div>
+
+    <!-- REFERENCES SECTION -->
+    {post.references && post.references.length > 0 && (
+      <div class="mt-14 pt-8 border-t border-[var(--border-color)] font-sans">
+        <h3 class="text-lg font-bold text-[var(--text-primary)] mb-4">
+          References & Archival Sources
+        </h3>
+        <ul class="space-y-2.5 text-xs sm:text-sm text-[var(--text-secondary)] font-serif">
+          {post.references.map((ref) => (
+            <li class="pl-4 -indent-4 leading-relaxed">
+              {ref}
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+
+    <!-- CITE THIS PUBLICATION CARD (APA 7th + Syntax-Highlighted BibTeX with 1-Click Copy) -->
+    {post.bibtex && (
+      <div id="cite-publication" class="mt-12 p-6 sm:p-8 rounded-2xl bg-[var(--bg-secondary)]/60 border border-[var(--border-color)] font-sans space-y-5">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <h3 class="text-sm font-bold uppercase tracking-wider text-[var(--text-primary)]">
+              Cite This Publication
+            </h3>
+          </div>
+          <span class="text-xs font-mono text-[var(--text-secondary)]">APA 7th &amp; BibTeX</span>
+        </div>
+
+        {/* APA 7th Citation Box */}
+        {post.citationApa && (
+          <div class="space-y-2">
+            <div class="flex items-center justify-between text-xs text-[var(--text-secondary)] font-medium">
+              <span>APA 7th Edition:</span>
+              <button
+                type="button"
+                id="copy-apa-btn"
+                class="text-[var(--accent)] hover:underline flex items-center gap-1 cursor-pointer font-sans"
+              >
+                <span id="copy-apa-text">Copy APA</span>
+              </button>
+            </div>
+            <div
+              id="apa-content"
+              class="p-3.5 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-color)] text-xs sm:text-sm font-serif text-[var(--text-primary)] leading-relaxed select-all"
+            >
+              {post.citationApa}
+            </div>
+          </div>
+        )}
+
+        {/* BibTeX Entry Code Block */}
+        <div class="space-y-2">
+          <div class="flex items-center justify-between text-xs text-[var(--text-secondary)] font-medium">
+            <span>BibTeX Entry:</span>
+            <button
+              type="button"
+              id="copy-bibtex-btn"
+              class="px-2.5 py-1 rounded-md bg-[var(--accent)] text-white text-xs font-medium hover:opacity-90 transition-opacity flex items-center gap-1 cursor-pointer"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
+              </svg>
+              <span id="copy-bibtex-text">Copy BibTeX</span>
+            </button>
+          </div>
+          <pre
+            id="bibtex-content"
+            class="p-4 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-color)] text-xs font-mono text-[var(--text-primary)] overflow-x-auto leading-relaxed select-all"
+          ><code>{post.bibtex}</code></pre>
+        </div>
+      </div>
+    )}
+
+    <!-- NEXT & PREVIOUS RESEARCH PAPER NAVIGATION -->
+    <nav class="mt-14 pt-8 border-t border-[var(--border-color)] grid grid-cols-1 sm:grid-cols-2 gap-4 font-sans text-xs">
+      {prevPost ? (
+        <a
+          href={getPostUrl(prevPost)}
+          class="p-4 rounded-xl border border-[var(--border-color)] hover:border-[var(--accent)] transition-colors space-y-1 block"
+        >
+          <span class="text-[var(--text-secondary)] uppercase tracking-wider font-semibold block">
+            ← Previous Research Paper
+          </span>
+          <span class="text-sm font-bold text-[var(--text-primary)] block line-clamp-1">
+            {prevPost.title}
+          </span>
+        </a>
+      ) : <div />}
+
+      {nextPost && (
+        <a
+          href={getPostUrl(nextPost)}
+          class="p-4 rounded-xl border border-[var(--border-color)] hover:border-[var(--accent)] transition-colors space-y-1 block sm:text-right"
+        >
+          <span class="text-[var(--text-secondary)] uppercase tracking-wider font-semibold block">
+            Next Research Paper →
+          </span>
+          <span class="text-sm font-bold text-[var(--text-primary)] block line-clamp-1">
+            {nextPost.title}
+          </span>
+        </a>
+      )}
+    </nav>
+  </article>
+</BaseLayout>
+
+<script>
+  // 1-Click Clipboard Copy with visual confirmation
+  const copyApaBtn = document.getElementById('copy-apa-btn');
+  const copyApaText = document.getElementById('copy-apa-text');
+  const apaContent = document.getElementById('apa-content');
+
+  copyApaBtn?.addEventListener('click', async () => {
+    if (apaContent) {
+      try {
+        await navigator.clipboard.writeText(apaContent.innerText.trim());
+        if (copyApaText) copyApaText.textContent = '✓ Copied!';
+        setTimeout(() => {
+          if (copyApaText) copyApaText.textContent = 'Copy APA';
+        }, 2000);
+      } catch (err) {
+        console.error('Failed to copy APA citation:', err);
+      }
+    }
+  });
+
+  const copyBibtexBtn = document.getElementById('copy-bibtex-btn');
+  const copyBibtexText = document.getElementById('copy-bibtex-text');
+  const bibtexContent = document.getElementById('bibtex-content');
+
+  copyBibtexBtn?.addEventListener('click', async () => {
+    if (bibtexContent) {
+      try {
+        await navigator.clipboard.writeText(bibtexContent.innerText.trim());
+        if (copyBibtexText) copyBibtexText.textContent = '✓ Copied BibTeX!';
+        setTimeout(() => {
+          if (copyBibtexText) copyBibtexText.textContent = 'Copy BibTeX';
+        }, 2000);
+      } catch (err) {
+        console.error('Failed to copy BibTeX entry:', err);
+      }
+    }
+  });
+</script>

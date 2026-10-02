@@ -1,0 +1,262 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PostPlate from '../components/PostPlate.astro';
+import SocialIcon from '../components/SocialIcon.astro';
+import { samplePosts, getPostUrl } from '../data/posts';
+import { siteConfig } from '../data/siteConfig';
+import { url } from '../utils/url';
+
+const recentPosts = samplePosts.slice(0, 4);
+const { author, fieldworkSpotlight: spotlight, pages } = siteConfig;
+---
+
+<BaseLayout
+  title={siteConfig.meta.siteTitle}
+  description={siteConfig.meta.siteDescription}
+>
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+    <!-- Split Layout: Desktop 2-column (Left Sticky Bio, Right Feed), Mobile Stacked -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+      
+      <!-- LEFT COLUMN: Sticky Bio Card & Academic Credentials -->
+      <aside class="lg:col-span-4 lg:sticky lg:top-24 space-y-6">
+        <div class="bg-[var(--bg-secondary)]/70 border border-[var(--border-color)] rounded-2xl p-6 sm:p-7 shadow-xs space-y-5">
+          
+          <!-- Avatar & Identity Stacked Vertically -->
+          <div class="space-y-3.5">
+            <div class="relative inline-block">
+              <img
+                src={author.avatar}
+                alt={author.name}
+                class="w-20 h-20 sm:w-22 sm:h-22 rounded-2xl object-cover border-2 border-[var(--border-color)] shadow-sm"
+                loading="eager"
+              />
+              <span
+                class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-[var(--accent)] text-white text-[10px] flex items-center justify-center border-2 border-[var(--bg-primary)] shadow-2xs font-mono font-bold"
+                title="Verified Scholar"
+              >
+                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+              </span>
+            </div>
+
+            <div class="space-y-1">
+              <h1 class="text-xl sm:text-2xl font-bold font-sans tracking-tight text-[var(--text-primary)]">
+                {author.name}
+              </h1>
+              <p class="text-xs sm:text-sm font-sans font-medium text-[var(--accent)]">
+                {author.qualification}
+              </p>
+              <div class="pt-1 flex items-center gap-1.5 text-xs font-mono text-[var(--text-secondary)]">
+                <SocialIcon name="pin" class="w-3.5 h-3.5 text-[var(--accent)] shrink-0" />
+                <span>{author.location}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bio text -->
+          <p class="text-sm font-serif leading-relaxed text-[var(--text-secondary)]">
+            {author.shortBio}
+          </p>
+
+          <!-- Primary Research Pillars -->
+          {author.researchAreas?.length > 0 && (
+            <div class="space-y-2 pt-2 border-t border-[var(--border-color)]/60 font-sans">
+              <h2 class="text-xs font-mono font-bold uppercase tracking-wider text-[var(--text-secondary)]">
+                Primary Research Areas
+              </h2>
+              <div class="flex flex-wrap gap-1.5">
+                {author.researchAreas.map((area) => (
+                  <span class="px-2 py-0.5 text-xs rounded-md bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] font-medium">
+                    {area}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <!-- Quick Metrics -->
+          <div class="p-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-color)] space-y-2 font-sans text-xs">
+            <div class="flex items-center justify-between">
+              <span class="text-[var(--text-secondary)] font-medium">{author.metrics.papersCountLabel}</span>
+              <span class="font-bold text-[var(--text-primary)] font-mono">{author.metrics.papersCountValue}</span>
+            </div>
+            <div class="h-px bg-[var(--border-color)]"></div>
+            <div class="flex items-center justify-between">
+              <span class="text-[var(--text-secondary)] font-medium">{author.metrics.documentedLanguagesLabel}</span>
+              <span class="font-bold text-[var(--accent)] font-mono">{author.metrics.documentedLanguagesValue}</span>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          {author.actionButtons?.filter((b) => b.enabled).length > 0 && (
+            <div class="space-y-2 font-sans pt-1">
+              {author.actionButtons.filter((b) => b.enabled).slice(0, 1).map((btn) => (
+                <a
+                  href={url(btn.href)}
+                  class="w-full min-h-[44px] inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--text-primary)] text-[var(--bg-primary)] hover:opacity-90 font-medium text-sm transition-opacity shadow-xs"
+                >
+                  <SocialIcon name={btn.icon || "paper"} class="w-4 h-4 shrink-0" />
+                  <span>{btn.label}</span>
+                  <span>→</span>
+                </a>
+              ))}
+              <div class="grid grid-cols-2 gap-2">
+                {author.actionButtons.filter((b) => b.enabled).slice(1).map((btn) => (
+                  <a
+                    href={url(btn.href)}
+                    class="min-h-[44px] inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-primary)] hover:bg-[var(--bg-secondary)] text-xs font-medium text-[var(--text-primary)] transition-colors"
+                  >
+                    <SocialIcon name={btn.icon || "academic"} class="w-3.5 h-3.5 text-[var(--accent)] shrink-0" />
+                    <span>{btn.label}</span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
+        </div>
+
+      </aside>
+
+      <!-- RIGHT COLUMN: Recent Writing & Field Notes Feed -->
+      <section class="lg:col-span-8 space-y-8">
+
+        <!-- Linguistic Feature Showcase: Leipzig Interlinear Gloss (Spotlight) -->
+        {spotlight?.enabled && (
+          <div class="bg-[var(--bg-secondary)]/50 border border-[var(--border-color)] rounded-2xl p-5 sm:p-6 shadow-xs space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <span class="text-[11px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-[var(--accent-light)] text-[var(--accent)] border border-[var(--accent)]/20">
+                  {spotlight.badge}
+                </span>
+                <span class="text-xs font-mono text-[var(--text-secondary)]">
+                  {spotlight.subtitle}
+                </span>
+              </div>
+              {spotlight.studyLinkHref && (
+                <a
+                  href={url(spotlight.studyLinkHref)}
+                  class="text-xs font-sans font-medium text-[var(--accent)] hover:underline inline-flex items-center gap-1 min-h-[32px]"
+                >
+                  <span>{spotlight.studyLinkText}</span>
+                  <span>→</span>
+                </a>
+              )}
+            </div>
+
+            <div class="gloss-block text-sm bg-[var(--bg-primary)] my-0 overflow-x-auto p-4 sm:p-5 rounded-xl border border-[var(--border-color)]">
+              <div class="gloss-words min-w-max flex gap-6 sm:gap-8">
+                {spotlight.words?.map((w) => (
+                  <div class="gloss-word-unit">
+                    <span class="word-src ipa font-semibold text-sm sm:text-base">{w.src}</span>
+                    <span class="word-gloss text-xs text-[var(--text-secondary)]">{w.gloss}</span>
+                  </div>
+                ))}
+              </div>
+              <p class="gloss-line-trans text-xs sm:text-sm mt-3 pt-2 border-t border-[var(--border-color)]/60 text-[var(--text-secondary)] font-serif italic">
+                {spotlight.translation}
+              </p>
+            </div>
+          </div>
+        )}
+
+        <div class="flex items-baseline justify-between border-b border-[var(--border-color)] pb-3">
+          <div>
+            <h2 class="text-2xl font-bold font-sans tracking-tight text-[var(--text-primary)]">
+              {pages.home.recentHeading}
+            </h2>
+            <p class="text-xs sm:text-sm font-sans text-[var(--text-secondary)] mt-0.5">
+              {pages.home.recentDesc}
+            </p>
+          </div>
+          <a
+            href={url("/feed")}
+            class="text-xs sm:text-sm font-sans font-medium text-[var(--accent)] hover:underline flex items-center gap-1 min-h-[44px]"
+          >
+            <span>{pages.home.allPostsText}</span>
+            <span>→</span>
+          </a>
+        </div>
+
+        <!-- Post Cards List (Original compact horizontal layout matching feed) -->
+        <div class="space-y-6">
+          {recentPosts.map((post) => (
+            <article class="group bg-[var(--bg-secondary)]/40 hover:bg-[var(--bg-secondary)]/80 border border-[var(--border-color)] rounded-2xl p-5 sm:p-6 transition-all duration-200">
+              <div class="grid grid-cols-1 sm:grid-cols-12 gap-5 sm:gap-6 items-center">
+                
+                <!-- Text Content (on left, leads the card) -->
+                <div class="sm:col-span-7 md:col-span-8 space-y-2.5">
+                  <div class="flex flex-wrap items-center gap-2 text-xs font-sans text-[var(--text-secondary)]">
+                    <span class="px-2.5 py-0.5 rounded bg-[var(--accent-light)] text-[var(--accent)] font-semibold text-[11px]">
+                      {post.category}
+                    </span>
+                    <span>•</span>
+                    <time datetime={post.date}>{post.date}</time>
+                    <span>•</span>
+                    <span>{post.readingTime}</span>
+                  </div>
+
+                  <h3 class="text-lg sm:text-xl font-bold font-sans tracking-tight text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors">
+                    <a href={getPostUrl(post)}>
+                      {post.title}
+                    </a>
+                  </h3>
+
+                  {post.subtitle && (
+                    <p class="text-xs sm:text-sm font-sans text-[var(--text-secondary)] font-medium line-clamp-1">
+                      {post.subtitle}
+                    </p>
+                  )}
+
+                  <p class="text-sm font-serif text-[var(--text-secondary)] leading-relaxed line-clamp-2">
+                    {post.excerpt}
+                  </p>
+
+                  <!-- Tags -->
+                  <div class="flex flex-wrap gap-1.5 pt-1 font-sans">
+                    {post.tags.slice(0, 3).map((tag) => (
+                      <span class="text-xs font-mono text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
+                        #{tag.toLowerCase()}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <!-- Academic Monograph Plate (Clean, uncluttered on Home) -->
+                <div class="sm:col-span-5 md:col-span-4">
+                  <a href={getPostUrl(post)} class="block group-hover:opacity-95 transition-opacity">
+                    <PostPlate post={post} aspect="aspect-video sm:aspect-[4/3]" minimal={true} />
+                  </a>
+                </div>
+
+              </div>
+            </article>
+          ))}
+        </div>
+
+        <!-- Bottom Feed Navigation CTA -->
+        <div class="p-6 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 flex flex-col sm:flex-row items-center justify-between gap-4 font-sans text-center sm:text-left">
+          <div>
+            <h4 class="font-bold text-sm text-[var(--text-primary)]">Looking for specific language tags or topics?</h4>
+            <p class="text-xs text-[var(--text-secondary)] mt-0.5">Explore the categorized archive with real-time keyword search.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <a
+              href={url("/feed")}
+              class="min-h-[44px] inline-flex items-center px-4 py-2 text-xs font-medium rounded-xl bg-[var(--text-primary)] text-[var(--bg-primary)] hover:opacity-90 transition-opacity"
+            >
+              Chronological Feed
+            </a>
+            <a
+              href={url("/archive")}
+              class="min-h-[44px] inline-flex items-center px-4 py-2 text-xs font-medium rounded-xl border border-[var(--border-color)] bg-[var(--bg-primary)] hover:bg-[var(--bg-secondary)] text-[var(--text-primary)] transition-colors"
+            >
+              Search Archive
+            </a>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</BaseLayout>

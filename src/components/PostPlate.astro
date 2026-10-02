@@ -1,0 +1,106 @@
+---
+import type { Post } from '../data/posts';
+import { plateConfigs } from '../data/plateConfigs';
+
+interface Props {
+  post: Post;
+  aspect?: string;
+  class?: string;
+  minimal?: boolean;
+}
+
+const { post, aspect = "aspect-video md:aspect-[4/3]", class: className = "", minimal = false } = Astro.props;
+
+// Determine if the post has an authentic local photo or needs an Academic Monograph Plate
+const hasRealImage = post.coverImage && !post.coverImage.includes('placehold.co') && !post.coverImage.includes('placeholder');
+
+const baseConfig = plateConfigs[post.slug] || {
+  headerLabel: post.headerLabel || (post.journal ? post.journal.slice(0, 26).toUpperCase() : (post.postType === "poem" ? "POETRY MONOGRAPH" : "ACADEMIC PUBLICATION")),
+  themeClass: "from-stone-900 via-stone-800 to-stone-900 text-stone-100",
+  accentBarClass: "bg-[var(--accent)]",
+  subCategory: post.category.toUpperCase(),
+  formula: post.formula || (post.postType === "poem" ? post.title : (post.language || "Linguistic Research")),
+  formulaSub: post.formulaSub || (post.postType === "poem" ? (post.subtitle || post.readingTime) : post.readingTime),
+  languageBadge: post.language || (post.postType === "poem" ? "English Verse" : "Kuki-Chin"),
+  statusBadge: post.postType === "academic_paper" ? "Peer-Reviewed" : (post.postType === "poem" ? "Poetry" : "Essay"),
+  pattern: "default",
+};
+
+const config = {
+  ...baseConfig,
+  themeClass: post.themeClass || baseConfig.themeClass,
+  accentBarClass: post.accentBarClass || baseConfig.accentBarClass,
+  headerLabel: post.headerLabel || baseConfig.headerLabel,
+  formula: post.formula || baseConfig.formula,
+  formulaSub: post.formulaSub || baseConfig.formulaSub,
+};
+---
+
+{hasRealImage ? (
+  <div class={`block overflow-hidden rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-color)] ${aspect} ${className}`}>
+    <img
+      src={post.coverImage}
+      alt={post.title}
+      class="w-full h-full object-cover group-hover:scale-103 transition-transform duration-300"
+      loading="lazy"
+    />
+  </div>
+) : (
+  <div
+    class={`relative flex flex-col justify-between overflow-hidden rounded-xl border border-stone-800/80 p-4 sm:p-5 select-none bg-gradient-to-br ${config.themeClass} ${aspect} ${className} shadow-sm group-hover:shadow-md group-hover:border-stone-700 transition-all duration-300`}
+  >
+    {/* Fine Top Accent Color Spine */}
+    <div class={`absolute top-0 left-0 right-0 h-1.5 ${config.accentBarClass}`}></div>
+
+    {/* Background Subtle Watermark Grid / Rings */}
+    <div class="absolute inset-0 opacity-[0.08] pointer-events-none" aria-hidden="true">
+      <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id={`plate-grid-${post.slug}`} width="20" height="20" patternUnits="userSpaceOnUse">
+            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="currentColor" stroke-width="0.5" />
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill={`url(#plate-grid-${post.slug})`} />
+      </svg>
+    </div>
+
+    {/* Top Header Row (Hidden in minimal mode for clean Home view) */}
+    {!minimal && (
+      <div class="relative z-10 flex items-center justify-between gap-1 text-[11px] font-mono tracking-wider text-stone-300 uppercase">
+        <div class="flex items-center gap-1.5 truncate">
+          <span class="inline-block w-2 h-2 rounded-full bg-stone-400"></span>
+          <span class="truncate font-semibold">{config.headerLabel}</span>
+        </div>
+        <span class="shrink-0 px-2 py-0.5 rounded bg-white/10 text-[10px] text-stone-200 font-medium font-mono">
+          {post.year}
+        </span>
+      </div>
+    )}
+
+    {/* Center Typography Block */}
+    <div class="relative z-10 my-auto py-3 space-y-1.5 text-center">
+      <span class="block text-[10px] sm:text-[11px] font-mono tracking-widest uppercase text-stone-400 font-bold">
+        {config.subCategory}
+      </span>
+      <div class="text-base sm:text-lg lg:text-xl font-bold font-serif tracking-tight text-white ipa group-hover:text-amber-200 transition-colors drop-shadow-xs line-clamp-1">
+        {config.formula}
+      </div>
+      <div class="text-xs sm:text-xs font-mono text-stone-300 tracking-tight truncate">
+        {config.formulaSub}
+      </div>
+    </div>
+
+    {/* Bottom Metadata Badges: Clean language focus, zero cramping */}
+    {!minimal && (
+      <div class="relative z-10 flex items-center justify-between text-[11px] font-mono pt-3 border-t border-white/10 text-stone-300">
+        <span class="inline-flex items-center gap-1 font-medium">
+          <span class="text-stone-400">#</span>
+          <span class="truncate">{config.languageBadge}</span>
+        </span>
+        <span class="text-[10px] text-stone-400 font-sans tracking-wide">
+          H. Kapginlian
+        </span>
+      </div>
+    )}
+  </div>
+)}

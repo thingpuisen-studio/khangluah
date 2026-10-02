@@ -1,0 +1,288 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SocialIcon from '../components/SocialIcon.astro';
+import { samplePosts, getPostUrl } from '../data/posts';
+import { siteConfig } from '../data/siteConfig';
+import { url } from '../utils/url';
+
+// Authenticated primary languages of research & documentation
+const languagesDocumented = siteConfig.pages.about.languagesDocumented;
+const authorProfile = siteConfig.author;
+
+// Peer-reviewed publications and research monographs
+const academicPublications = samplePosts.filter((p) => p.postType === "academic_paper");
+---
+
+<BaseLayout
+  title="About & Research | H. Kapginlian"
+  description="Biography, research focus, language documentation fieldwork, and academic publications of H. Kapginlian (NEHU Shillong)."
+>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 space-y-16">
+    
+    <!-- Hero Header with Profile & Credentials -->
+    <section class="grid grid-cols-1 md:grid-cols-12 gap-8 items-center border-b border-[var(--border-color)] pb-12">
+      <div class="md:col-span-8 space-y-4">
+        <span class="text-xs font-mono uppercase tracking-wider text-[var(--accent)] font-semibold">
+          Curriculum & Research Agenda
+        </span>
+        <h1 class="text-3xl sm:text-5xl font-bold font-sans tracking-tight text-[var(--text-primary)]">
+          {authorProfile.name}
+        </h1>
+        <p class="text-lg sm:text-xl font-serif text-[var(--accent)] font-medium">
+          Completed PhD in Linguistics from NEHU, Shillong
+        </p>
+        <div class="space-y-4 text-base font-serif text-[var(--text-secondary)] leading-relaxed pt-1">
+          {authorProfile.fullBio.map((para) => (
+            <p>{para}</p>
+          ))}
+        </div>
+        
+        <!-- Action Bar: ORCID & Research Links -->
+        <div class="flex flex-wrap items-center gap-3 pt-3 font-sans text-xs">
+          <a
+            href={`https://orcid.org/${authorProfile.orcid}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="min-h-[44px] px-4 py-2.5 rounded-xl bg-[#A6CE39]/15 border border-[#A6CE39]/40 text-[var(--text-primary)] font-semibold hover:bg-[#A6CE39]/25 transition-colors inline-flex items-center gap-2"
+          >
+            <span class="w-4 h-4 rounded-full bg-[#A6CE39] text-white text-[10px] font-bold flex items-center justify-center">iD</span>
+            <span>ORCID: {authorProfile.orcid}</span>
+            <SocialIcon name="external" class="w-3.5 h-3.5 opacity-70" />
+          </a>
+          <a
+            href={url("/research")}
+            class="min-h-[44px] px-4 py-2.5 rounded-xl bg-[var(--text-primary)] text-[var(--bg-primary)] font-semibold hover:opacity-90 transition-opacity inline-flex items-center gap-1.5"
+          >
+            <span>Research Hub ({academicPublications.length} Papers)</span>
+            <span>→</span>
+          </a>
+          <a
+            href={url("/socials")}
+            class="min-h-[44px] px-4 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] text-[var(--text-primary)] font-medium hover:bg-[var(--bg-primary)] transition-colors inline-flex items-center gap-1.5"
+          >
+            <span>Academic Network</span>
+            <span>→</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Portrait Card -->
+      <div class="md:col-span-4 flex justify-center md:justify-end">
+        <div class="p-2.5 rounded-3xl bg-[var(--bg-secondary)] border border-[var(--border-color)] shadow-sm">
+          <img
+            src={authorProfile.fullPhoto}
+            alt={authorProfile.name}
+            class="w-56 h-56 sm:w-72 sm:h-72 rounded-2xl object-cover aspect-square"
+          />
+          <div class="pt-3 px-1 text-center font-mono text-xs text-[var(--text-secondary)]">
+            H. Kapginlian • Field Linguist
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Core Research Pillars (Authenticated to his actual research) -->
+    <section class="space-y-6">
+      <div class="space-y-1">
+        <span class="text-xs font-mono uppercase tracking-wider text-[var(--accent)] font-semibold">
+          Theoretical Specialization
+        </span>
+        <h2 class="text-2xl font-bold font-sans tracking-tight text-[var(--text-primary)]">
+          Research Pillars & Methodology
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 font-sans">
+        <div class="p-6 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/40 space-y-2.5">
+          <span class="w-7 h-7 rounded-lg bg-[var(--accent-light)] text-[var(--accent)] font-mono font-bold text-xs inline-flex items-center justify-center">01</span>
+          <h3 class="font-bold text-base text-[var(--text-primary)]">Morphology & Syntax</h3>
+          <p class="text-xs sm:text-sm font-serif text-[var(--text-secondary)] leading-relaxed">
+            Investigating pronominal systems, clusivity contrasts (1st person inclusive vs. exclusive), pro-drop agreement prefixes, and animate gender morphology across Tibeto-Burman languages.
+          </p>
+        </div>
+
+        <div class="p-6 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/40 space-y-2.5">
+          <span class="w-7 h-7 rounded-lg bg-[var(--accent-light)] text-[var(--accent)] font-mono font-bold text-xs inline-flex items-center justify-center">02</span>
+          <h3 class="font-bold text-base text-[var(--text-primary)]">Indigenous Knowledge Systems</h3>
+          <p class="text-xs sm:text-sm font-serif text-[var(--text-secondary)] leading-relaxed">
+            Exploring language as an intricate repository of collective memory, ethical philosophy, ecological kinship with mountains and rivers, and lived indigenous experience.
+          </p>
+        </div>
+
+        <div class="p-6 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/40 space-y-2.5">
+          <span class="w-7 h-7 rounded-lg bg-[var(--accent-light)] text-[var(--accent)] font-mono font-bold text-xs inline-flex items-center justify-center">03</span>
+          <h3 class="font-bold text-base text-[var(--text-primary)]">Language Documentation & Fieldwork</h3>
+          <p class="text-xs sm:text-sm font-serif text-[var(--text-secondary)] leading-relaxed">
+            Conducting primary community fieldwork in southern Manipur, transcribing speech varieties using standard Leipzig Glossing Rules, and building open-access digital corpora.
+          </p>
+        </div>
+
+        <div class="p-6 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/40 space-y-2.5">
+          <span class="w-7 h-7 rounded-lg bg-[var(--accent-light)] text-[var(--accent)] font-mono font-bold text-xs inline-flex items-center justify-center">04</span>
+          <h3 class="font-bold text-base text-[var(--text-primary)]">Folklore, Oral Ballads & Heritage</h3>
+          <p class="text-xs sm:text-sm font-serif text-[var(--text-secondary)] leading-relaxed">
+            Documenting ancestral oral literature, traditional couplets (*La*), folktales, and intangible cultural heritage passed down orally but underrepresented in global archives.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Languages Documented Table (Authenticated) -->
+    <section class="space-y-6">
+      <div class="space-y-1">
+        <span class="text-xs font-mono uppercase tracking-wider text-[var(--accent)] font-semibold">
+          Primary Field Focus
+        </span>
+        <h2 class="text-2xl font-bold font-sans tracking-tight text-[var(--text-primary)]">
+          Languages Documented & Investigated
+        </h2>
+        <p class="text-xs sm:text-sm font-sans text-[var(--text-secondary)]">
+          Primary linguistic field investigations and comparative corpora across Southern Manipur and Northeast India.
+        </p>
+      </div>
+
+      <div class="overflow-x-auto rounded-2xl border border-[var(--border-color)]">
+        <table class="w-full text-left text-sm font-sans">
+          <thead class="bg-[var(--bg-secondary)] border-b border-[var(--border-color)] text-xs uppercase font-semibold text-[var(--text-secondary)]">
+            <tr>
+              <th class="py-3.5 px-4">Language / Variety</th>
+              <th class="py-3.5 px-4 font-mono">ISO 639-3</th>
+              <th class="py-3.5 px-4">Subgroup</th>
+              <th class="py-3.5 px-4">Primary Documentation Area</th>
+              <th class="py-3.5 px-4">Fieldwork Region</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-[var(--border-color)] bg-[var(--bg-primary)]">
+            {languagesDocumented.map((item) => (
+              <tr class="hover:bg-[var(--bg-secondary)]/40 transition-colors">
+                <td class="py-4 px-4 font-bold text-[var(--text-primary)]">{item.name}</td>
+                <td class="py-4 px-4 font-mono text-xs text-[var(--accent)] font-semibold">{item.iso}</td>
+                <td class="py-4 px-4 text-xs text-[var(--text-secondary)] font-medium">{item.branch}</td>
+                <td class="py-4 px-4 text-xs font-serif text-[var(--text-secondary)] leading-relaxed">{item.focus}</td>
+                <td class="py-4 px-4 text-xs font-mono text-[var(--text-secondary)]">{item.region}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Selected Peer-Reviewed Publications -->
+    <section class="space-y-6" id="publications">
+      <div class="border-b border-[var(--border-color)] pb-4 flex flex-col sm:flex-row sm:items-baseline justify-between gap-1">
+        <div>
+          <span class="text-xs font-mono uppercase tracking-wider text-[var(--accent)] font-semibold">
+            Publications
+          </span>
+          <h2 class="text-2xl font-bold font-sans tracking-tight text-[var(--text-primary)]">
+            Selected Research Publications
+          </h2>
+        </div>
+        <a href={url("/research")} class="text-xs font-sans font-semibold text-[var(--accent)] hover:underline inline-flex items-center gap-1">
+          View full research repository with glosses →
+        </a>
+      </div>
+
+      <div class="space-y-5">
+        {academicPublications.map((pub) => (
+          <div class="p-6 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 hover:border-[var(--accent)]/40 transition-all space-y-3">
+            <div class="flex flex-wrap items-center gap-2 text-xs font-mono text-[var(--text-secondary)]">
+              <span class="px-2 py-0.5 rounded bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] font-bold">
+                {pub.year}
+              </span>
+              <span>•</span>
+              <span class="text-[var(--accent)] font-medium font-sans">
+                {pub.journal}
+              </span>
+              {pub.volume && (
+                <>
+                  <span>•</span>
+                  <span>{pub.volume}</span>
+                </>
+              )}
+            </div>
+
+            <h3 class="text-lg sm:text-xl font-bold font-sans text-[var(--text-primary)]">
+              <a href={getPostUrl(pub)} class="hover:text-[var(--accent)] transition-colors">
+                {pub.title}
+              </a>
+            </h3>
+
+            <p class="text-xs font-sans text-[var(--text-secondary)]">
+              Authors: <span class="font-semibold text-[var(--text-primary)]">{pub.authors}</span>
+            </p>
+
+            {pub.abstract && (
+              <p class="text-xs sm:text-sm font-serif text-[var(--text-secondary)] leading-relaxed line-clamp-2">
+                {pub.abstract}
+              </p>
+            )}
+
+            <div class="flex flex-wrap items-center gap-3 pt-2 font-sans text-xs">
+              <a
+                href={getPostUrl(pub)}
+                class="min-h-[40px] px-3.5 py-1.5 rounded-lg bg-[var(--text-primary)] text-[var(--bg-primary)] hover:opacity-90 font-semibold transition-opacity inline-flex items-center gap-1"
+              >
+                Read Paper & Glosses →
+              </a>
+
+              {pub.pdfUrl && (
+                <a
+                  href={pub.pdfUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="min-h-[40px] px-3.5 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] hover:bg-[var(--bg-secondary)] text-[var(--text-primary)] font-medium transition-colors inline-flex items-center gap-1.5 font-mono text-[11px]"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                  </svg>
+                  Download PDF
+                </a>
+              )}
+
+              <a
+                href={`${getPostUrl(pub)}#cite-publication`}
+                class="min-h-[40px] px-3 py-1.5 rounded-lg border border-dashed border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--accent)] hover:border-[var(--accent)] transition-colors inline-flex items-center gap-1 font-mono text-[11px]"
+              >
+                Cite (BibTeX / APA)
+              </a>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Academic Collaboration & CV Inquiries -->
+    <section class="p-8 sm:p-10 rounded-3xl bg-[var(--bg-secondary)]/50 border border-[var(--border-color)] text-center space-y-4 font-sans" id="academic-contact">
+      <span class="text-xs font-mono uppercase tracking-wider text-[var(--accent)] font-semibold">
+        Scholarly Inquiries & Review
+      </span>
+      <h3 class="text-2xl font-bold font-sans text-[var(--text-primary)]">
+        Academic Collaboration & Curriculum Vitae
+      </h3>
+      <p class="text-sm sm:text-base font-serif text-[var(--text-secondary)] max-w-xl mx-auto leading-relaxed">
+        For university committees, conference speaking invitations, fieldwork collaborations, peer reviews, or to request a full academic Curriculum Vitae with fieldwork history, please reach out via email.
+      </p>
+      <div class="pt-2 flex flex-wrap justify-center gap-3">
+        <a
+          href={`mailto:${authorProfile.email}?subject=Academic%20Inquiry%20-%20H.%20Kapginlian`}
+          class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--text-primary)] text-[var(--bg-primary)] font-bold text-sm hover:opacity-90 transition-opacity cursor-pointer"
+        >
+          <SocialIcon name="email" class="w-4 h-4" />
+          <span>Email Inquiry ({authorProfile.email})</span>
+        </a>
+        <a
+          href={url("/research")}
+          class="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-primary)] text-[var(--text-primary)] font-semibold text-sm hover:bg-[var(--bg-secondary)] transition-colors"
+        >
+          <span>Explore All Research Papers</span>
+          <span>→</span>
+        </a>
+      </div>
+      <p class="text-xs text-[var(--text-secondary)] font-mono pt-2">
+        Affiliation: Department of Linguistics, North-Eastern Hill University (NEHU), Shillong, Meghalaya
+      </p>
+    </section>
+
+  </div>
+</BaseLayout>

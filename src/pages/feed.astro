@@ -1,0 +1,173 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PostPlate from '../components/PostPlate.astro';
+import { samplePosts, getPostUrl } from '../data/posts';
+import { siteConfig } from '../data/siteConfig';
+import { url } from '../utils/url';
+
+const feedPosts = samplePosts.filter((p) => p.postType !== "academic_paper");
+const categories = ["All", ...Array.from(new Set(feedPosts.map((p) => p.category)))];
+const { eyebrow, title, description, researchNoticeText, researchNoticeBtnText } = siteConfig.pages.feed;
+---
+
+<BaseLayout
+  title={`${title} | ${siteConfig.author.name}`}
+  description={description}
+>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
+    <!-- Header -->
+    <div class="border-b border-[var(--border-color)] pb-8 mb-10 space-y-4">
+      <div>
+        <span class="text-xs font-mono uppercase tracking-wider text-[var(--accent)] font-semibold">
+          {eyebrow}
+        </span>
+        <h1 class="text-3xl sm:text-4xl font-bold font-sans tracking-tight text-[var(--text-primary)] mt-1.5 mb-3">
+          {title}
+        </h1>
+        <p class="text-base sm:text-lg font-serif text-[var(--text-secondary)] leading-relaxed max-w-2xl">
+          {description}
+        </p>
+      </div>
+
+      <!-- Quick Link to Academic Papers -->
+      <div class="p-3.5 rounded-xl bg-[var(--bg-secondary)]/60 border border-[var(--border-color)] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-sans">
+        <div class="flex items-center gap-2 text-[var(--text-secondary)]">
+          <span>{researchNoticeText}</span>
+        </div>
+        <a href={url("/research")} class="font-semibold text-[var(--accent)] hover:underline inline-flex items-center gap-1 shrink-0">
+          <span>{researchNoticeBtnText}</span>
+          <span>→</span>
+        </a>
+      </div>
+
+      <!-- Category Filter Pills (Client interactive) -->
+      <div class="flex flex-wrap gap-2 pt-2 font-sans text-xs" id="category-filters">
+        {categories.map((cat, idx) => (
+          <button
+            class={`category-pill px-3 py-1.5 rounded-full border transition-all cursor-pointer ${
+              idx === 0
+                ? "bg-[var(--text-primary)] text-[var(--bg-primary)] border-[var(--text-primary)] font-semibold active-pill"
+                : "bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-[var(--border-color)] hover:text-[var(--text-primary)]"
+            }`}
+            data-category={cat}
+          >
+            {cat}
+          </button>
+        ))}
+      </div>
+    </div>
+
+    <!-- Feed Articles List -->
+    <div class="space-y-10" id="posts-container">
+      {feedPosts.map((post) => (
+        <article
+          class="post-item group border-b border-[var(--border-color)] pb-10 transition-opacity duration-200"
+          data-category={post.category}
+        >
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+            <!-- Left Academic Monograph Plate or Cover (Larger, balanced portrait ratio) -->
+            <div class="md:col-span-5 lg:col-span-4">
+              <a
+                href={getPostUrl(post)}
+                class="block group-hover:opacity-95 transition-opacity"
+              >
+                <PostPlate post={post} aspect="aspect-[4/3] sm:aspect-[3/4]" />
+              </a>
+            </div>
+
+            <!-- Right Info & Text -->
+            <div class="md:col-span-7 lg:col-span-8 space-y-3">
+              <div class="flex flex-wrap items-center gap-2 text-xs font-sans text-[var(--text-secondary)]">
+                <span class="font-semibold text-[var(--accent)]">
+                  {post.category}
+                </span>
+                <span>•</span>
+                <time datetime={post.date}>{post.date}</time>
+                <span>•</span>
+                <span>{post.readingTime}</span>
+                {post.language && (
+                  <>
+                    <span>•</span>
+                    <span class="font-mono bg-[var(--bg-secondary)] px-1.5 py-0.5 rounded text-[11px]">
+                      {post.language}
+                    </span>
+                  </>
+                )}
+              </div>
+
+              <h2 class="text-xl sm:text-2xl font-bold font-sans tracking-tight text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors">
+                <a href={getPostUrl(post)}>
+                  {post.title}
+                </a>
+              </h2>
+
+              {post.subtitle && (
+                <p class="text-sm font-sans font-medium text-[var(--text-secondary)]">
+                  {post.subtitle}
+                </p>
+              )}
+
+              <p class="text-base font-serif text-[var(--text-secondary)] leading-relaxed">
+                {post.excerpt}
+              </p>
+
+              <!-- Tags -->
+              <div class="flex flex-wrap gap-2 pt-1 font-sans">
+                {post.tags.map((tag) => (
+                  <a
+                    href={url(`/archive?q=${encodeURIComponent(tag)}`)}
+                    class="text-xs font-mono text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors"
+                  >
+                    #{tag.toLowerCase()}
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+
+    <!-- Empty State (Hidden by default) -->
+    <div id="no-results" class="hidden text-center py-16 font-sans">
+      <p class="text-lg font-bold text-[var(--text-primary)]">No posts found in this category.</p>
+      <p class="text-sm text-[var(--text-secondary)] mt-1">Try selecting another topic filter above.</p>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  const pills = document.querySelectorAll('.category-pill');
+  const postItems = document.querySelectorAll<HTMLElement>('.post-item');
+  const noResults = document.getElementById('no-results');
+
+  pills.forEach((pill) => {
+    pill.addEventListener('click', () => {
+      const selectedCategory = pill.getAttribute('data-category');
+
+      // Update pill styles
+      pills.forEach((p) => {
+        p.classList.remove('bg-[var(--text-primary)]', 'text-[var(--bg-primary)]', 'border-[var(--text-primary)]', 'font-semibold');
+        p.classList.add('bg-[var(--bg-secondary)]', 'text-[var(--text-secondary)]', 'border-[var(--border-color)]');
+      });
+      pill.classList.add('bg-[var(--text-primary)]', 'text-[var(--bg-primary)]', 'border-[var(--text-primary)]', 'font-semibold');
+      pill.classList.remove('bg-[var(--bg-secondary)]', 'text-[var(--text-secondary)]', 'border-[var(--border-color)]');
+
+      // Filter articles
+      let visibleCount = 0;
+      postItems.forEach((item) => {
+        const itemCat = item.getAttribute('data-category');
+        if (selectedCategory === 'All' || itemCat === selectedCategory) {
+          item.style.display = 'block';
+          visibleCount++;
+        } else {
+          item.style.display = 'none';
+        }
+      });
+
+      if (noResults) {
+        noResults.style.display = visibleCount === 0 ? 'block' : 'none';
+      }
+    });
+  });
+</script>
