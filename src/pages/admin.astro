@@ -1,12 +1,61 @@
 ---
+import fs from 'node:fs';
+import path from 'node:path';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { samplePosts, getPostUrl } from '../data/posts';
+import { allPosts, samplePosts, getPostUrl } from '../data/posts';
 import { url } from '../utils/url';
 import { PRESET_TIPS, PRESET_THEMES, plateConfigs } from '../data/plateConfigs';
 import { siteConfig, defaultSiteConfig } from '../data/siteConfig';
 
-// Provide initial data for existing posts to the client
-const existingPostsData = samplePosts.map((p) => {
+// Scan all images in public/images directory
+const publicDir = path.resolve(process.cwd(), 'public');
+const imagesDir = path.resolve(publicDir, 'images');
+
+const scannedAssets: Array<{
+  path: string;
+  filename: string;
+  size: number;
+  formattedSize: string;
+  usedIn: Array<{ title: string; slug: string; type: string }>;
+}> = [];
+
+if (fs.existsSync(imagesDir)) {
+  function walk(dir: string) {
+    for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
+      const fullPath = path.join(dir, ent.name);
+      if (ent.isDirectory()) {
+        walk(fullPath);
+      } else if (/\.(jpe?g|png|webp|svg|gif|avif)$/i.test(ent.name)) {
+        const stat = fs.statSync(fullPath);
+        const webPath = '/' + path.relative(publicDir, fullPath).replace(/\\/g, '/');
+        const filename = ent.name;
+        const formattedSize = stat.size > 1024 * 1024
+          ? (stat.size / (1024 * 1024)).toFixed(1) + ' MB'
+          : Math.round(stat.size / 1024) + ' KB';
+        
+        const usedIn: Array<{ title: string; slug: string; type: string }> = [];
+        for (const post of allPosts) {
+          if (post.coverImage && (post.coverImage === webPath || post.coverImage.endsWith('/' + filename))) {
+            usedIn.push({ title: post.title, slug: post.slug, type: 'Cover Image' });
+          } else if (post.body && (post.body.includes(webPath) || post.body.includes(filename))) {
+            usedIn.push({ title: post.title, slug: post.slug, type: 'Article Body' });
+          }
+        }
+        scannedAssets.push({
+          path: webPath,
+          filename,
+          size: stat.size,
+          formattedSize,
+          usedIn,
+        });
+      }
+    }
+  }
+  walk(imagesDir);
+}
+
+// Provide initial data for existing posts to the client (including remote drafts)
+const existingPostsData = allPosts.map((p) => {
   const plate = plateConfigs[p.slug];
   return {
     slug: p.slug,
@@ -21,6 +70,7 @@ const existingPostsData = samplePosts.map((p) => {
     language: p.language || "English",
     tags: p.tags,
     coverImage: p.coverImage || "",
+    draft: Boolean(p.draft),
     journal: p.journal || "",
     volume: p.volume || "",
     issn: p.issn || "",
@@ -213,6 +263,14 @@ const existingPostsData = samplePosts.map((p) => {
         <button
           type="button"
           class="nav-tab-btn min-h-[40px] px-3.5 py-2 rounded-lg transition-all cursor-pointer text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]/60 flex items-center gap-2"
+          data-target="tab-assets"
+        >
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+          <span>Assets <span id="assets-count-badge" class="font-mono text-[11px] opacity-70">({scannedAssets.length})</span></span>
+        </button>
+        <button
+          type="button"
+          class="nav-tab-btn min-h-[40px] px-3.5 py-2 rounded-lg transition-all cursor-pointer text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]/60 flex items-center gap-2"
           data-target="tab-drafts"
         >
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
@@ -229,36 +287,38 @@ const existingPostsData = samplePosts.map((p) => {
       </nav>
 
       <!-- Contextual Action Buttons -->
-      <div class="flex items-center gap-2 self-end lg:self-auto">
+      <div class="flex items-center gap-2 self-end lg:self-auto flex-wrap">
         <button
           type="button"
           id="btn-save-draft"
-          class="min-h-[40px] px-3.5 py-1.5 text-xs rounded-lg border border-[var(--border-color)]/70 bg-[var(--bg-secondary)]/30 hover:bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium transition-colors inline-flex items-center gap-1.5 cursor-pointer"
-          title="Save work in progress to browser storage"
+          class="min-h-[40px] px-3 py-1.5 text-xs rounded-lg border border-[var(--border-color)]/70 bg-[var(--bg-secondary)]/30 hover:bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium transition-colors inline-flex items-center gap-1.5 cursor-pointer"
+          title="Save Post as Draft to Local Storage (SPADTLS)"
         >
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
-          <span>Save Draft</span>
+          <span>Save Draft (SPADTLS)</span>
         </button>
 
         <button
           type="button"
-          id="btn-save-post-top"
-          class="min-h-[40px] px-3.5 py-1.5 text-xs rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-medium hover:bg-emerald-500/20 transition-colors inline-flex items-center gap-1.5 cursor-pointer"
-          title="Save post to local browser catalog"
+          id="btn-save-remote-draft"
+          class="min-h-[40px] px-3 py-1.5 text-xs rounded-lg border border-indigo-500/30 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-medium hover:bg-indigo-500/20 transition-colors inline-flex items-center gap-1.5 cursor-pointer"
+          title="Save Post as Draft in Remote Repo (SPADIRR) - commits to GitHub with draft: true"
         >
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-          <span>Save (Local)</span>
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+          <span>Save Draft (SPADIRR)</span>
         </button>
 
         <button
           type="button"
           id="btn-deploy-top"
-          class="min-h-[40px] px-4 py-1.5 text-xs rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-medium transition-colors inline-flex items-center gap-1.5 cursor-pointer shadow-xs"
-          title="Commit directly to GitHub on main branch, triggering Cloudflare Pages rebuild"
+          class="min-h-[40px] px-3.5 py-1.5 text-xs rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-medium transition-colors inline-flex items-center gap-1.5 cursor-pointer shadow-xs"
+          title="Publish post with draft: false and deploy live to Cloudflare Pages"
         >
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
           <span>Deploy to Live Site</span>
         </button>
+
+        <button type="button" id="btn-save-post-top" class="hidden" aria-hidden="true"></button>
       </div>
     </div>
 
@@ -822,17 +882,26 @@ const existingPostsData = samplePosts.map((p) => {
               <button
                 type="button"
                 id="btn-save-post"
-                class="min-h-[44px] px-4 py-2 rounded-xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-semibold hover:bg-emerald-500/20 transition-colors cursor-pointer inline-flex items-center gap-1.5"
-                title="Save post to local catalog in browser without triggering a Cloudflare build"
+                class="min-h-[44px] px-3.5 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 hover:bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-semibold transition-colors cursor-pointer inline-flex items-center gap-1.5"
+                title="Save Post as Draft to Local Storage (SPADTLS)"
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
-                <span>Save Post (Local)</span>
+                <span>Save Draft (SPADTLS)</span>
+              </button>
+              <button
+                type="button"
+                id="btn-save-remote-draft-bottom"
+                class="min-h-[44px] px-3.5 py-2 rounded-xl border border-indigo-500/30 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs font-semibold hover:bg-indigo-500/20 transition-colors cursor-pointer inline-flex items-center gap-1.5"
+                title="Save Post as Draft in Remote Repo (SPADIRR) - commits to GitHub with draft: true"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                <span>Save Draft (SPADIRR)</span>
               </button>
               <button
                 type="button"
                 id="btn-deploy-post"
                 class="min-h-[44px] px-5 py-2 rounded-xl bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition-colors cursor-pointer inline-flex items-center gap-1.5 shadow-xs"
-                title="Commit directly to GitHub on main branch, triggering Cloudflare Pages rebuild"
+                title="Commit directly to GitHub on main branch with draft: false, triggering Cloudflare Pages rebuild"
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
                 <span>Deploy to Live Site</span>
@@ -1031,6 +1100,124 @@ const existingPostsData = samplePosts.map((p) => {
               </div>
             </div>
           ))}
+        </div>
+      </section>
+
+      <!-- ================= TAB: ASSET & MEDIA LIBRARY ================= -->
+      <section id="tab-assets" class="tab-panel hidden space-y-8">
+        
+        <!-- Header Banner & Action Bar -->
+        <div class="pb-6 border-b border-[var(--border-color)]/60 flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div class="space-y-1.5 max-w-2xl">
+            <div class="flex items-center gap-2">
+              <span class="text-[11px] font-mono uppercase tracking-widest text-[var(--accent)] font-semibold">
+                Media Library
+              </span>
+              <span class="text-[var(--text-secondary)] text-xs">&bull;</span>
+              <span class="text-[11px] font-mono text-[var(--text-secondary)]">
+                Repository Assets
+              </span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-serif font-bold tracking-tight text-[var(--text-primary)]">
+              Asset Library &amp; Media Gallery
+            </h2>
+            <p class="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">
+              Browse repository photography and figures with automatic WebP conversion, one-click Markdown links, and deletion safety guards.
+            </p>
+          </div>
+
+          <div class="flex items-center gap-3 shrink-0">
+            <label for="asset-upload-input" class="min-h-[40px] px-4 py-2 rounded-lg bg-[var(--text-primary)] text-[var(--bg-primary)] font-semibold text-xs hover:opacity-90 transition-opacity cursor-pointer inline-flex items-center gap-1.5 shadow-xs">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+              <span>Upload New Asset</span>
+            </label>
+            <input type="file" id="asset-upload-input" accept="image/*" class="hidden" />
+          </div>
+        </div>
+
+        <!-- Auto-Converting WebP Dropzone Card -->
+        <div class="p-6 sm:p-7 rounded-2xl border border-[var(--border-color)]/70 bg-[var(--bg-secondary)]/20 space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h3 class="text-sm font-bold text-[var(--text-primary)]">Client-Side WebP Converter &amp; Uploader</h3>
+              <p class="text-xs text-[var(--text-secondary)]">Drop any photo (JPEG, PNG, HEIC). The studio automatically compresses and converts it to WebP before committing.</p>
+            </div>
+            <span class="text-[11px] font-mono text-[var(--accent)] font-semibold px-2.5 py-1 rounded-full bg-[var(--bg-primary)] border border-[var(--border-color)]/60 self-start sm:self-auto">
+              Auto WebP (0.85 Quality)
+            </span>
+          </div>
+
+          <!-- Drag and drop zone -->
+          <div id="asset-dropzone" class="border-2 border-dashed border-[var(--border-color)] hover:border-[var(--accent)] rounded-xl p-8 text-center transition-colors cursor-pointer space-y-2 bg-[var(--bg-primary)]/50">
+            <div class="w-10 h-10 mx-auto rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-color)] flex items-center justify-center text-[var(--text-secondary)]">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            </div>
+            <p class="text-xs text-[var(--text-secondary)]">
+              <span class="font-semibold text-[var(--text-primary)]">Click to browse</span> or drag and drop image file here
+            </p>
+            <p class="text-[10px] font-mono text-[var(--text-secondary)]">Max width 1400px &bull; Auto-scaled &bull; Target: public/images/posts/</p>
+          </div>
+
+          <!-- Upload preview (hidden initially) -->
+          <div id="asset-pending-preview" class="hidden p-4 rounded-xl border border-emerald-500/40 bg-emerald-500/5 space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div class="flex items-center gap-3">
+                <img id="asset-pending-thumb" src="" alt="Pending WebP preview" class="w-16 h-16 object-cover rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)]" />
+                <div class="space-y-1">
+                  <span id="asset-pending-stats" class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 block font-mono">
+                    Converted to WebP
+                  </span>
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-[11px] font-mono text-[var(--text-secondary)]">/images/posts/</span>
+                    <input type="text" id="asset-pending-filename" class="text-xs font-mono px-2.5 py-1 rounded border border-[var(--border-color)] bg-[var(--bg-primary)] text-[var(--text-primary)] w-48 sm:w-64" placeholder="filename.webp" />
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2 shrink-0">
+                <button type="button" id="btn-cancel-pending-asset" class="min-h-[38px] px-3.5 py-1.5 rounded-lg border border-[var(--border-color)] text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer">
+                  Cancel
+                </button>
+                <button type="button" id="btn-upload-pending-asset" class="min-h-[38px] px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs cursor-pointer inline-flex items-center gap-1.5 shadow-xs">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                  <span id="btn-upload-asset-text">Commit WebP to GitHub</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Search & Filter Controls -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
+          <div class="flex items-center gap-2">
+            <input
+              type="text"
+              id="asset-search-input"
+              placeholder="Search by filename or referenced article..."
+              class="px-3.5 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 text-xs text-[var(--text-primary)] w-64 sm:w-80 focus:outline-none"
+            />
+          </div>
+          <div class="flex items-center gap-1.5 text-xs font-medium">
+            <button type="button" class="asset-filter-btn px-3 py-1.5 rounded-lg bg-[var(--text-primary)] text-[var(--bg-primary)] font-semibold cursor-pointer" data-filter="all">
+              All (<span id="count-assets-all">{scannedAssets.length}</span>)
+            </button>
+            <button type="button" class="asset-filter-btn px-3 py-1.5 rounded-lg text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] cursor-pointer" data-filter="used">
+              Used in Posts
+            </button>
+            <button type="button" class="asset-filter-btn px-3 py-1.5 rounded-lg text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] cursor-pointer" data-filter="unused">
+              Unused
+            </button>
+          </div>
+        </div>
+
+        <!-- Asset Cards Grid -->
+        <div id="assets-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <!-- Dynamically populated or rendered -->
+        </div>
+
+        <div id="no-assets-found" class="hidden text-center py-16 border border-dashed border-[var(--border-color)] rounded-2xl text-xs text-[var(--text-secondary)] space-y-1">
+          <p class="font-medium text-[var(--text-primary)]">No matching assets found</p>
+          <p>Try adjusting your search query or upload a new image.</p>
         </div>
       </section>
 
@@ -1674,6 +1861,14 @@ const existingPostsData = samplePosts.map((p) => {
       <button
         type="button"
         class="mobile-dock-btn flex flex-col items-center justify-center p-1 rounded-lg text-[var(--text-secondary)] min-w-[44px] min-h-[44px]"
+        data-target="tab-assets"
+      >
+        <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+        <span class="text-[9px] font-sans">Assets</span>
+      </button>
+      <button
+        type="button"
+        class="mobile-dock-btn flex flex-col items-center justify-center p-1 rounded-lg text-[var(--text-secondary)] min-w-[44px] min-h-[44px]"
         data-target="tab-drafts"
       >
         <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
@@ -1768,6 +1963,79 @@ const existingPostsData = samplePosts.map((p) => {
       </div>
     </div>
 
+    <!-- Asset Deletion Blocked Safety Modal (When in use) -->
+    <div id="asset-blocked-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+      <div class="bg-[var(--bg-primary)] border border-amber-500/40 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
+        <div class="flex items-center gap-2 text-amber-500">
+          <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          <span class="text-xs font-mono font-bold uppercase tracking-wider">Deletion Blocked - Asset In Use</span>
+        </div>
+        <h3 class="text-base font-bold text-[var(--text-primary)]">Cannot Delete This Image</h3>
+        <p class="text-xs text-[var(--text-secondary)] leading-relaxed">
+          This image is currently referenced in active publications. Deleting it from the repository would break images on the live site.
+        </p>
+
+        <div class="space-y-2">
+          <span class="text-[10px] font-mono uppercase tracking-wider font-bold text-[var(--accent)] block">
+            Referenced In Articles:
+          </span>
+          <div id="asset-blocked-list" class="max-h-48 overflow-y-auto space-y-2 p-3 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-color)] text-xs">
+            <!-- Populated dynamically via JS -->
+          </div>
+        </div>
+
+        <p class="text-[11px] text-[var(--text-secondary)] leading-relaxed">
+          To delete this asset, first edit the referenced post(s) to remove or replace this image reference.
+        </p>
+
+        <div class="flex items-center justify-end pt-2">
+          <button
+            type="button"
+            id="asset-blocked-close"
+            class="min-h-[40px] px-4 py-2 rounded-xl bg-[var(--text-primary)] text-[var(--bg-primary)] font-semibold text-xs cursor-pointer shadow-xs hover:opacity-90"
+          >
+            Understood
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Asset Delete Confirmation Modal (When Safe / Unused) -->
+    <div id="asset-delete-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+      <div class="bg-[var(--bg-primary)] border border-rose-500/40 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
+        <div class="flex items-center gap-2 text-rose-500">
+          <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+          <span class="text-xs font-mono font-bold uppercase tracking-wider">Confirm Asset Deletion</span>
+        </div>
+        <h3 class="text-base font-bold text-[var(--text-primary)]">Delete Image from Repository?</h3>
+        <p class="text-xs text-[var(--text-secondary)] leading-relaxed">
+          You are about to permanently delete <span id="asset-del-filename" class="font-bold text-[var(--text-primary)]"></span>. This asset is verified as unused across all publications.
+        </p>
+
+        <div class="p-3.5 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-color)] text-xs font-mono space-y-1.5 text-[var(--text-secondary)]">
+          <span class="text-[10px] font-bold uppercase tracking-wider block text-rose-500">Repository Path:</span>
+          <code id="asset-del-path" class="block text-rose-500 font-bold select-all">public/images/posts/example.webp</code>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button
+            type="button"
+            id="asset-del-cancel"
+            class="min-h-[40px] px-4 py-2 rounded-xl border border-[var(--border-color)] text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            id="asset-del-confirm"
+            class="min-h-[40px] px-4 py-2 rounded-xl bg-rose-600 text-white font-semibold text-xs hover:bg-rose-700 cursor-pointer shadow-xs inline-flex items-center gap-2"
+          >
+            <span id="asset-del-btn-text">Delete Asset</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Toast Feedback Notification -->
     <div
       id="cms-toast"
@@ -1779,7 +2047,7 @@ const existingPostsData = samplePosts.map((p) => {
   </div>
 </BaseLayout>
 
-<script is:inline define:vars={{ existingPostsData, PRESET_TIPS, PRESET_THEMES, siteConfig, defaultSiteConfig }}>
+<script is:inline define:vars={{ existingPostsData, PRESET_TIPS, PRESET_THEMES, siteConfig, defaultSiteConfig, scannedAssets }}>
   let currentType = "poem";
   let existingPosts = existingPostsData || [];
   let currentTipClass = "bg-purple-500";
@@ -2277,6 +2545,7 @@ const existingPostsData = samplePosts.map((p) => {
 
     if (targetId === 'tab-preview') updateLivePreview();
     if (targetId === 'tab-code') generateCode();
+    if (targetId === 'tab-assets') renderAssetsGrid();
     if (targetId === 'tab-drafts') renderDrafts();
     if (targetId === 'tab-site-config') updateSiteConfigCodeOutput();
   }
@@ -2482,7 +2751,7 @@ const existingPostsData = samplePosts.map((p) => {
   }
 
   // Generate Markdown file utility
-  function generateCode(forDeploy = false, deploySlug = null) {
+  function generateCode(forDeploy = false, deploySlug = null, isDraft = false) {
     const title = titleInput.value.trim() || "Untitled Publication";
     const slug = deploySlug || slugInput.value.trim() || "untitled-publication";
     const subtitle = subtitleInput.value.trim();
@@ -2553,6 +2822,7 @@ const existingPostsData = samplePosts.map((p) => {
     if (currentTipClass) md += `accentBarClass: ${JSON.stringify(currentTipClass)}\n`;
     md += `coverImage: ${JSON.stringify(coverImage)}\n`;
     md += `featured: false\n`;
+    md += `draft: ${isDraft ? 'true' : 'false'}\n`;
 
     if (tags.length > 0) {
       md += `tags:\n`;
@@ -2576,11 +2846,19 @@ const existingPostsData = samplePosts.map((p) => {
     let itemEl = listContainer.querySelector(`.catalog-item[data-slug="${post.slug}"]`);
     if (!itemEl) {
       itemEl = document.createElement('div');
-      itemEl.className = 'catalog-item p-4 rounded-xl border border-emerald-500/40 bg-emerald-500/5 hover:border-emerald-500 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs';
       itemEl.dataset.slug = post.slug;
       itemEl.dataset.title = post.title;
       listContainer.prepend(itemEl);
     }
+    const isDraft = Boolean(post.draft);
+    itemEl.className = isDraft
+      ? 'catalog-item p-4 rounded-xl border border-amber-500/40 bg-amber-500/5 hover:border-amber-500 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs'
+      : 'catalog-item p-4 rounded-xl border border-emerald-500/40 bg-emerald-500/5 hover:border-emerald-500 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs';
+
+    const statusBadge = isDraft
+      ? '<span class="px-2 py-0.5 rounded font-bold uppercase bg-amber-500/20 text-amber-500 border border-amber-500/30">Draft (Remote)</span>'
+      : '<span class="px-2 py-0.5 rounded font-bold uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Published</span>';
+
     const typeLabel = (post.postType || "poem").replace("_", " ");
     const typeClass = post.postType === "poem" ? "bg-purple-500/10 text-purple-600 dark:text-purple-400" :
       post.postType === "academic_paper" ? "bg-blue-500/10 text-blue-600 dark:text-blue-400" :
@@ -2589,9 +2867,7 @@ const existingPostsData = samplePosts.map((p) => {
     itemEl.innerHTML = `
       <div class="space-y-1">
         <div class="flex items-center gap-2 font-mono text-[10px]">
-          <span class="px-2 py-0.5 rounded font-bold uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-            Published
-          </span>
+          ${statusBadge}
           <span class="px-2 py-0.5 rounded font-bold uppercase ${typeClass}">
             ${typeLabel}
           </span>
@@ -2634,6 +2910,104 @@ const existingPostsData = samplePosts.map((p) => {
       delModalCommand.textContent = `rm ${filePath}`;
       deleteModal.classList.remove('hidden');
     });
+  }
+
+  // 2. Save Post as Draft in Remote Repo (SPADIRR)
+  async function savePostAsRemoteDraft() {
+    const token = getGhToken();
+    if (!token) {
+      alert("GitHub authentication required to save remote drafts. Please sign in with GitHub.");
+      window.location.href = "/api/auth/login";
+      return;
+    }
+
+    const title = titleInput.value.trim();
+    if (!title) {
+      showToast("Please enter a title before saving remote draft");
+      titleInput.focus();
+      return;
+    }
+
+    const slug = slugInput.value.trim() || title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const targetFile = currentType === 'academic_paper' ? `src/data/posts/${slug}.ts` : `src/content/posts/${slug}.md`;
+
+    const confirmed = confirm(`Save draft "${title}" in remote repository (SPADIRR)?\n\nThis will commit to branch 'main' with 'draft: true' so the article is preserved in GitHub but hidden from public readers.`);
+    if (!confirmed) return;
+
+    showToast("Committing remote draft to GitHub (SPADIRR)...");
+
+    const btnRemote = document.getElementById('btn-save-remote-draft');
+    const btnRemoteBottom = document.getElementById('btn-save-remote-draft-bottom');
+    if (btnRemote) btnRemote.textContent = "Saving...";
+    if (btnRemoteBottom) btnRemoteBottom.textContent = "Saving to GitHub...";
+
+    try {
+      if (pendingImageBase64 && pendingImageBase64.startsWith('data:image/')) {
+        const imgPath = `public/images/posts/${slug}.${pendingImageExt}`;
+        const rawBase64 = pendingImageBase64.split(',')[1];
+        try {
+          await commitBinaryFileToGitHub(imgPath, rawBase64, `chore(assets): add draft cover for ${slug}`);
+        } catch (imgErr) {
+          console.warn("Cover image upload warning:", imgErr);
+        }
+      }
+
+      generateCode(true, slug, true);
+      const draftCode = document.getElementById('code-output').querySelector('code').textContent;
+
+      await commitFileToGitHub(targetFile, draftCode, `draft(content): save draft ${title} (SPADIRR)`);
+      showToast(`Draft "${title}" saved in remote repository (SPADIRR)!`);
+
+      const category = categoryInput.value.trim() || "Poetry & Literature";
+      const date = dateInput.value.trim() || "October 2026";
+      const draftPost = {
+        slug,
+        title,
+        subtitle: subtitleInput.value.trim(),
+        category,
+        date,
+        year: parseInt(date.replace(/\D/g, '').slice(-4)) || 2026,
+        readingTime: readingTimeInput.value.trim() || '3 min read',
+        tags: tagsInput.value.split(',').map(t => t.trim()).filter(Boolean),
+        coverImage: coverInput.value.trim(),
+        body: bodyInput.value,
+        postType: currentType,
+        themeClass: currentThemeClass,
+        accentBarClass: currentTipClass,
+        draft: true,
+        isPublished: false,
+      };
+
+      const catIdx = existingPosts.findIndex(p => p.slug === slug);
+      if (catIdx >= 0) existingPosts[catIdx] = draftPost;
+      else existingPosts.unshift(draftPost);
+
+      renderPublishedItemToCatalog(draftPost);
+
+      const pubModal = document.getElementById('publish-modal');
+      if (pubModal) {
+        document.getElementById('pub-modal-eyebrow').textContent = "Remote Draft Saved (SPADIRR)";
+        document.getElementById('pub-modal-title').textContent = `"${title}"`;
+        document.getElementById('pub-modal-filename').textContent = targetFile;
+        document.getElementById('pub-modal-notice').textContent =
+          "Your draft has been committed directly to GitHub with 'draft: true'. It is safely version-controlled in the repository but hidden from public visitors until you click 'Deploy to Live Site'.";
+        const deployBtn = document.getElementById('pub-modal-deploy-live');
+        if (deployBtn) deployBtn.classList.remove('hidden');
+        pubModal.classList.remove('hidden');
+      }
+    } catch (ghErr) {
+      console.error("Remote draft commit failed:", ghErr);
+      showToast(`Remote draft error: ${ghErr.message}`);
+      alert(`Remote draft failed: ${ghErr.message}\nYour draft has been saved locally instead.`);
+      saveCurrentDraft();
+    } finally {
+      if (btnRemote) {
+        btnRemote.innerHTML = '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg><span>Save Draft (SPADIRR)</span>';
+      }
+      if (btnRemoteBottom) {
+        btnRemoteBottom.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg><span>Save Draft (SPADIRR)</span>';
+      }
+    }
   }
 
   // 1. Save Post Locally (No GitHub Commit, No Cloudflare Rebuild)
@@ -2794,8 +3168,16 @@ const existingPostsData = samplePosts.map((p) => {
   }
 
   // Post Save & Deploy triggers
-  document.getElementById('btn-save-post')?.addEventListener('click', () => saveCurrentPostLocally(true));
-  document.getElementById('btn-save-post-top')?.addEventListener('click', () => saveCurrentPostLocally(true));
+  document.getElementById('btn-save-draft')?.addEventListener('click', () => {
+    saveCurrentDraft();
+    saveCurrentPostLocally(true);
+  });
+  document.getElementById('btn-save-post')?.addEventListener('click', () => {
+    saveCurrentDraft();
+    saveCurrentPostLocally(true);
+  });
+  document.getElementById('btn-save-remote-draft')?.addEventListener('click', savePostAsRemoteDraft);
+  document.getElementById('btn-save-remote-draft-bottom')?.addEventListener('click', savePostAsRemoteDraft);
   document.getElementById('btn-deploy-post')?.addEventListener('click', deployCurrentPostToGitHub);
   document.getElementById('btn-deploy-top')?.addEventListener('click', deployCurrentPostToGitHub);
   document.getElementById('pub-modal-deploy-live')?.addEventListener('click', deployCurrentPostToGitHub);
@@ -3251,6 +3633,442 @@ const existingPostsData = samplePosts.map((p) => {
       setThemeClass("from-slate-950 via-purple-950 to-stone-950 text-purple-100", "Poetic Violet");
       updateLivePreview();
       showToast("Form cleared");
+    }
+  });
+
+  // -------------------------------------------------------------
+  // ASSET LIBRARY & MEDIA GALLERY STUDIO
+  // -------------------------------------------------------------
+  let currentAssets = (typeof scannedAssets !== 'undefined' && Array.isArray(scannedAssets)) ? [...scannedAssets] : [];
+  let activeAssetFilter = 'all';
+  let assetToDelete = null;
+  let pendingWebpDataUrl = null;
+  let pendingWebpBytes = 0;
+
+  function updateAssetsCountBadges() {
+    const totalCount = currentAssets.length;
+    const badge = document.getElementById('assets-count-badge');
+    if (badge) badge.textContent = `(${totalCount})`;
+    const allCount = document.getElementById('count-assets-all');
+    if (allCount) allCount.textContent = totalCount;
+  }
+
+  function renderAssetsGrid(filterType = activeAssetFilter, searchQuery = '') {
+    const grid = document.getElementById('assets-grid');
+    const noAssetsFound = document.getElementById('no-assets-found');
+    if (!grid) return;
+
+    updateAssetsCountBadges();
+
+    const searchInput = document.getElementById('asset-search-input');
+    const q = (searchQuery || searchInput?.value || '').toLowerCase().trim();
+
+    const filtered = currentAssets.filter((asset) => {
+      // Filter by type
+      if (filterType === 'used' && (!asset.usedIn || asset.usedIn.length === 0)) return false;
+      if (filterType === 'unused' && asset.usedIn && asset.usedIn.length > 0) return false;
+
+      // Filter by search query
+      if (q) {
+        const matchesFilename = asset.filename.toLowerCase().includes(q);
+        const matchesPath = asset.path.toLowerCase().includes(q);
+        const matchesUsed = asset.usedIn && asset.usedIn.some((u) =>
+          u.title.toLowerCase().includes(q) || u.slug.toLowerCase().includes(q)
+        );
+        if (!matchesFilename && !matchesPath && !matchesUsed) return false;
+      }
+      return true;
+    });
+
+    if (filtered.length === 0) {
+      grid.innerHTML = '';
+      if (noAssetsFound) noAssetsFound.classList.remove('hidden');
+      return;
+    }
+
+    if (noAssetsFound) noAssetsFound.classList.add('hidden');
+
+    grid.innerHTML = filtered.map((asset) => {
+      const hasUsage = asset.usedIn && asset.usedIn.length > 0;
+      const usageBadge = hasUsage
+        ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono text-[10px] font-semibold border border-emerald-500/20">
+             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+             Used in ${asset.usedIn.length} post${asset.usedIn.length > 1 ? 's' : ''}
+           </span>`
+        : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-stone-500/10 text-stone-500 font-mono text-[10px] font-semibold border border-stone-500/20">
+             <span class="w-1.5 h-1.5 rounded-full bg-stone-400"></span>
+             Unused Asset
+           </span>`;
+
+      const usageList = hasUsage
+        ? `<div class="pt-2 border-t border-[var(--border-color)]/50 space-y-1">
+             <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--text-secondary)] font-bold block">Referenced in:</span>
+             <div class="max-h-20 overflow-y-auto space-y-1">
+               ${asset.usedIn.map((u) => `
+                 <div class="text-[11px] font-serif text-[var(--text-secondary)] truncate flex items-center justify-between gap-1" title="${u.title} (${u.type})">
+                   <span class="truncate">&bull; ${u.title}</span>
+                   <span class="text-[9px] font-mono px-1 py-0.2 rounded bg-[var(--bg-secondary)] text-[var(--text-secondary)] shrink-0">${u.type}</span>
+                 </div>
+               `).join('')}
+             </div>
+           </div>`
+        : '';
+
+      return `
+        <div class="asset-card rounded-2xl border border-[var(--border-color)]/70 bg-[var(--bg-primary)] overflow-hidden shadow-xs hover:border-[var(--accent)] transition-all flex flex-col justify-between group">
+          <div class="relative bg-[var(--bg-secondary)]/50 aspect-4/3 overflow-hidden border-b border-[var(--border-color)]/60 flex items-center justify-center">
+            <img
+              src="${asset.path}"
+              alt="${asset.filename}"
+              class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              loading="lazy"
+            />
+            <div class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full bg-black/70 backdrop-blur-xs font-mono text-[10px] text-white font-medium">
+              ${asset.formattedSize}
+            </div>
+          </div>
+
+          <div class="p-4 space-y-3 flex-1 flex flex-col justify-between">
+            <div class="space-y-2">
+              <div class="flex items-start justify-between gap-2">
+                <h4 class="font-mono text-xs font-bold text-[var(--text-primary)] truncate flex-1" title="${asset.filename}">
+                  ${asset.filename}
+                </h4>
+              </div>
+
+              <div>
+                ${usageBadge}
+                ${usageList}
+              </div>
+            </div>
+
+            <div class="pt-3 border-t border-[var(--border-color)]/60 flex flex-wrap items-center gap-1.5 text-xs">
+              <button
+                type="button"
+                class="btn-asset-cp-md min-h-[32px] px-2.5 py-1 rounded-lg border border-[var(--border-color)] bg-[var(--bg-secondary)]/40 hover:bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-mono text-[11px] transition-colors cursor-pointer"
+                data-path="${asset.path}"
+                data-name="${asset.filename}"
+                title="Copy Markdown image code"
+              >
+                Copy Markdown
+              </button>
+              <button
+                type="button"
+                class="btn-asset-cp-path min-h-[32px] px-2.5 py-1 rounded-lg border border-[var(--border-color)] bg-[var(--bg-secondary)]/40 hover:bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-mono text-[11px] transition-colors cursor-pointer"
+                data-path="${asset.path}"
+                title="Copy file path"
+              >
+                Copy Path
+              </button>
+              <button
+                type="button"
+                class="btn-asset-set-cover min-h-[32px] px-2.5 py-1 rounded-lg border border-[var(--border-color)] bg-[var(--bg-secondary)]/40 hover:bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-mono text-[11px] transition-colors cursor-pointer"
+                data-path="${asset.path}"
+                title="Set as cover image in writer"
+              >
+                Set Cover
+              </button>
+              <button
+                type="button"
+                class="btn-asset-delete min-h-[32px] px-2.5 py-1 rounded-lg border border-rose-300 dark:border-rose-900/50 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 font-mono text-[11px] transition-colors ml-auto cursor-pointer"
+                data-path="${asset.path}"
+                title="Delete asset from repository"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Wire Card Buttons
+    grid.querySelectorAll('.btn-asset-cp-md').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const path = btn.dataset.path;
+        const name = btn.dataset.name || 'image';
+        const caption = name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ');
+        const md = `![${caption}](${path})`;
+        navigator.clipboard.writeText(md).then(() => showToast("Markdown image code copied to clipboard!"));
+      });
+    });
+
+    grid.querySelectorAll('.btn-asset-cp-path').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const path = btn.dataset.path;
+        navigator.clipboard.writeText(path).then(() => showToast("Asset path copied to clipboard!"));
+      });
+    });
+
+    grid.querySelectorAll('.btn-asset-set-cover').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const path = btn.dataset.path;
+        coverInput.value = path;
+        updateLivePreview();
+        showToast("Set as current cover image!");
+        switchTab('tab-write');
+      });
+    });
+
+    grid.querySelectorAll('.btn-asset-delete').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const path = btn.dataset.path;
+        const asset = currentAssets.find((a) => a.path === path);
+        if (!asset) return;
+
+        if (asset.usedIn && asset.usedIn.length > 0) {
+          // Deletion Safety Guard: Block deletion when in use
+          const blockedList = document.getElementById('asset-blocked-list');
+          if (blockedList) {
+            blockedList.innerHTML = asset.usedIn.map((u) => `
+              <div class="p-2.5 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-color)] flex items-center justify-between gap-2">
+                <span class="font-serif font-bold text-[var(--text-primary)] truncate">${u.title}</span>
+                <span class="font-mono text-[10px] px-2 py-0.5 rounded bg-[var(--bg-secondary)] text-[var(--text-secondary)] shrink-0">${u.type}</span>
+              </div>
+            `).join('');
+          }
+          document.getElementById('asset-blocked-modal')?.classList.remove('hidden');
+        } else {
+          // Unused asset: Allow confirmation dialog
+          assetToDelete = asset;
+          const nameEl = document.getElementById('asset-del-filename');
+          const pathEl = document.getElementById('asset-del-path');
+          if (nameEl) nameEl.textContent = `"${asset.filename}"`;
+          if (pathEl) pathEl.textContent = `public${asset.path}`;
+          document.getElementById('asset-delete-modal')?.classList.remove('hidden');
+        }
+      });
+    });
+  }
+
+  // Asset Filter Buttons
+  document.querySelectorAll('.asset-filter-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.asset-filter-btn').forEach((b) => {
+        b.classList.remove('bg-[var(--text-primary)]', 'text-[var(--bg-primary)]', 'font-semibold');
+        b.classList.add('text-[var(--text-secondary)]');
+      });
+      btn.classList.add('bg-[var(--text-primary)]', 'text-[var(--bg-primary)]', 'font-semibold');
+      btn.classList.remove('text-[var(--text-secondary)]');
+
+      activeAssetFilter = btn.dataset.filter || 'all';
+      renderAssetsGrid(activeAssetFilter);
+    });
+  });
+
+  // Asset Search Input
+  document.getElementById('asset-search-input')?.addEventListener('input', (e) => {
+    renderAssetsGrid(activeAssetFilter, e.target.value);
+  });
+
+  // Asset Safety Modals Listeners
+  document.getElementById('asset-blocked-close')?.addEventListener('click', () => {
+    document.getElementById('asset-blocked-modal')?.classList.add('hidden');
+  });
+
+  document.getElementById('asset-del-cancel')?.addEventListener('click', () => {
+    document.getElementById('asset-delete-modal')?.classList.add('hidden');
+    assetToDelete = null;
+  });
+
+  document.getElementById('asset-del-confirm')?.addEventListener('click', async () => {
+    if (!assetToDelete) return;
+    const token = getGhToken();
+    const btnText = document.getElementById('asset-del-btn-text');
+    const confirmBtn = document.getElementById('asset-del-confirm');
+    const filePath = `public${assetToDelete.path}`;
+
+    if (token) {
+      if (btnText) btnText.textContent = "Deleting on GitHub...";
+      confirmBtn?.setAttribute("disabled", "true");
+      try {
+        await deleteFileFromGitHub(filePath, `chore(assets): remove unused asset ${assetToDelete.filename}`);
+        showToast(`Deleted ${assetToDelete.filename} from GitHub repository`);
+      } catch (err) {
+        console.error("Asset deletion error:", err);
+        showToast(err.message || "Failed to delete asset from GitHub");
+      } finally {
+        if (btnText) btnText.textContent = "Delete Asset";
+        confirmBtn?.removeAttribute("disabled");
+      }
+    }
+
+    currentAssets = currentAssets.filter((a) => a.path !== assetToDelete.path);
+    renderAssetsGrid(activeAssetFilter);
+    showToast(`Removed "${assetToDelete.filename}" from library`);
+    document.getElementById('asset-delete-modal')?.classList.add('hidden');
+    assetToDelete = null;
+  });
+
+  // Client-Side WebP Converter & Dropzone
+  function convertFileToWebP(file, maxWidth = 1400, quality = 0.85) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          const dataUrl = canvas.toDataURL('image/webp', quality);
+          resolve(dataUrl);
+        };
+        img.onerror = reject;
+        img.src = e.target.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function processAssetFileForWebP(file) {
+    if (!file || !file.type.startsWith('image/')) {
+      showToast("Please choose a valid image file");
+      return;
+    }
+    showToast("Converting to WebP...");
+    try {
+      const originalBytes = file.size;
+      const baseSlug = file.name
+        .replace(/\.[^.]+$/, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '');
+      const defaultFilename = `${baseSlug || 'image'}.webp`;
+
+      const webpDataUrl = await convertFileToWebP(file, 1400, 0.85);
+      const head = 'data:image/webp;base64,';
+      const base64Len = webpDataUrl.length - head.length;
+      const webpBytes = Math.round((base64Len * 3) / 4);
+
+      const origKb = originalBytes > 1024 * 1024
+        ? (originalBytes / (1024 * 1024)).toFixed(1) + ' MB'
+        : Math.round(originalBytes / 1024) + ' KB';
+      const webpKb = webpBytes > 1024 * 1024
+        ? (webpBytes / (1024 * 1024)).toFixed(1) + ' MB'
+        : Math.round(webpBytes / 1024) + ' KB';
+      const percentSaved = Math.max(0, Math.round(((originalBytes - webpBytes) / originalBytes) * 100));
+
+      pendingWebpDataUrl = webpDataUrl;
+      pendingWebpBytes = webpBytes;
+
+      const thumb = document.getElementById('asset-pending-thumb');
+      const filenameInput = document.getElementById('asset-pending-filename');
+      const stats = document.getElementById('asset-pending-stats');
+      const previewBox = document.getElementById('asset-pending-preview');
+
+      if (thumb) thumb.src = webpDataUrl;
+      if (filenameInput) filenameInput.value = defaultFilename;
+      if (stats) stats.textContent = `WebP Compressed: ${origKb} -> ${webpKb} (${percentSaved}% file size reduction)`;
+      if (previewBox) previewBox.classList.remove('hidden');
+
+      showToast("Converted to WebP! Ready to commit.");
+    } catch (err) {
+      console.error("WebP conversion error:", err);
+      showToast("Failed to convert image to WebP");
+    }
+  }
+
+  const assetDropzone = document.getElementById('asset-dropzone');
+  const assetFileInput = document.getElementById('asset-upload-input');
+
+  assetDropzone?.addEventListener('click', () => {
+    assetFileInput?.click();
+  });
+
+  assetDropzone?.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    assetDropzone.classList.add('border-[var(--accent)]', 'bg-[var(--accent)]/5');
+  });
+
+  assetDropzone?.addEventListener('dragleave', () => {
+    assetDropzone.classList.remove('border-[var(--accent)]', 'bg-[var(--accent)]/5');
+  });
+
+  assetDropzone?.addEventListener('drop', (e) => {
+    e.preventDefault();
+    assetDropzone.classList.remove('border-[var(--accent)]', 'bg-[var(--accent)]/5');
+    const file = e.dataTransfer?.files?.[0];
+    if (file) processAssetFileForWebP(file);
+  });
+
+  assetFileInput?.addEventListener('change', (e) => {
+    const file = e.target.files?.[0];
+    if (file) processAssetFileForWebP(file);
+  });
+
+  document.getElementById('btn-cancel-pending-asset')?.addEventListener('click', () => {
+    pendingWebpDataUrl = null;
+    pendingWebpBytes = 0;
+    if (assetFileInput) assetFileInput.value = '';
+    document.getElementById('asset-pending-preview')?.classList.add('hidden');
+    showToast("Upload cancelled");
+  });
+
+  document.getElementById('btn-upload-pending-asset')?.addEventListener('click', async () => {
+    if (!pendingWebpDataUrl) return;
+    const token = getGhToken();
+    if (!token) {
+      alert("GitHub authentication required to commit assets. Please sign in with GitHub.");
+      window.location.href = "/api/auth/login";
+      return;
+    }
+
+    const filenameInput = document.getElementById('asset-pending-filename');
+    let filename = (filenameInput?.value || 'image.webp').trim().toLowerCase().replace(/[^a-z0-9_.-]+/g, '-');
+    if (!filename.endsWith('.webp')) filename += '.webp';
+
+    const targetPath = `public/images/posts/${filename}`;
+    const webPath = `/images/posts/${filename}`;
+    const rawBase64 = pendingWebpDataUrl.split(',')[1];
+    const btnText = document.getElementById('btn-upload-asset-text');
+    const uploadBtn = document.getElementById('btn-upload-pending-asset');
+
+    if (btnText) btnText.textContent = "Committing to GitHub...";
+    uploadBtn?.setAttribute("disabled", "true");
+
+    try {
+      await commitBinaryFileToGitHub(targetPath, rawBase64, `chore(assets): upload ${filename} via CMS Studio`);
+      showToast(`Committed ${filename} to GitHub!`);
+
+      const newAsset = {
+        path: webPath,
+        filename: filename,
+        size: pendingWebpBytes,
+        formattedSize: pendingWebpBytes > 1024 * 1024
+          ? (pendingWebpBytes / (1024 * 1024)).toFixed(1) + ' MB'
+          : Math.round(pendingWebpBytes / 1024) + ' KB',
+        usedIn: [],
+      };
+
+      const existingIdx = currentAssets.findIndex((a) => a.path === webPath);
+      if (existingIdx >= 0) {
+        currentAssets[existingIdx] = newAsset;
+      } else {
+        currentAssets.unshift(newAsset);
+      }
+
+      document.getElementById('asset-pending-preview')?.classList.add('hidden');
+      pendingWebpDataUrl = null;
+      pendingWebpBytes = 0;
+      if (assetFileInput) assetFileInput.value = '';
+
+      renderAssetsGrid(activeAssetFilter);
+      alert(`Asset Committed to GitHub!\n\nPath: ${targetPath}\nSize: ${newAsset.formattedSize}\n\nYou can now copy the Markdown code or set it as a post cover image.`);
+    } catch (err) {
+      console.error("Asset commit error:", err);
+      alert(`Asset commit failed: ${err.message}`);
+    } finally {
+      if (btnText) btnText.textContent = "Commit WebP to GitHub";
+      uploadBtn?.removeAttribute("disabled");
     }
   });
 
@@ -3923,6 +4741,7 @@ export const siteConfig: SiteConfig = defaultSiteConfig;
   updateGhAuthUI();
   updateDraftsBadge();
   updateLivePreview();
+  renderAssetsGrid();
   populateSiteConfigForm();
 </script>
 

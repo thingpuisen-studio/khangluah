@@ -44,6 +44,7 @@ export interface Post {
   tags: string[];
   coverImage: string;
   featured?: boolean;
+  draft?: boolean;
   postType: "academic_paper" | "essay" | "poem";
   
   // Academic paper specific metadata
@@ -179,6 +180,7 @@ const markdownPosts: Post[] = Object.entries(mdModules).map(([path, mod]) => {
     tags: Array.isArray(fm.tags) ? fm.tags : [],
     coverImage: fm.coverImage || "https://placehold.co/800x450/1c1917/ffffff?text=Publication",
     featured: Boolean(fm.featured),
+    draft: Boolean(fm.draft),
     postType: fm.postType || "poem",
     authors: fm.authors || "H. Kapginlian",
     abstract: fm.abstract || "",
@@ -193,14 +195,17 @@ const markdownPosts: Post[] = Object.entries(mdModules).map(([path, mod]) => {
   };
 });
 
-// Primary catalog combining academic research monographs and markdown publications
-export const samplePosts: Post[] = [
+// Complete catalog including remote drafts for admin CMS management
+export const allPosts: Post[] = [
   simtePronounsPost,
   genderInSimtePost,
   numeralsKaipengSimtePost,
   historyChristianityPost,
   ...markdownPosts
 ];
+
+// Primary public catalog combining academic research monographs and markdown publications (excluding remote drafts)
+export const samplePosts: Post[] = allPosts.filter((p) => !p.draft);
 
 export function getPostUrl(post: { slug: string; postType?: string }): string {
   return post.postType === "academic_paper" ? url(`/research/${post.slug}`) : url(`/feed/${post.slug}`);
