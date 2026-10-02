@@ -12,6 +12,14 @@ export default defineConfig({
     '/feed/numerals-kaipeng-simte-comparative': '/research/numerals-kaipeng-simte-comparative',
     '/feed/advent-of-christianity-simte-oral-history': '/research/advent-of-christianity-simte-oral-history',
   },
+  markdown: {
+    shikiConfig: {
+      themes: {
+        light: 'github-light',
+        dark: 'github-dark',
+      },
+    },
+  },
   integrations: [mdx()],
   vite: {
     plugins: [tailwindcss()],

@@ -253,6 +253,11 @@ Image syntax is identical to link syntax, but starts with an exclamation point (
 ```markdown
 ![Descriptive alternative text for accessibility](/images/posts/literary-manuscript.webp)
 ```
+
+Rendered output:
+
+![Archival literary manuscript on aged paper](/images/posts/literary-manuscript.webp)
+
 - The brackets `[...]` contain the **alt text** (read by screen readers and search engines).
 - The parentheses `(...)` contain the **image file path** (typically `/images/posts/your-file.webp`).
 

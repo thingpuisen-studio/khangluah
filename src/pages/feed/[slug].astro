@@ -166,87 +166,81 @@ const isAcademic = post.postType === "academic_paper";
 
     <!-- ARTICLE BODY -->
     {post.html ? (
-      <div class="prose prose-stone dark:prose-invert max-w-none text-base sm:text-lg font-serif leading-relaxed text-[var(--text-primary)]">
+      <div class="article-prose max-w-none">
         <Fragment set:html={post.html} />
       </div>
     ) : (
-      <div class="prose prose-stone dark:prose-invert max-w-none text-base sm:text-lg font-serif leading-relaxed text-[var(--text-primary)] space-y-8">
+      <div class="article-prose max-w-none space-y-10">
         {post.sections && post.sections.map((sec) => (
-          <section class="space-y-4 not-prose">
-          <h2 class="text-2xl font-bold font-sans tracking-tight text-[var(--text-primary)] pt-4 border-b border-[var(--border-color)] pb-2">
-            {sec.heading}
-          </h2>
+          <section class="space-y-4">
+            <h2>{sec.heading}</h2>
 
-          {sec.paragraphs && sec.paragraphs.map((p) => (
-            <p class="text-base sm:text-lg font-serif leading-relaxed text-[var(--text-primary)]">
-              {p}
-            </p>
-          ))}
+            {sec.paragraphs && sec.paragraphs.map((p) => (
+              <p>{p}</p>
+            ))}
 
-          {/* Styled Scholarly Blockquote / Oral History Quote */}
-          {sec.blockquote && (
-            <figure class="my-6 pl-4 border-l-4 border-[var(--accent)] italic text-[var(--text-primary)] font-serif bg-[var(--bg-secondary)]/50 p-4 rounded-r-xl">
-              <p class="text-base sm:text-lg mb-2">"{sec.blockquote.text}"</p>
-              {sec.blockquote.source && (
-                <figcaption class="text-xs font-sans not-italic text-[var(--text-secondary)] font-medium">
-                  — {sec.blockquote.source}
-                </figcaption>
-              )}
-            </figure>
-          )}
+            {/* Styled Scholarly Blockquote / Oral History Quote */}
+            {sec.blockquote && (
+              <blockquote>
+                <p>"{sec.blockquote.text}"</p>
+                {sec.blockquote.source && (
+                  <cite>— {sec.blockquote.source}</cite>
+                )}
+              </blockquote>
+            )}
 
-          {/* Formatted Linguistic Table (e.g. Pronoun paradigm or Numeral comparison) */}
-          {sec.table && (
-            <div class="my-6 overflow-x-auto rounded-xl border border-[var(--border-color)] bg-[var(--bg-primary)]">
-              {sec.table.caption && (
-                <div class="py-2.5 px-4 bg-[var(--bg-secondary)] border-b border-[var(--border-color)] text-xs font-mono font-semibold text-[var(--text-primary)]">
-                  {sec.table.caption}
-                </div>
-              )}
-              <table class="w-full text-left text-sm font-sans">
-                <thead class="bg-[var(--bg-secondary)]/50 border-b border-[var(--border-color)] text-xs uppercase font-semibold text-[var(--text-secondary)]">
-                  <tr>
-                    {sec.table.headers.map((h) => (
-                      <th class="py-2.5 px-4">{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-[var(--border-color)]">
-                  {sec.table.rows.map((row) => (
-                    <tr class="hover:bg-[var(--bg-secondary)]/30 transition-colors">
-                      {row.map((cell, idx) => (
-                        <td class={`py-2.5 px-4 ${idx === 0 ? "font-bold text-[var(--text-primary)]" : "text-[var(--text-secondary)]"}`}>
-                          <span class="ipa">{cell}</span>
-                        </td>
+            {/* Formatted Linguistic Table */}
+            {sec.table && (
+              <div class="my-6 overflow-x-auto rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/20 p-4">
+                {sec.table.caption && (
+                  <div class="py-2 px-3 text-xs font-mono font-semibold uppercase tracking-wider text-[var(--accent)] mb-2">
+                    {sec.table.caption}
+                  </div>
+                )}
+                <table class="w-full text-left text-sm font-sans">
+                  <thead>
+                    <tr class="border-b border-[var(--border-color)] text-[var(--text-primary)]">
+                      {sec.table.headers.map((h) => (
+                        <th class="py-2.5 px-4 font-bold">{h}</th>
                       ))}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+                  </thead>
+                  <tbody class="divide-y divide-[var(--border-color)]/50 font-serif">
+                    {sec.table.rows.map((row) => (
+                      <tr class="hover:bg-[var(--bg-secondary)]/40 transition-colors">
+                        {row.map((cell, idx) => (
+                          <td class={`py-2.5 px-4 ${idx === 0 ? "font-bold text-[var(--text-primary)]" : "text-[var(--text-secondary)]"} ipa`}>
+                            {cell}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
 
-          {/* Formatted Leipzig Gloss Examples */}
-          {sec.glossExamples && sec.glossExamples.map((ex) => (
-            <div class="gloss-block text-sm my-5">
-              <div class="text-xs font-mono text-[var(--accent)] uppercase tracking-wider mb-2 font-bold">
-                {ex.label}
+            {/* Formatted Leipzig Gloss Examples */}
+            {sec.glossExamples && sec.glossExamples.map((ex) => (
+              <div class="gloss-block text-sm my-5">
+                <div class="text-xs font-mono text-[var(--accent)] uppercase tracking-wider mb-2 font-bold">
+                  {ex.label}
+                </div>
+                <div class="gloss-words">
+                  {ex.words.map((w) => (
+                    <div class="gloss-word-unit">
+                      <span class="word-src ipa">{w.src}</span>
+                      <span class="word-gloss">{w.gloss}</span>
+                    </div>
+                  ))}
+                </div>
+                <p class="gloss-line-trans text-sm pt-2 mt-2 border-t border-[var(--border-color)]">
+                  {ex.trans}
+                </p>
               </div>
-              <div class="gloss-words">
-                {ex.words.map((w) => (
-                  <div class="gloss-word-unit">
-                    <span class="word-src ipa">{w.src}</span>
-                    <span class="word-gloss">{w.gloss}</span>
-                  </div>
-                ))}
-              </div>
-              <p class="gloss-line-trans text-sm pt-2 mt-2 border-t border-[var(--border-color)]">
-                {ex.trans}
-              </p>
-            </div>
-          ))}
-        </section>
-      ))}
+            ))}
+          </section>
+        ))}
       </div>
     )}
 
