@@ -42,7 +42,7 @@ function checkIsActive(itemHref: string): boolean {
           <a
             href={item.href}
             aria-current={isActive ? "page" : undefined}
-            class={`px-3.5 py-2 rounded-md transition-all duration-150 min-h-[44px] inline-flex items-center text-sm ${
+            class={`px-3.5 py-1.5 rounded-full transition-all duration-150 inline-flex items-center text-sm ${
               isActive
                 ? "bg-stone-900 text-stone-50 shadow-xs dark:bg-stone-100 dark:text-stone-950 font-semibold"
                 : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] font-medium"
@@ -57,7 +57,7 @@ function checkIsActive(itemHref: string): boolean {
       <button
         id="theme-toggle"
         type="button"
-        class="ml-3 p-2.5 rounded-md text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition-colors cursor-pointer min-h-[44px] min-w-[44px] inline-flex items-center justify-center"
+        class="ml-2 p-2 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition-colors cursor-pointer inline-flex items-center justify-center"
         aria-label="Toggle Dark Mode"
       >
         <!-- Sun icon -->
@@ -105,7 +105,7 @@ function checkIsActive(itemHref: string): boolean {
         <a
           href={item.href}
           aria-current={isActive ? "page" : undefined}
-          class={`block px-4 py-3 rounded-lg text-base font-sans min-h-[44px] flex items-center transition-colors ${
+          class={`block px-4 py-2.5 rounded-full text-sm font-sans flex items-center transition-colors ${
             isActive
               ? "bg-stone-900 text-stone-50 shadow-xs dark:bg-stone-100 dark:text-stone-950 font-semibold"
               : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] font-medium"
