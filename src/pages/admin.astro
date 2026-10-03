@@ -10,6 +10,28 @@ import { siteConfig, defaultSiteConfig } from '../data/siteConfig';
 // Scan all images in public/images directory
 const publicDir = path.resolve(process.cwd(), 'public');
 const imagesDir = path.resolve(publicDir, 'images');
+const srcDir = path.resolve(process.cwd(), 'src');
+
+// Collect all text from src/ outside admin.astro to detect site-level template usages
+const siteCodeFiles: Array<{ relPath: string; content: string }> = [];
+if (fs.existsSync(srcDir)) {
+  function scanDir(dir: string) {
+    for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, ent.name);
+      if (ent.isDirectory()) {
+        scanDir(full);
+      } else if (/\.(astro|ts|js|mjs|md|html|json)$/i.test(ent.name) && !ent.name.includes('admin.astro')) {
+        try {
+          siteCodeFiles.push({
+            relPath: path.relative(process.cwd(), full).replace(/\\/g, '/'),
+            content: fs.readFileSync(full, 'utf-8'),
+          });
+        } catch (_) {}
+      }
+    }
+  }
+  scanDir(srcDir);
+}
 
 const scannedAssets: Array<{
   path: string;
@@ -34,13 +56,63 @@ if (fs.existsSync(imagesDir)) {
           : Math.round(stat.size / 1024) + ' KB';
         
         const usedIn: Array<{ title: string; slug: string; type: string }> = [];
+
+        // 1. Check all publications (posts, research papers, poems, guides)
         for (const post of allPosts) {
-          if (post.coverImage && (post.coverImage === webPath || post.coverImage.endsWith('/' + filename))) {
-            usedIn.push({ title: post.title, slug: post.slug, type: 'Cover Image' });
-          } else if (post.body && (post.body.includes(webPath) || post.body.includes(filename))) {
-            usedIn.push({ title: post.title, slug: post.slug, type: 'Article Body' });
+          const isCover = post.coverImage && (post.coverImage === webPath || post.coverImage.endsWith('/' + filename));
+          const postText = (post.body || '') + ' ' + (post.html || '') + ' ' + (post.abstract || '') + ' ' + JSON.stringify(post.sections || []);
+          const inContent = postText.includes(webPath) || postText.includes(filename);
+
+          if (isCover) {
+            usedIn.push({ title: post.title, slug: post.slug, type: 'Post Cover' });
+          }
+          if (inContent) {
+            usedIn.push({ title: post.title, slug: post.slug, type: 'Article Content' });
           }
         }
+
+        // 2. Check siteConfig identity (Author avatar, full biography photo)
+        if (siteConfig.author.avatar && (siteConfig.author.avatar === webPath || siteConfig.author.avatar.endsWith('/' + filename) || siteConfig.author.avatar.endsWith(filename))) {
+          usedIn.push({ title: 'Author Profile Avatar', slug: 'author-avatar', type: 'Site Identity' });
+        }
+        if (siteConfig.author.fullPhoto && (siteConfig.author.fullPhoto === webPath || siteConfig.author.fullPhoto.endsWith('/' + filename) || siteConfig.author.fullPhoto.endsWith(filename))) {
+          usedIn.push({ title: 'Author Biography Photo', slug: 'author-photo', type: 'Site Identity' });
+        }
+
+        // 3. Check site layouts, templates, and components
+        for (const file of siteCodeFiles) {
+          if (file.relPath.includes('src/content/posts/')) continue;
+
+          if (file.content.includes(webPath) || file.content.includes(filename)) {
+            let label = path.basename(file.relPath);
+            let type = 'Site Template';
+
+            if (file.relPath.includes('BaseLayout.astro')) {
+              label = 'Default Open Graph Meta (BaseLayout)';
+              type = 'Social Meta';
+            } else if (file.relPath.includes('siteConfig.ts')) {
+              label = 'Site Configuration (siteConfig.ts)';
+              type = 'Site Config';
+            } else if (file.relPath.includes('schema.ts')) {
+              label = 'Schema.org Structured Data';
+              type = 'SEO Schema';
+            } else if (file.relPath.includes('Header.astro')) {
+              label = 'Site Header Navigation';
+              type = 'Navigation';
+            } else if (file.relPath.includes('about.astro')) {
+              label = 'About / Biography Page';
+              type = 'Site Page';
+            } else if (file.relPath.includes('index.astro')) {
+              label = 'Home Page';
+              type = 'Site Page';
+            }
+
+            if (!usedIn.some((u) => u.title === label)) {
+              usedIn.push({ title: label, slug: file.relPath, type });
+            }
+          }
+        }
+
         scannedAssets.push({
           path: webPath,
           filename,
@@ -1202,10 +1274,10 @@ const existingPostsData = allPosts.map((p) => {
               All (<span id="count-assets-all">{scannedAssets.length}</span>)
             </button>
             <button type="button" class="asset-filter-btn px-3 py-1.5 rounded-lg text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] cursor-pointer" data-filter="used">
-              Used in Posts
+              In Use (<span id="count-assets-used">{scannedAssets.filter((a) => a.usedIn && a.usedIn.length > 0).length}</span>)
             </button>
             <button type="button" class="asset-filter-btn px-3 py-1.5 rounded-lg text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] cursor-pointer" data-filter="unused">
-              Unused
+              Unused (<span id="count-assets-unused">{scannedAssets.filter((a) => !a.usedIn || a.usedIn.length === 0).length}</span>)
             </button>
           </div>
         </div>
@@ -3734,12 +3806,67 @@ const existingPostsData = allPosts.map((p) => {
   let pendingWebpDataUrl = null;
   let pendingWebpBytes = 0;
 
+  function recalculateAssetUsages() {
+    const drafts = (typeof getDrafts === 'function') ? getDrafts() : [];
+    let localPublished = [];
+    try {
+      localPublished = JSON.parse(localStorage.getItem('hk_cms_published_posts') || '[]');
+    } catch (e) {}
+
+    const allClientPosts = [...existingPosts, ...drafts, ...localPublished];
+
+    currentAssets.forEach((asset) => {
+      const usages = asset.usedIn ? [...asset.usedIn] : [];
+      const webPath = asset.path;
+      const filename = asset.filename;
+
+      // Check client drafts and local published posts
+      for (const p of allClientPosts) {
+        const title = p.title || 'Untitled Draft';
+        const isCover = p.coverImage && (p.coverImage === webPath || p.coverImage.endsWith('/' + filename));
+        const bodyContent = (p.body || '') + ' ' + (p.html || '') + ' ' + (p.excerpt || '');
+        const inBody = bodyContent.includes(webPath) || bodyContent.includes(filename);
+
+        if (isCover && !usages.some((u) => u.title === title && u.type === 'Post Cover')) {
+          usages.push({ title, slug: p.slug || 'draft', type: 'Post Cover' });
+        }
+        if (inBody && !usages.some((u) => u.title === title && u.type === 'Article Content')) {
+          usages.push({ title, slug: p.slug || 'draft', type: 'Article Content' });
+        }
+      }
+
+      // Check siteConfig author avatar and full photo
+      if (typeof siteConfig !== 'undefined' && siteConfig.author) {
+        if (siteConfig.author.avatar && (siteConfig.author.avatar === webPath || siteConfig.author.avatar.endsWith('/' + filename) || siteConfig.author.avatar.endsWith(filename))) {
+          if (!usages.some((u) => u.slug === 'author-avatar')) {
+            usages.push({ title: 'Author Profile Avatar', slug: 'author-avatar', type: 'Site Identity' });
+          }
+        }
+        if (siteConfig.author.fullPhoto && (siteConfig.author.fullPhoto === webPath || siteConfig.author.fullPhoto.endsWith('/' + filename) || siteConfig.author.fullPhoto.endsWith(filename))) {
+          if (!usages.some((u) => u.slug === 'author-photo')) {
+            usages.push({ title: 'Author Biography Photo', slug: 'author-photo', type: 'Site Identity' });
+          }
+        }
+      }
+
+      asset.usedIn = usages;
+    });
+  }
+
   function updateAssetsCountBadges() {
+    recalculateAssetUsages();
     const totalCount = currentAssets.length;
+    const usedCount = currentAssets.filter((a) => a.usedIn && a.usedIn.length > 0).length;
+    const unusedCount = totalCount - usedCount;
+
     const badge = document.getElementById('assets-count-badge');
     if (badge) badge.textContent = `(${totalCount})`;
     const allCount = document.getElementById('count-assets-all');
     if (allCount) allCount.textContent = totalCount;
+    const usedCountEl = document.getElementById('count-assets-used');
+    if (usedCountEl) usedCountEl.textContent = usedCount;
+    const unusedCountEl = document.getElementById('count-assets-unused');
+    if (unusedCountEl) unusedCountEl.textContent = unusedCount;
   }
 
   function renderAssetsGrid(filterType = activeAssetFilter, searchQuery = '') {
@@ -3782,7 +3909,7 @@ const existingPostsData = allPosts.map((p) => {
       const usageBadge = hasUsage
         ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono text-[10px] font-semibold border border-emerald-500/20">
              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-             Used in ${asset.usedIn.length} post${asset.usedIn.length > 1 ? 's' : ''}
+             In Use (${asset.usedIn.length} location${asset.usedIn.length > 1 ? 's' : ''})
            </span>`
         : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-stone-500/10 text-stone-500 font-mono text-[10px] font-semibold border border-stone-500/20">
              <span class="w-1.5 h-1.5 rounded-full bg-stone-400"></span>
