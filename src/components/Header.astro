@@ -41,10 +41,11 @@ function checkIsActive(itemHref: string): boolean {
         return (
           <a
             href={item.href}
-            class={`px-3.5 py-2 rounded-md transition-all duration-150 min-h-[44px] inline-flex items-center ${
+            aria-current={isActive ? "page" : undefined}
+            class={`px-3.5 py-2 rounded-md transition-all duration-150 min-h-[44px] inline-flex items-center text-sm ${
               isActive
-                ? "bg-[var(--accent-light)] text-[var(--accent)] font-semibold"
-                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]"
+                ? "bg-stone-900 text-stone-50 shadow-xs dark:bg-stone-100 dark:text-stone-950 font-semibold"
+                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] font-medium"
             }`}
           >
             {item.label}
@@ -103,10 +104,11 @@ function checkIsActive(itemHref: string): boolean {
       return (
         <a
           href={item.href}
-          class={`block px-4 py-3 rounded-lg text-base font-medium font-sans min-h-[44px] flex items-center ${
+          aria-current={isActive ? "page" : undefined}
+          class={`block px-4 py-3 rounded-lg text-base font-sans min-h-[44px] flex items-center transition-colors ${
             isActive
-              ? "bg-[var(--accent-light)] text-[var(--accent)] font-semibold"
-              : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]"
+              ? "bg-stone-900 text-stone-50 shadow-xs dark:bg-stone-100 dark:text-stone-950 font-semibold"
+              : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] font-medium"
           }`}
         >
           {item.label}
