@@ -1,0 +1,79 @@
+bun test v1.3.11 (af24e281)
+
+tests/url.test.ts:
+(pass) url utility > returns root slash for empty string or root slash
+(pass) url utility > normalizes path with leading slash
+(pass) url utility > handles complex paths and query parameters
+(pass) navigation active link logic > identifies home page active state strictly [1.00ms]
+(pass) navigation active link logic > identifies section paths and nested routes correctly
+
+tests/schema.test.ts:
+(pass) Schema.org Utilities & JSON-LD Graph > toAbsoluteUrl > converts relative paths to absolute URLs
+(pass) Schema.org Utilities & JSON-LD Graph > toAbsoluteUrl > preserves already-absolute URLs
+(pass) Schema.org Utilities & JSON-LD Graph > toAbsoluteUrl > falls back to default avatar when empty
+(pass) Schema.org Utilities & JSON-LD Graph > getPersonSchema (Author H. Kapginlian) > has correct Schema.org properties and ID [1.00ms]
+(pass) Schema.org Utilities & JSON-LD Graph > getPersonSchema (Author H. Kapginlian) > includes academic affiliations and ORCID
+(pass) Schema.org Utilities & JSON-LD Graph > getDeveloperSchema (Creator Donal Muolhoi) > contains required identity and verification fields
+(pass) Schema.org Utilities & JSON-LD Graph > getDeveloperSchema (Creator Donal Muolhoi) > includes required developer alternate names and aliases
+(pass) Schema.org Utilities & JSON-LD Graph > getDeveloperSchema (Creator Donal Muolhoi) > includes software engineering capabilities
+(pass) Schema.org Utilities & JSON-LD Graph > getWebSiteSchema > contains publisher and developer attributions
+(pass) Schema.org Utilities & JSON-LD Graph > getWebSiteSchema > defines SearchAction potentialAction
+(pass) Schema.org Utilities & JSON-LD Graph > getScholarlyArticleSchema > generates ScholarlyArticle for peer-reviewed research papers
+(pass) Schema.org Utilities & JSON-LD Graph > getScholarlyArticleSchema > includes academic fields (abstract, pdf, citation, inLanguage)
+(pass) Schema.org Utilities & JSON-LD Graph > getBreadcrumbSchema > generates valid BreadcrumbList structure
+(pass) Schema.org Utilities & JSON-LD Graph > generateJsonLdGraph > combines WebSite, Person, Developer, and Article in unified @graph [2.00ms]
+
+tests/content.test.ts:
+(pass) Academic Content & Monograph Integrity > contains exactly 4 core peer-reviewed academic research monographs
+(pass) Academic Content & Monograph Integrity > Monograph: Pronouns in Simte > has valid required academic metadata
+(pass) Academic Content & Monograph Integrity > Monograph: Pronouns in Simte > has working PDF download URL referencing public directory
+(pass) Academic Content & Monograph Integrity > Monograph: Pronouns in Simte > provides formatted APA and BibTeX academic citations
+(pass) Academic Content & Monograph Integrity > Monograph: Pronouns in Simte > contains structured content sections
+(pass) Academic Content & Monograph Integrity > Monograph: Gender in Simte > has valid required academic metadata
+(pass) Academic Content & Monograph Integrity > Monograph: Gender in Simte > has working PDF download URL referencing public directory
+(pass) Academic Content & Monograph Integrity > Monograph: Gender in Simte > provides formatted APA and BibTeX academic citations
+(pass) Academic Content & Monograph Integrity > Monograph: Gender in Simte > contains structured content sections
+(pass) Academic Content & Monograph Integrity > Monograph: Numerals in Kaipeng and Simte > has valid required academic metadata
+(pass) Academic Content & Monograph Integrity > Monograph: Numerals in Kaipeng and Simte > has working PDF download URL referencing public directory
+(pass) Academic Content & Monograph Integrity > Monograph: Numerals in Kaipeng and Simte > provides formatted APA and BibTeX academic citations
+(pass) Academic Content & Monograph Integrity > Monograph: Numerals in Kaipeng and Simte > contains structured content sections
+(pass) Academic Content & Monograph Integrity > Monograph: Brief History of the Advent of Christianity Among the Simtes (1917–1958) > has valid required academic metadata
+(pass) Academic Content & Monograph Integrity > Monograph: Brief History of the Advent of Christianity Among the Simtes (1917–1958) > has working PDF download URL referencing public directory
+(pass) Academic Content & Monograph Integrity > Monograph: Brief History of the Advent of Christianity Among the Simtes (1917–1958) > provides formatted APA and BibTeX academic citations
+(pass) Academic Content & Monograph Integrity > Monograph: Brief History of the Advent of Christianity Among the Simtes (1917–1958) > contains structured content sections
+(pass) Markdown Technical Guides & Articles > contains markdown guide posts [1.00ms]
+(pass) Markdown Technical Guides & Articles > validates structure and YAML frontmatter for markdown-formatting-complete-guide.md
+(pass) Markdown Technical Guides & Articles > validates structure and YAML frontmatter for cms-studio-operations-and-drafts-guide.md
+(pass) Markdown Technical Guides & Articles > validates structure and YAML frontmatter for asset-library-and-image-optimization-guide.md
+(pass) Markdown Technical Guides & Articles > validates structure and YAML frontmatter for site-configuration-and-settings-guide.md
+
+tests/build.test.ts:
+(pass) Production Build Output Verification > has a generated dist directory
+(pass) Production Build Output Verification > verifies static HTML file exists: index.html
+(pass) Production Build Output Verification > verifies static HTML file exists: about/index.html
+(pass) Production Build Output Verification > verifies static HTML file exists: archive/index.html
+(pass) Production Build Output Verification > verifies static HTML file exists: feed/index.html
+(pass) Production Build Output Verification > verifies static HTML file exists: poems/index.html
+(pass) Production Build Output Verification > verifies static HTML file exists: privacy/index.html
+(pass) Production Build Output Verification > verifies static HTML file exists: prompts/index.html
+(pass) Production Build Output Verification > verifies static HTML file exists: research/index.html
+(pass) Production Build Output Verification > verifies static HTML file exists: socials/index.html
+(pass) Production Build Output Verification > verifies static HTML file exists: terms/index.html
+(pass) Production Build Output Verification > verifies static HTML file exists: research/pronouns-in-simte-pro-drop-emphatic/index.html
+(pass) Production Build Output Verification > verifies static HTML file exists: research/gender-marking-in-simte-human-animal/index.html
+(pass) Production Build Output Verification > verifies static HTML file exists: research/numerals-kaipeng-simte-comparative/index.html
+(pass) Production Build Output Verification > verifies static HTML file exists: research/advent-of-christianity-simte-oral-history/index.html
+(pass) Production Build Output Verification > verifies static HTML file exists: feed/markdown-formatting-complete-guide/index.html
+(pass) Production Build Output Verification > verifies static HTML file exists: feed/cms-studio-operations-and-drafts-guide/index.html
+(pass) Production Build Output Verification > verifies static HTML file exists: feed/asset-library-and-image-optimization-guide/index.html
+(pass) Production Build Output Verification > verifies static HTML file exists: feed/site-configuration-and-settings-guide/index.html
+(pass) Production Build Output Verification > verifies sitemap.xml exists and is well-formed XML [1.00ms]
+(pass) Production Build Output Verification > verifies robots.txt exists and references sitemap.xml
+(pass) Production Build Output Verification > verifies home page HTML contains structured data and developer credit
+(pass) Production Build Output Verification > verifies research monograph page contains ScholarlyArticle and linguistic IPA markers [2.00ms]
+(pass) Production Build Output Verification > verifies technical guide page contains TechArticle schema and article-prose styling [1.00ms]
+
+ 65 pass
+ 0 fail
+ 191 expect() calls
+Ran 65 tests across 4 files. [90.00ms]
