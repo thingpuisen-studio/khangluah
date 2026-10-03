@@ -38,7 +38,7 @@ Every publication on this site is stored as a Markdown file with structured YAML
 - **Essays, Guides, & Poems**: Located in `src/content/posts/*.md`.
 - **Peer-Reviewed Academic Monologues**: Located in `src/data/posts/*.ts`.
 - **Media Assets**: Stored in `public/images/posts/`.
-- **Hosting & CI/CD**: Cloudflare Pages monitors the `main` branch of `lianhangluah/hkhangluah`. When a new commit is detected, Cloudflare executes `astro build` and deploys the generated static HTML across its global edge network in ~60 seconds.
+- **Hosting & CI/CD**: Cloudflare Pages monitors the `main` branch of `thingpuisen-studio/khangluah`. When a new commit is detected, Cloudflare executes `astro build` and deploys the generated static HTML across its global edge network in ~60 seconds.
 
 ```text
 Browser CMS Studio
@@ -102,5 +102,5 @@ When an article must be removed:
 
 The CMS Studio communicates with GitHub using a GitHub OAuth token or a fine-grained Personal Access Token (PAT):
 
-- **Repository Permissions**: The token must possess `Contents: Read and write` access on `lianhangluah/hkhangluah`.
+- **Repository Permissions**: The token must possess `Contents: Read and write` access on `thingpuisen-studio/khangluah`.
 - **Verify Button**: Located in the top header brand line. Clicking **Verify** tests both token validity and write permission against the repository, confirming that your environment is ready to commit files without permission errors.

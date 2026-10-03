@@ -16,7 +16,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     });
   }
 
-  const clientId = context.env.GITHUB_CLIENT_ID || "Ov23liELdAzmQwnCaqaO";
+  const clientId = context.env.GITHUB_CLIENT_ID || "Ov23liKRkzVePYAQkuOx";
   const clientSecret = context.env.GITHUB_CLIENT_SECRET;
 
   if (!clientSecret) {

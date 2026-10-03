@@ -39,7 +39,7 @@ You do **not** need to install any software or use the command line. You can man
 Follow these step-by-step instructions in your web browser:
 
 ### Step 1: Navigate to the Posts Folder
-1. Go to your repository on GitHub: `https://github.com/lianhangluah/hkhangluah`
+1. Go to your repository on GitHub: `https://github.com/thingpuisen-studio/khangluah`
 2. Click on the folder **`src`**.
 3. Click on the folder **`content`**.
 4. Click on the folder **`posts`**.
@@ -176,7 +176,7 @@ Continue writing your observations, field narratives, or analysis.
 
 If you need to fix a typo, update a line, or change a date:
 
-1. Go to `https://github.com/lianhangluah/hkhangluah`.
+1. Go to `https://github.com/thingpuisen-studio/khangluah`.
 2. Click **src** -> **content** -> **posts**.
 3. Click the name of the file you want to edit (e.g. `tuithaphai-whispers-river-valley-verse.md`).
 4. In the upper right of the file preview, click the **pencil icon** ("Edit this file").

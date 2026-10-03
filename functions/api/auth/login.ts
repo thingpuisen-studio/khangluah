@@ -3,7 +3,7 @@ interface Env {
 }
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
-  const clientId = context.env.GITHUB_CLIENT_ID || "Ov23liELdAzmQwnCaqaO";
+  const clientId = context.env.GITHUB_CLIENT_ID || "Ov23liKRkzVePYAQkuOx";
   const url = new URL(context.request.url);
   const redirectUri = `${url.origin}/api/auth/callback`;
   const state = crypto.randomUUID();

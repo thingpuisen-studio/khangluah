@@ -259,7 +259,7 @@ const existingPostsData = allPosts.map((p) => {
             type="button"
             id="btn-test-conn"
             class="text-[11px] underline underline-offset-4 decoration-[var(--border-color)] hover:decoration-[var(--text-primary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer ml-0.5"
-            title="Verify GitHub token permissions on repository lianhangluah/hkhangluah"
+            title="Verify GitHub token permissions on repository thingpuisen-studio/khangluah"
           >
             Verify
           </button>
@@ -1796,7 +1796,7 @@ const existingPostsData = allPosts.map((p) => {
                     GitHub Live Synchronization
                   </h3>
                   <p class="text-xs text-[var(--text-secondary)] leading-relaxed">
-                    Connect your account or set a token to commit directly to <code class="font-mono text-[11px] text-[var(--accent)] font-semibold">lianhangluah/hkhangluah</code>.
+                    Connect your account or set a token to commit directly to <code class="font-mono text-[11px] text-[var(--accent)] font-semibold">thingpuisen-studio/khangluah</code>.
                   </p>
                 </div>
                 <span id="cfg-gh-pill" class="text-[10px] font-mono px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20 font-bold self-start sm:self-auto">
@@ -2127,8 +2127,9 @@ const existingPostsData = allPosts.map((p) => {
   let currentThemeClass = "from-slate-950 via-purple-950 to-stone-950 text-purple-100";
   let currentThemeName = "Poetic Violet";
 
-  const GH_REPO_OWNER = "lianhangluah";
-  const GH_REPO_NAME = "hkhangluah";
+  const GH_REPO_OWNER = "thingpuisen-studio";
+  const GH_REPO_NAME = "khangluah";
+  const GH_CLIENT_ID = "Ov23liKRkzVePYAQkuOx";
 
   function getGhToken() {
     return localStorage.getItem('hk_gh_token') || "";
@@ -2264,7 +2265,7 @@ const existingPostsData = allPosts.map((p) => {
       const errData = await putRes.json().catch(() => ({}));
       let msg = errData.message || `HTTP ${putRes.status}: ${putRes.statusText}`;
       if (putRes.status === 404 || putRes.status === 403) {
-        msg = `GitHub ${putRes.status} (${errData.message || putRes.statusText}):\nThe token cannot write to repository ${GH_REPO_OWNER}/${GH_REPO_NAME}.\n\nTo fix:\n1. If using GitHub App (Ov23liELdAzmQwnCaqaO): Go to GitHub Settings -> Developer settings -> GitHub Apps -> Permissions: set "Contents" to "Read & write". Then in "Install App" sidebar, install it on ${GH_REPO_OWNER}/${GH_REPO_NAME}.\n2. Or generate a Personal Access Token with "repo" scope and save it in Site Settings.`;
+        msg = `GitHub ${putRes.status} (${errData.message || putRes.statusText}):\nThe token cannot write to repository ${GH_REPO_OWNER}/${GH_REPO_NAME}.\n\nTo fix:\n1. If using GitHub OAuth App (${GH_CLIENT_ID}): Ensure your account has Write/Admin access to ${GH_REPO_OWNER}/${GH_REPO_NAME}.\n2. Or generate a Personal Access Token with "repo" scope and save it in Site Settings.`;
       }
       throw new Error(msg);
     }
@@ -3422,7 +3423,7 @@ const existingPostsData = allPosts.map((p) => {
       }
       const userData = await userRes.json();
 
-      // 2. Verify repository access on lianhangluah/hkhangluah
+      // 2. Verify repository access on thingpuisen-studio/khangluah
       const repoRes = await fetch(`https://api.github.com/repos/${GH_REPO_OWNER}/${GH_REPO_NAME}`, {
         headers: { "Authorization": `${authScheme} ${token}`, "Accept": "application/vnd.github.v3+json" }
       });
@@ -3432,10 +3433,8 @@ const existingPostsData = allPosts.map((p) => {
         throw new Error(
           `Token belongs to @${userData.login}, but CANNOT access repository "${GH_REPO_OWNER}/${GH_REPO_NAME}" (HTTP ${repoRes.status}: ${repoErr.message || repoRes.statusText}).\n\n` +
           `Why this happens:\n` +
-          `1. If using GitHub App (Ov23liELdAzmQwnCaqaO):\n` +
-          `   - Open GitHub Settings -> Developer settings -> GitHub Apps -> click your app.\n` +
-          `   - Go to "Permissions & events" -> "Repository permissions" -> set "Contents" to "Read & write".\n` +
-          `   - Go to "Install App" in the left sidebar -> click "Install" on lianhangluah for repository "hkhangluah".\n\n` +
+          `1. If using GitHub OAuth App (${GH_CLIENT_ID}):\n` +
+          `   - Ensure your GitHub account has write access to "${GH_REPO_OWNER}/${GH_REPO_NAME}".\n\n` +
           `2. Alternatively (Instant fix):\n` +
           `   - Create a Personal Access Token on GitHub with "repo" scope.\n` +
           `   - Paste it in Site Settings -> Personal Access Token and click "Save & Verify".`
