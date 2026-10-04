@@ -102,7 +102,6 @@ export function getDeveloperSchema() {
     name: 'Donal Muolhoi',
     alternateName: [
       'D. Muolhoi',
-      'Pheklom',
       'Donal Hmar',
       'Donald Hmar',
       'Donald Muolhoi',
