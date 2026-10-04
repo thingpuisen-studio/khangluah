@@ -426,6 +426,25 @@ export function generateJsonLdGraph(options: JsonLdOptions = {}): Record<string,
     graph.push(getArticleSchema(options.post, siteUrl));
   } else if (options.pageType === 'profile') {
     graph.push(getProfilePageSchema(siteUrl));
+  } else if (
+    options.pageType === 'website' ||
+    !options.pageType ||
+    options.canonicalUrl === siteUrl ||
+    options.canonicalUrl === `${siteUrl}/`
+  ) {
+    graph.push({
+      '@type': 'ProfilePage',
+      '@id': `${siteUrl}/#profile`,
+      url: `${siteUrl}/`,
+      name: options.title || siteConfig.siteTitle,
+      description: options.description || siteConfig.author.shortBio,
+      isPartOf: {
+        '@id': `${siteUrl}/#website`,
+      },
+      mainEntity: {
+        '@id': `${siteUrl}/#person`,
+      },
+    });
   } else if (options.pageType === 'collection') {
     graph.push(
       getCollectionPageSchema(
