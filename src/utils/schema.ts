@@ -32,6 +32,22 @@ export function toAbsoluteUrl(pathOrUrl: string, baseUrl: string = DEFAULT_SITE_
 }
 
 /**
+ * Normalizes date strings like 'October 2026' or timestamps into ISO-8601 strings
+ */
+export function toIsoDate(dateStr?: string | number, year?: number): string {
+  if (!dateStr) return `${year || 2026}-01-01T00:00:00+05:30`;
+  const str = String(dateStr).trim();
+  const parsed = Date.parse(str);
+  if (!isNaN(parsed)) return new Date(parsed).toISOString();
+  const m = str.match(/([a-zA-Z]+)\s+(\d{4})/);
+  if (m) {
+    const monthParsed = Date.parse(`${m[1]} 1, ${m[2]}`);
+    if (!isNaN(monthParsed)) return new Date(monthParsed).toISOString();
+  }
+  return `${year || 2026}-01-01T00:00:00+05:30`;
+}
+
+/**
  * Builds the Person entity for H. Kapginlian
  */
 export function getPersonSchema(siteUrl: string = DEFAULT_SITE_URL) {
@@ -79,9 +95,14 @@ export function getDeveloperSchema() {
   return {
     '@type': 'Person',
     '@id': 'https://thingpuisen.pages.dev/#developer',
+    identifier: [
+      'kg:/g/11yf0bzxbq',
+      'https://www.wikidata.org/wiki/Q134733823',
+    ],
     name: 'Donal Muolhoi',
     alternateName: [
-      'D Muolhoi',
+      'D. Muolhoi',
+      'Pheklom',
       'Donal Hmar',
       'Donald Hmar',
       'Donald Muolhoi',
@@ -89,18 +110,28 @@ export function getDeveloperSchema() {
     ],
     url: 'https://thingpuisen.pages.dev',
     mainEntityOfPage: 'https://thingpuisen.pages.dev',
-    jobTitle: 'Software Engineer & Web Developer',
-    disambiguatingDescription: 'Software engineer and web developer, creator of thingpuisen.pages.dev',
+    jobTitle: 'Cultural Activist',
+    disambiguatingDescription:
+      'Cultural activist and community representative from Northeast India. Technical creator and digital archivist for indigenous literature and research archives.',
+    worksFor: {
+      '@type': 'Organization',
+      '@id': 'https://www.wikidata.org/wiki/Q141635438',
+      name: 'Hmar Heritage Foundation',
+      url: 'https://hmarheritage.pages.dev',
+    },
     sameAs: [
+      'https://www.wikidata.org/wiki/Q134733823',
+      'https://www.google.com/search?kgmid=/g/11yf0bzxbq',
       'https://thingpuisen.pages.dev',
+      'https://github.com/azinamotoe',
     ],
     knowsAbout: [
-      'Web Development',
-      'Front-End Engineering',
-      'Full-Stack Web Development',
+      'Hmar Heritage & Culture',
+      'Cultural Preservation',
+      'Digital Humanities',
+      'Indigenous Literature',
+      'Web Engineering',
       'Astro Framework',
-      'Software Architecture',
-      'Content Management Systems',
       'SEO & Structured Data',
     ],
   };
@@ -164,7 +195,13 @@ function parseAuthorEntities(authorsStr?: string, siteUrl: string = DEFAULT_SITE
 
   // Check if it's the primary author
   if (authorsStr.includes('H. Kapginlian') && !authorsStr.includes('&')) {
-    return [{ '@id': `${siteUrl}/#person` }];
+    return [
+      {
+        '@type': 'Person',
+        name: 'H. Kapginlian',
+        url: `${siteUrl}/about`,
+      },
+    ];
   }
 
   // If multiple authors e.g. "H. Kapginlian & Dr. Saralin A. Lyngdoh, Associate Professor (NEHU, Shillong)"
@@ -172,7 +209,11 @@ function parseAuthorEntities(authorsStr?: string, siteUrl: string = DEFAULT_SITE
   return parts.map((namePart) => {
     const cleanName = namePart.trim();
     if (cleanName.includes('H. Kapginlian')) {
-      return { '@id': `${siteUrl}/#person` };
+      return {
+        '@type': 'Person',
+        name: 'H. Kapginlian',
+        url: `${siteUrl}/about`,
+      };
     }
     const firstCommaIdx = cleanName.indexOf(',');
     if (firstCommaIdx === -1) {
@@ -205,20 +246,26 @@ function parseAuthorEntities(authorsStr?: string, siteUrl: string = DEFAULT_SITE
 export function getScholarlyArticleSchema(post: Post, siteUrl: string = DEFAULT_SITE_URL) {
   const canonicalUrl = `${siteUrl}/research/${post.slug}`;
   const authors = parseAuthorEntities(post.authors, siteUrl);
+  const isoDate = toIsoDate(post.date, post.year);
+  const coverUrl = toAbsoluteUrl(post.coverImage, siteUrl);
 
   const schema: Record<string, any> = {
-    '@type': 'ScholarlyArticle',
+    '@type': 'BlogPosting',
+    additionalType: 'https://schema.org/ScholarlyArticle',
     '@id': `${canonicalUrl}#article`,
     isPartOf: {
       '@id': `${siteUrl}/#website`,
     },
-    mainEntityOfPage: canonicalUrl,
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': canonicalUrl,
+    },
     headline: post.title,
     name: post.title,
     description: post.abstract || post.excerpt,
-    datePublished: post.date,
-    dateModified: post.date,
-    image: toAbsoluteUrl(post.coverImage, siteUrl),
+    datePublished: isoDate,
+    dateModified: isoDate,
+    image: [coverUrl],
     author: authors,
     publisher: post.journal
       ? {
@@ -227,7 +274,9 @@ export function getScholarlyArticleSchema(post: Post, siteUrl: string = DEFAULT_
           ...(post.doi ? { url: `https://doi.org/${post.doi}` } : {}),
         }
       : {
-          '@id': `${siteUrl}/#person`,
+          '@type': 'Person',
+          name: 'H. Kapginlian',
+          url: `${siteUrl}/`,
         },
     inLanguage: post.language || 'en',
     keywords: post.keywords ? post.keywords.join(', ') : post.tags?.join(', '),
@@ -274,25 +323,34 @@ export function getScholarlyArticleSchema(post: Post, siteUrl: string = DEFAULT_
 export function getArticleSchema(post: Post, siteUrl: string = DEFAULT_SITE_URL) {
   const canonicalUrl = `${siteUrl}/feed/${post.slug}`;
   const isTechnical = post.category === 'Technical Guides';
+  const isoDate = toIsoDate(post.date, post.year);
+  const coverUrl = toAbsoluteUrl(post.coverImage, siteUrl);
 
   return {
-    '@type': isTechnical ? 'TechArticle' : 'BlogPosting',
+    '@type': 'BlogPosting',
     '@id': `${canonicalUrl}#article`,
     isPartOf: {
       '@id': `${siteUrl}/#website`,
     },
-    mainEntityOfPage: canonicalUrl,
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': canonicalUrl,
+    },
     headline: post.title,
     name: post.title,
     description: post.excerpt,
-    datePublished: post.date,
-    dateModified: post.date,
-    image: toAbsoluteUrl(post.coverImage, siteUrl),
+    datePublished: isoDate,
+    dateModified: isoDate,
+    image: [coverUrl],
     author: {
-      '@id': `${siteUrl}/#person`,
+      '@type': 'Person',
+      name: post.authors || 'H. Kapginlian',
+      url: `${siteUrl}/about`,
     },
     publisher: {
-      '@id': `${siteUrl}/#person`,
+      '@type': 'Person',
+      name: 'H. Kapginlian',
+      url: `${siteUrl}/`,
     },
     articleSection: post.category,
     keywords: post.tags?.join(', '),
