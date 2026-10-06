@@ -447,3 +447,10 @@ html.dark .article-prose pre.astro-code {
   color: var(--text-primary);
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.08);
 }
+
+/* Poetic Verses & Stanzas: Preserves deliberate line-breaks and stanza cadence */
+.poem-prose p {
+  white-space: pre-line;
+  margin-bottom: 2rem;
+  line-height: 1.95;
+}

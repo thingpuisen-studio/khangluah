@@ -156,7 +156,7 @@ const existingPostsData = allPosts.map((p) => {
     headerLabel: p.headerLabel || plate?.headerLabel || "",
     formula: p.formula || plate?.formula || "",
     formulaSub: p.formulaSub || plate?.formulaSub || "",
-    body: p.sections?.flatMap((s) => {
+    body: p.body || p.sections?.flatMap((s) => {
       const list: string[] = [];
       if (s.heading && s.heading !== p.title) list.push(`## ${s.heading}`);
       if (s.blockquote?.text) list.push(`> ${s.blockquote.text.replace(/\n/g, '\n> ')}`);
@@ -347,6 +347,14 @@ const existingPostsData = allPosts.map((p) => {
         >
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
           <span>Drafts <span id="drafts-count-badge" class="font-mono text-[11px] opacity-70">(0)</span></span>
+        </button>
+        <button
+          type="button"
+          class="nav-tab-btn min-h-[40px] px-3.5 py-2 rounded-lg transition-all cursor-pointer text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]/60 flex items-center gap-2"
+          data-target="tab-code"
+        >
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+          <span>Export .md</span>
         </button>
         <button
           type="button"
@@ -919,6 +927,9 @@ const existingPostsData = allPosts.map((p) => {
               <button type="button" class="md-tool-btn px-2.5 py-1 text-xs font-mono rounded-md bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] hover:bg-[var(--accent-light)] transition-colors cursor-pointer" data-action="divider" title="Stanza Break">
                 &mdash; Stanza Break
               </button>
+              <button type="button" id="btn-verse-break" class="md-tool-btn px-2.5 py-1 text-xs font-mono rounded-md bg-[var(--bg-primary)] border border-purple-500/40 text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 transition-colors cursor-pointer" data-action="versebreak" title="Verse Break (Preserve Line Break in Poetry with Markdown hard break)">
+                ↵ Verse Break
+              </button>
               <button type="button" class="md-tool-btn px-2.5 py-1 text-xs font-mono rounded-md bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] hover:bg-[var(--accent-light)] transition-colors cursor-pointer" data-action="image" title="Insert Image Link">
                 Image
               </button>
@@ -950,6 +961,14 @@ const existingPostsData = allPosts.map((p) => {
                 class="min-h-[44px] px-4 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-primary)] transition-colors cursor-pointer inline-flex items-center gap-1.5"
               >
                 <span>Live Preview &rarr;</span>
+              </button>
+              <button
+                type="button"
+                id="btn-goto-code"
+                class="min-h-[44px] px-3.5 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/40 hover:bg-[var(--bg-secondary)] text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer inline-flex items-center gap-1.5"
+                data-target="tab-code"
+              >
+                <span>Export .md</span>
               </button>
               <button
                 type="button"
@@ -1946,6 +1965,14 @@ const existingPostsData = allPosts.map((p) => {
         <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
         <span class="text-[9px] font-sans">Drafts</span>
       </button>
+      <button
+        type="button"
+        class="mobile-dock-btn flex flex-col items-center justify-center p-1 rounded-lg text-[var(--text-secondary)] min-w-[44px] min-h-[44px]"
+        data-target="tab-code"
+      >
+        <svg class="w-4 h-4 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+        <span class="text-[9px] font-sans">Export</span>
+      </button>
 
       <button
         type="button"
@@ -2131,6 +2158,25 @@ const existingPostsData = allPosts.map((p) => {
   const GH_REPO_NAME = "khangluah";
   const GH_CLIENT_ID = "Ov23liKRkzVePYAQkuOx";
 
+  const isLocalHost = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+  const STATIC_ACADEMIC_PAPERS = {
+    'pronouns-in-simte-pro-drop-emphatic': 'src/data/posts/simte-pronouns.ts',
+    'gender-marking-in-simte-human-animal': 'src/data/posts/gender-in-simte.ts',
+    'numerals-kaipeng-simte-comparative': 'src/data/posts/numerals-kaipeng-simte.ts',
+    'advent-of-christianity-simte-oral-history': 'src/data/posts/history-christianity-simte.ts'
+  };
+
+  function getPostFilePath(slug, postType) {
+    if (STATIC_ACADEMIC_PAPERS[slug]) return STATIC_ACADEMIC_PAPERS[slug];
+    return `src/content/posts/${slug}.md`;
+  }
+
+  function isSimulationMode() {
+    const token = getGhToken();
+    return token === 'local_dev_token' || (isLocalHost && (!token || token.startsWith('local_')));
+  }
+
   function getGhToken() {
     return localStorage.getItem('hk_gh_token') || "";
   }
@@ -2142,7 +2188,7 @@ const existingPostsData = allPosts.map((p) => {
   function updateGhAuthUI() {
     const token = getGhToken();
     const user = getGhUser();
-    const isAuth = Boolean(token);
+    const isAuth = Boolean(token) || isSimulationMode();
 
     const loginGate = document.getElementById('admin-login-gate');
     const mainUi = document.getElementById('admin-main-ui');
@@ -2161,19 +2207,25 @@ const existingPostsData = allPosts.map((p) => {
       if (loginGate) loginGate.classList.add('hidden');
       if (mainUi) mainUi.classList.remove('hidden');
 
+      const isSim = isSimulationMode();
+
       if (ghDot) {
-        ghDot.className = "w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse";
+        ghDot.className = isSim
+          ? "w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"
+          : "w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse";
       }
       if (ghStatusText) {
-        ghStatusText.textContent = user ? `@${user}` : "Connected";
-        ghStatusText.className = "text-emerald-400 font-semibold";
+        ghStatusText.textContent = isSim ? (user ? `@${user} (Simulated)` : "Local Testing Mode") : (user ? `@${user}` : "Connected");
+        ghStatusText.className = isSim ? "text-amber-400 font-semibold" : "text-emerald-400 font-semibold";
       }
       if (btnGhAuthText) {
-        btnGhAuthText.textContent = "Sign Out";
+        btnGhAuthText.textContent = isSim ? "Exit Mock" : "Sign Out";
       }
       if (cfgGhPill) {
-        cfgGhPill.textContent = user ? `Connected as @${user}` : "Connected";
-        cfgGhPill.className = "text-[10px] font-mono px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-bold self-start sm:self-auto";
+        cfgGhPill.textContent = isSim ? `Simulation Mode (${user || 'local'})` : (user ? `Connected as @${user}` : "Connected");
+        cfgGhPill.className = isSim
+          ? "text-[10px] font-mono px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30 font-bold self-start sm:self-auto"
+          : "text-[10px] font-mono px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-bold self-start sm:self-auto";
       }
       if (btnSettingsOAuthText) {
         btnSettingsOAuthText.textContent = "Reconnect GitHub";
@@ -2203,11 +2255,13 @@ const existingPostsData = allPosts.map((p) => {
   }
 
   async function commitFileToGitHub(filePath, fileContent, commitMsg) {
+    if (isSimulationMode()) {
+      console.log(`[Local Simulation Mode] Simulated commit to GitHub for ${filePath}:`, commitMsg);
+      return { content: { path: filePath, sha: "simulated_sha_" + Date.now() }, simulated: true };
+    }
+
     const token = getGhToken();
     if (!token) throw new Error("No GitHub authentication token found. Please sign in with GitHub or enter a token in Site Settings.");
-    if (token === 'local_dev_token') {
-      throw new Error("You are using local mock mode. Your post is saved in your local browser storage. To push real commits to GitHub, connect your GitHub account or paste a GitHub Personal Access Token.");
-    }
 
     let sha = null;
     let authHeader = `Bearer ${token}`;
@@ -2274,6 +2328,11 @@ const existingPostsData = allPosts.map((p) => {
   }
 
   async function commitBinaryFileToGitHub(filePath, rawBase64, commitMsg) {
+    if (isSimulationMode()) {
+      console.log(`[Local Simulation Mode] Simulated binary commit for ${filePath}:`, commitMsg);
+      return { content: { path: filePath, sha: "simulated_sha_" + Date.now() }, simulated: true };
+    }
+
     const token = getGhToken();
     if (!token) throw new Error("No GitHub token available");
 
@@ -2320,6 +2379,11 @@ const existingPostsData = allPosts.map((p) => {
   }
 
   async function deleteFileFromGitHub(filePath, commitMsg) {
+    if (isSimulationMode()) {
+      console.log(`[Local Simulation Mode] Simulated delete for ${filePath}:`, commitMsg);
+      return { simulated: true };
+    }
+
     const token = getGhToken();
     if (!token) throw new Error("No GitHub token available");
 
@@ -2332,7 +2396,11 @@ const existingPostsData = allPosts.map((p) => {
     });
 
     if (!getRes.ok) {
-      return true;
+      if (getRes.status === 404) {
+        return true; // Already deleted or doesn't exist on remote
+      }
+      const errData = await getRes.json().catch(() => ({}));
+      throw new Error(errData.message || `File lookup failed on GitHub (HTTP ${getRes.status})`);
     }
 
     const fileData = await getRes.json();
@@ -2791,11 +2859,11 @@ const existingPostsData = allPosts.map((p) => {
   });
 
   // Markdown Toolbar actions
-  function wrapSelection(before, after = before) {
+  function wrapSelection(before, after = before, defaultText = "text") {
     const start = bodyInput.selectionStart;
     const end = bodyInput.selectionEnd;
     const text = bodyInput.value;
-    const selected = text.substring(start, end) || "text";
+    const selected = text.substring(start, end) || defaultText;
     bodyInput.value = text.substring(0, start) + before + selected + after + text.substring(end);
     bodyInput.focus();
     bodyInput.setSelectionRange(start + before.length, start + before.length + selected.length);
@@ -2827,7 +2895,9 @@ const existingPostsData = allPosts.map((p) => {
       } else if (action === 'list') {
         insertLinePrefix('- ');
       } else if (action === 'divider') {
-        wrapSelection('\n\n---\n\n', '');
+        wrapSelection('\n\n---\n\n', '', '');
+      } else if (action === 'versebreak') {
+        wrapSelection('  \n', '', '');
       } else if (action === 'image') {
         const url = prompt("Enter Image URL:", "https://");
         if (url) {
@@ -2993,11 +3063,18 @@ const existingPostsData = allPosts.map((p) => {
       });
     }
 
+    let formattedBody = body;
+    if (currentType === 'poem' && body) {
+      formattedBody = body.split(/\n\s*\n/).map(stanza => {
+        return stanza.split('\n').map(l => l.trimEnd()).join('  \n');
+      }).join('\n\n');
+    }
+
     md += `---\n\n`;
-    md += body ? body : `<!-- Verses or content -->\n`;
+    md += formattedBody ? formattedBody : `<!-- Verses or content -->\n`;
 
     document.getElementById('code-output').querySelector('code').textContent = md;
-    const targetPath = currentType === 'academic_paper' ? `src/data/posts/${slug}.ts` : `src/content/posts/${slug}.md`;
+    const targetPath = getPostFilePath(slug, currentType);
     document.getElementById('target-filename-label').textContent = targetPath;
   }
 
@@ -3025,7 +3102,7 @@ const existingPostsData = allPosts.map((p) => {
     const typeClass = post.postType === "poem" ? "bg-purple-500/10 text-purple-600 dark:text-purple-400" :
       post.postType === "academic_paper" ? "bg-blue-500/10 text-blue-600 dark:text-blue-400" :
       "bg-amber-500/10 text-amber-600 dark:text-amber-400";
-    const filePath = post.postType === "academic_paper" ? `src/data/posts/${post.slug}.ts` : `src/content/posts/${post.slug}.md`;
+    const filePath = getPostFilePath(post.slug, post.postType);
     itemEl.innerHTML = `
       <div class="space-y-1">
         <div class="flex items-center gap-2 font-mono text-[10px]">
@@ -3076,8 +3153,9 @@ const existingPostsData = allPosts.map((p) => {
 
   // 2. Save Post as Draft in Remote Repo (SPADIRR)
   async function savePostAsRemoteDraft() {
+    const isSim = isSimulationMode();
     const token = getGhToken();
-    if (!token) {
+    if (!token && !isSim) {
       alert("GitHub authentication required to save remote drafts. Please sign in with GitHub.");
       window.location.href = "/api/auth/login";
       return;
@@ -3091,17 +3169,20 @@ const existingPostsData = allPosts.map((p) => {
     }
 
     const slug = slugInput.value.trim() || title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    const targetFile = currentType === 'academic_paper' ? `src/data/posts/${slug}.ts` : `src/content/posts/${slug}.md`;
+    const targetFile = getPostFilePath(slug, currentType);
 
-    const confirmed = confirm(`Save draft "${title}" in remote repository (SPADIRR)?\n\nThis will commit to branch 'main' with 'draft: true' so the article is preserved in GitHub but hidden from public readers.`);
+    const confirmed = confirm(isSim
+      ? `[Simulation Mode] Save draft "${title}" in simulated remote repository (SPADIRR)?\n\nThis will record the draft with 'draft: true' locally without needing GitHub credentials.`
+      : `Save draft "${title}" in remote repository (SPADIRR)?\n\nThis will commit to branch 'main' with 'draft: true' so the article is preserved in GitHub but hidden from public readers.`
+    );
     if (!confirmed) return;
 
-    showToast("Committing remote draft to GitHub (SPADIRR)...");
+    showToast(isSim ? "Simulating remote draft commit (SPADIRR)..." : "Committing remote draft to GitHub (SPADIRR)...");
 
     const btnRemote = document.getElementById('btn-save-remote-draft');
     const btnRemoteBottom = document.getElementById('btn-save-remote-draft-bottom');
     if (btnRemote) btnRemote.textContent = "Saving...";
-    if (btnRemoteBottom) btnRemoteBottom.textContent = "Saving to GitHub...";
+    if (btnRemoteBottom) btnRemoteBottom.textContent = isSim ? "Saving Draft..." : "Saving to GitHub...";
 
     try {
       if (pendingImageBase64 && pendingImageBase64.startsWith('data:image/')) {
@@ -3118,7 +3199,7 @@ const existingPostsData = allPosts.map((p) => {
       const draftCode = document.getElementById('code-output').querySelector('code').textContent;
 
       await commitFileToGitHub(targetFile, draftCode, `draft(content): save draft ${title} (SPADIRR)`);
-      showToast(`Draft "${title}" saved in remote repository (SPADIRR)!`);
+      showToast(isSim ? `[Simulation] Draft "${title}" saved!` : `Draft "${title}" saved in remote repository (SPADIRR)!`);
 
       const category = categoryInput.value.trim() || "Poetry & Literature";
       const date = dateInput.value.trim() || "October 2026";
@@ -3140,6 +3221,17 @@ const existingPostsData = allPosts.map((p) => {
         isPublished: false,
       };
 
+      // Persist draft in localStorage published posts as draft
+      try {
+        const stored = JSON.parse(localStorage.getItem('hk_cms_published_posts') || '[]');
+        const existIdx = stored.findIndex(p => p.slug === slug);
+        if (existIdx >= 0) stored[existIdx] = draftPost;
+        else stored.unshift(draftPost);
+        localStorage.setItem('hk_cms_published_posts', JSON.stringify(stored));
+      } catch (e) {
+        console.error(e);
+      }
+
       const catIdx = existingPosts.findIndex(p => p.slug === slug);
       if (catIdx >= 0) existingPosts[catIdx] = draftPost;
       else existingPosts.unshift(draftPost);
@@ -3148,11 +3240,12 @@ const existingPostsData = allPosts.map((p) => {
 
       const pubModal = document.getElementById('publish-modal');
       if (pubModal) {
-        document.getElementById('pub-modal-eyebrow').textContent = "Remote Draft Saved (SPADIRR)";
+        document.getElementById('pub-modal-eyebrow').textContent = isSim ? "Remote Draft Saved (Simulation Mode)" : "Remote Draft Saved (SPADIRR)";
         document.getElementById('pub-modal-title').textContent = `"${title}"`;
         document.getElementById('pub-modal-filename').textContent = targetFile;
-        document.getElementById('pub-modal-notice').textContent =
-          "Your draft has been committed directly to GitHub with 'draft: true'. It is safely version-controlled in the repository but hidden from public visitors until you click 'Deploy to Live Site'.";
+        document.getElementById('pub-modal-notice').textContent = isSim
+          ? "Your draft has been recorded with 'draft: true'. In simulation mode, your local catalog reflects the draft and you can continue testing."
+          : "Your draft has been committed directly to GitHub with 'draft: true'. It is safely version-controlled in the repository but hidden from public visitors until you click 'Deploy to Live Site'.";
         const deployBtn = document.getElementById('pub-modal-deploy-live');
         if (deployBtn) deployBtn.classList.remove('hidden');
         pubModal.classList.remove('hidden');
@@ -3189,7 +3282,7 @@ const existingPostsData = allPosts.map((p) => {
     const body = bodyInput.value;
     const coverImage = coverInput.value.trim();
     const tags = tagsInput.value.split(',').map(t => t.trim()).filter(Boolean);
-    const targetFile = currentType === 'academic_paper' ? `src/data/posts/${slug}.ts` : `src/content/posts/${slug}.md`;
+    const targetFile = getPostFilePath(slug, currentType);
 
     const postItem = {
       slug,
@@ -3228,7 +3321,7 @@ const existingPostsData = allPosts.map((p) => {
       existingPosts.unshift(postItem);
     }
     const catBadge = document.getElementById('catalog-count-badge');
-    if (catBadge) catBadge.textContent = existingPosts.length;
+    if (catBadge) catBadge.textContent = `(${existingPosts.length})`;
 
     // Render immediately into catalog DOM
     renderPublishedItemToCatalog(postItem);
@@ -3254,8 +3347,9 @@ const existingPostsData = allPosts.map((p) => {
 
   // 2. Deploy Post to Live Site (GitHub API -> Cloudflare Pages)
   async function deployCurrentPostToGitHub() {
+    const isSim = isSimulationMode();
     const token = getGhToken();
-    if (!token) {
+    if (!token && !isSim) {
       alert("GitHub authentication required to deploy to the live site. Please sign in with GitHub.");
       window.location.href = "/api/auth/login";
       return;
@@ -3265,9 +3359,11 @@ const existingPostsData = allPosts.map((p) => {
     if (!saved) return;
 
     const { title, slug, targetFile } = saved;
-    const code = document.getElementById('code-output').querySelector('code').textContent;
 
-    const confirmed = confirm(`Deploy "${title}" to GitHub on branch 'main'?\n\nThis will commit directly to the repository and trigger a Cloudflare Pages rebuild for lianhangluah.com.`);
+    const confirmed = confirm(isSim
+      ? `[Simulation Mode] Deploy "${title}" to catalog?\n\nThis will simulate a GitHub commit on branch 'main' and update your catalog locally without contacting GitHub servers.`
+      : `Deploy "${title}" to GitHub on branch 'main'?\n\nThis will commit directly to the repository and trigger a Cloudflare Pages rebuild for lianhangluah.com.`
+    );
     if (!confirmed) return;
 
     const deployTop = document.getElementById('btn-deploy-top');
@@ -3275,17 +3371,17 @@ const existingPostsData = allPosts.map((p) => {
     const deployModal = document.getElementById('pub-modal-deploy-text');
 
     if (deployTop) deployTop.textContent = "Deploying...";
-    if (deployBottom) deployBottom.textContent = "Deploying to GitHub...";
+    if (deployBottom) deployBottom.textContent = isSim ? "Simulating Deploy..." : "Deploying to GitHub...";
     if (deployModal) deployModal.textContent = "Deploying...";
 
-    showToast("Committing to GitHub repository...");
+    showToast(isSim ? "Simulating GitHub commit..." : "Committing to GitHub repository...");
 
     try {
       // 1. Upload standalone web-optimized image file to GitHub if present
       if (pendingImageBase64 && pendingImageBase64.startsWith('data:image/')) {
         const imgPath = `public/images/posts/${slug}.${pendingImageExt}`;
         const rawBase64 = pendingImageBase64.split(',')[1];
-        showToast("Uploading optimized cover image to GitHub...");
+        showToast("Uploading optimized cover image...");
         try {
           await commitBinaryFileToGitHub(imgPath, rawBase64, `chore(assets): add cover image for ${slug}`);
         } catch (imgErr) {
@@ -3299,15 +3395,16 @@ const existingPostsData = allPosts.map((p) => {
 
       // 3. Commit markdown file
       await commitFileToGitHub(targetFile, deployCode, `feat(content): publish ${title}`);
-      showToast("Committed to GitHub! Cloudflare will deploy in ~60s.");
+      showToast(isSim ? `[Simulation] Deployed "${title}"!` : "Committed to GitHub! Cloudflare will deploy in ~60s.");
 
       const pubModal = document.getElementById('publish-modal');
       if (pubModal) {
-        document.getElementById('pub-modal-eyebrow').textContent = "Deployed to Live Site";
+        document.getElementById('pub-modal-eyebrow').textContent = isSim ? "Deployed (Simulation Mode)" : "Deployed to Live Site";
         document.getElementById('pub-modal-title').textContent = `"${title}"`;
         document.getElementById('pub-modal-filename').textContent = targetFile;
-        document.getElementById('pub-modal-notice').textContent =
-          "Your post has been committed directly to GitHub on branch 'main'. Cloudflare Pages is rebuilding and deploying to lianhangluah.com within 1 to 2 minutes.";
+        document.getElementById('pub-modal-notice').textContent = isSim
+          ? "Your post deployment has been simulated locally. The post is available in your catalog view and persisted in browser storage."
+          : "Your post has been committed directly to GitHub on branch 'main'. Cloudflare Pages is rebuilding and deploying to lianhangluah.com within 1 to 2 minutes.";
         const deployBtn = document.getElementById('pub-modal-deploy-live');
         if (deployBtn) deployBtn.classList.add('hidden');
         pubModal.classList.remove('hidden');
@@ -3332,7 +3429,6 @@ const existingPostsData = allPosts.map((p) => {
   // Post Save & Deploy triggers
   document.getElementById('btn-save-draft')?.addEventListener('click', () => {
     saveCurrentDraft();
-    saveCurrentPostLocally(true);
   });
   document.getElementById('btn-save-post')?.addEventListener('click', () => {
     saveCurrentDraft();
@@ -3365,15 +3461,13 @@ const existingPostsData = allPosts.map((p) => {
   document.getElementById('btn-download-file')?.addEventListener('click', () => {
     const slug = slugInput.value.trim() || "new-post";
     const code = document.getElementById('code-output').querySelector('code').textContent;
-    const ext = currentType === 'academic_paper' ? 'ts' : 'md';
-    const mime = currentType === 'academic_paper' ? 'text/typescript;charset=utf-8' : 'text/markdown;charset=utf-8';
-    const blob = new Blob([code], { type: mime });
+    const blob = new Blob([code], { type: 'text/markdown;charset=utf-8' });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = `${slug}.${ext}`;
+    link.download = `${slug}.md`;
     link.click();
     URL.revokeObjectURL(link.href);
-    showToast(`Downloaded ${slug}.${ext}`);
+    showToast(`Downloaded ${slug}.md`);
   });
 
   // GitHub Auth Event Listeners
@@ -3396,6 +3490,20 @@ const existingPostsData = allPosts.map((p) => {
 
   // Test GitHub Connection and Permissions
   async function testGitHubConnection() {
+    if (isSimulationMode()) {
+      const user = getGhUser() || 'local_developer';
+      alert(
+        `GitHub Connection: Simulation Mode (Active)\n\n` +
+        `User: @${user} (Simulated)\n` +
+        `Repository: ${GH_REPO_OWNER}/${GH_REPO_NAME}\n` +
+        `Push Access: YES (Local Simulation)\n` +
+        `Default Branch: main\n\n` +
+        `The studio is operating in localhost simulation mode. Operations (publishing, draft saving, WebP asset uploads, catalog deletion) run locally without sending requests to GitHub.`
+      );
+      showToast("Local simulation verified!");
+      return;
+    }
+
     const token = getGhToken();
     if (!token) {
       alert("No GitHub authentication token found.\n\nPlease sign in with GitHub, or paste a Personal Access Token in Site Settings.");
@@ -3537,7 +3645,9 @@ const existingPostsData = allPosts.map((p) => {
       themeClass: currentThemeClass,
       accentBarClass: currentTipClass,
       featuredCouplet: document.getElementById('poem-couplet-input')?.value || "",
-      abstract: document.getElementById('paper-abstract')?.value || document.getElementById('poem-reflection-input')?.value || "",
+      abstract: currentType === 'poem'
+        ? (document.getElementById('poem-reflection-input')?.value || "")
+        : (document.getElementById('paper-abstract')?.value || ""),
       pullQuote: document.getElementById('essay-pullquote-input')?.value || "",
       journal: document.getElementById('paper-journal')?.value || "",
       volume: document.getElementById('paper-volume')?.value || "",
@@ -3570,15 +3680,17 @@ const existingPostsData = allPosts.map((p) => {
     const drafts = getDrafts();
     const container = document.getElementById('drafts-container');
     const noMsg = document.getElementById('no-drafts-msg');
+    if (!container) return;
 
     if (drafts.length === 0) {
-      container.innerHTML = '';
-      container.appendChild(noMsg);
-      noMsg.classList.remove('hidden');
+      container.innerHTML = `
+        <div id="no-drafts-msg" class="text-center py-12 border border-dashed border-[var(--border-color)] rounded-2xl text-xs text-[var(--text-secondary)]">
+          No saved drafts found. Write something and tap "Save Draft".
+        </div>
+      `;
       return;
     }
 
-    noMsg.classList.add('hidden');
     container.innerHTML = drafts.map(d => `
       <div class="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-primary)] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
         <div class="space-y-1">
@@ -3604,14 +3716,15 @@ const existingPostsData = allPosts.map((p) => {
 
     container.querySelectorAll('.btn-load-draft').forEach(btn => {
       btn.addEventListener('click', () => {
-        const d = drafts.find(x => x.id === parseInt(btn.dataset.id));
+        const id = Number(btn.dataset.id);
+        const d = drafts.find(x => x.id === id);
         if (d) loadIntoForm(d);
       });
     });
 
     container.querySelectorAll('.btn-del-draft').forEach(btn => {
       btn.addEventListener('click', () => {
-        const id = parseInt(btn.dataset.id);
+        const id = Number(btn.dataset.id);
         const filtered = drafts.filter(x => x.id !== id);
         localStorage.setItem('hk_cms_drafts', JSON.stringify(filtered));
         renderDrafts();
@@ -3729,8 +3842,7 @@ const existingPostsData = allPosts.map((p) => {
         title: btn.dataset.title,
         postType: found?.postType
       };
-      const isAcademic = found?.postType === "academic_paper";
-      const filePath = isAcademic ? `src/data/posts/${slug}.ts` : `src/content/posts/${slug}.md`;
+      const filePath = getPostFilePath(slug, found?.postType);
       delModalTitle.textContent = `"${postToDelete.title}"`;
       delModalCommand.textContent = `rm ${filePath}`;
       deleteModal.classList.remove('hidden');
@@ -3745,16 +3857,16 @@ const existingPostsData = allPosts.map((p) => {
   delModalConfirm?.addEventListener('click', async () => {
     if (!postToDelete) return;
     const token = getGhToken();
-    const isAcademic = postToDelete.postType === "academic_paper";
-    const filePath = isAcademic ? `src/data/posts/${postToDelete.slug}.ts` : `src/content/posts/${postToDelete.slug}.md`;
+    const isSim = isSimulationMode();
+    const filePath = getPostFilePath(postToDelete.slug, postToDelete.postType);
     const btnText = document.getElementById('del-modal-btn-text');
 
-    if (token) {
+    if (token || isSim) {
       if (btnText) btnText.textContent = "Deleting on GitHub...";
       delModalConfirm.setAttribute("disabled", "true");
       try {
         await deleteFileFromGitHub(filePath, `chore(content): delete ${postToDelete.slug} via CMS Studio`);
-        showToast(`Deleted ${filePath} from GitHub repository`);
+        showToast(isSim ? `[Simulated] Deleted ${filePath}` : `Deleted ${filePath} from GitHub repository`);
       } catch (err) {
         console.error("GitHub deletion error:", err);
         showToast(err.message || "Failed to delete file from GitHub");
@@ -3764,11 +3876,19 @@ const existingPostsData = allPosts.map((p) => {
       }
     }
 
+    try {
+      const stored = JSON.parse(localStorage.getItem('hk_cms_published_posts') || '[]');
+      const filtered = stored.filter(p => p.slug !== postToDelete.slug);
+      localStorage.setItem('hk_cms_published_posts', JSON.stringify(filtered));
+    } catch (e) {
+      console.error("Failed to update published posts storage on delete", e);
+    }
+
     const item = document.querySelector(`.catalog-item[data-slug="${postToDelete.slug}"]`);
     if (item) {
       item.remove();
       existingPosts = existingPosts.filter(p => p.slug !== postToDelete.slug);
-      document.getElementById('catalog-count-badge').textContent = existingPosts.length;
+      document.getElementById('catalog-count-badge').textContent = `(${existingPosts.length})`;
       showToast(`Removed "${postToDelete.title}" from catalog view`);
     }
     deleteModal.classList.add('hidden');
@@ -3777,9 +3897,9 @@ const existingPostsData = allPosts.map((p) => {
 
   // Filter Catalog
   document.getElementById('existing-search')?.addEventListener('input', (e) => {
-    const q = e.target.value.toLowerCase();
+    const q = (e.target.value || '').trim().toLowerCase();
     document.querySelectorAll('.catalog-item').forEach(item => {
-      const match = item.dataset.title.toLowerCase().includes(q) || item.dataset.slug.toLowerCase().includes(q);
+      const match = !q || (item.dataset.title || '').toLowerCase().includes(q) || (item.dataset.slug || '').toLowerCase().includes(q);
       item.style.display = match ? '' : 'none';
     });
   });
@@ -3800,10 +3920,24 @@ const existingPostsData = allPosts.map((p) => {
   // ASSET LIBRARY & MEDIA GALLERY STUDIO
   // -------------------------------------------------------------
   let currentAssets = (typeof scannedAssets !== 'undefined' && Array.isArray(scannedAssets)) ? [...scannedAssets] : [];
+  try {
+    const customAssets = JSON.parse(localStorage.getItem('hk_cms_custom_assets') || '[]');
+    if (Array.isArray(customAssets)) {
+      customAssets.forEach(ca => {
+        if (!currentAssets.some(a => a.path === ca.path)) {
+          currentAssets.unshift(ca);
+        }
+      });
+    }
+  } catch (e) {}
   let activeAssetFilter = 'all';
   let assetToDelete = null;
   let pendingWebpDataUrl = null;
-  let pendingWebpBytes = 0;
+  currentAssets.forEach((a) => {
+    if (!a.baseUsedIn) {
+      a.baseUsedIn = a.usedIn ? JSON.parse(JSON.stringify(a.usedIn)) : [];
+    }
+  });
 
   function recalculateAssetUsages() {
     const drafts = (typeof getDrafts === 'function') ? getDrafts() : [];
@@ -3815,7 +3949,10 @@ const existingPostsData = allPosts.map((p) => {
     const allClientPosts = [...existingPosts, ...drafts, ...localPublished];
 
     currentAssets.forEach((asset) => {
-      const usages = asset.usedIn ? [...asset.usedIn] : [];
+      if (!asset.baseUsedIn) {
+        asset.baseUsedIn = asset.usedIn ? JSON.parse(JSON.stringify(asset.usedIn)) : [];
+      }
+      const usages = [...asset.baseUsedIn];
       const webPath = asset.path;
       const filename = asset.filename;
 
@@ -4089,16 +4226,17 @@ const existingPostsData = allPosts.map((p) => {
   document.getElementById('asset-del-confirm')?.addEventListener('click', async () => {
     if (!assetToDelete) return;
     const token = getGhToken();
+    const isSim = isSimulationMode();
     const btnText = document.getElementById('asset-del-btn-text');
     const confirmBtn = document.getElementById('asset-del-confirm');
     const filePath = `public${assetToDelete.path}`;
 
-    if (token) {
+    if (token || isSim) {
       if (btnText) btnText.textContent = "Deleting on GitHub...";
       confirmBtn?.setAttribute("disabled", "true");
       try {
         await deleteFileFromGitHub(filePath, `chore(assets): remove unused asset ${assetToDelete.filename}`);
-        showToast(`Deleted ${assetToDelete.filename} from GitHub repository`);
+        showToast(isSim ? `[Simulated] Deleted ${assetToDelete.filename}` : `Deleted ${assetToDelete.filename} from GitHub repository`);
       } catch (err) {
         console.error("Asset deletion error:", err);
         showToast(err.message || "Failed to delete asset from GitHub");
@@ -4109,6 +4247,12 @@ const existingPostsData = allPosts.map((p) => {
     }
 
     currentAssets = currentAssets.filter((a) => a.path !== assetToDelete.path);
+    try {
+      const customAssets = JSON.parse(localStorage.getItem('hk_cms_custom_assets') || '[]');
+      const filteredCustom = customAssets.filter((a) => a.path !== assetToDelete.path);
+      localStorage.setItem('hk_cms_custom_assets', JSON.stringify(filteredCustom));
+    } catch (e) {}
+
     renderAssetsGrid(activeAssetFilter);
     showToast(`Removed "${assetToDelete.filename}" from library`);
     document.getElementById('asset-delete-modal')?.classList.add('hidden');
@@ -4231,7 +4375,8 @@ const existingPostsData = allPosts.map((p) => {
   document.getElementById('btn-upload-pending-asset')?.addEventListener('click', async () => {
     if (!pendingWebpDataUrl) return;
     const token = getGhToken();
-    if (!token) {
+    const isSim = isSimulationMode();
+    if (!token && !isSim) {
       alert("GitHub authentication required to commit assets. Please sign in with GitHub.");
       window.location.href = "/api/auth/login";
       return;
@@ -4247,12 +4392,12 @@ const existingPostsData = allPosts.map((p) => {
     const btnText = document.getElementById('btn-upload-asset-text');
     const uploadBtn = document.getElementById('btn-upload-pending-asset');
 
-    if (btnText) btnText.textContent = "Committing to GitHub...";
+    if (btnText) btnText.textContent = isSim ? "Saving (Simulated)..." : "Committing to GitHub...";
     uploadBtn?.setAttribute("disabled", "true");
 
     try {
       await commitBinaryFileToGitHub(targetPath, rawBase64, `chore(assets): upload ${filename} via CMS Studio`);
-      showToast(`Committed ${filename} to GitHub!`);
+      showToast(isSim ? `[Simulated] Added ${filename} to local gallery!` : `Committed ${filename} to GitHub!`);
 
       const newAsset = {
         path: webPath,
@@ -4262,6 +4407,7 @@ const existingPostsData = allPosts.map((p) => {
           ? (pendingWebpBytes / (1024 * 1024)).toFixed(1) + ' MB'
           : Math.round(pendingWebpBytes / 1024) + ' KB',
         usedIn: [],
+        baseUsedIn: [],
       };
 
       const existingIdx = currentAssets.findIndex((a) => a.path === webPath);
@@ -4271,13 +4417,22 @@ const existingPostsData = allPosts.map((p) => {
         currentAssets.unshift(newAsset);
       }
 
+      try {
+        const customAssets = JSON.parse(localStorage.getItem('hk_cms_custom_assets') || '[]');
+        const filteredCustom = customAssets.filter((a) => a.path !== webPath);
+        filteredCustom.unshift(newAsset);
+        localStorage.setItem('hk_cms_custom_assets', JSON.stringify(filteredCustom));
+      } catch (e) {}
+
       document.getElementById('asset-pending-preview')?.classList.add('hidden');
       pendingWebpDataUrl = null;
       pendingWebpBytes = 0;
       if (assetFileInput) assetFileInput.value = '';
 
       renderAssetsGrid(activeAssetFilter);
-      alert(`Asset Committed to GitHub!\n\nPath: ${targetPath}\nSize: ${newAsset.formattedSize}\n\nYou can now copy the Markdown code or set it as a post cover image.`);
+      alert(isSim
+        ? `[SIMULATION MODE] Asset Added!\n\nPath: ${webPath}\nSize: ${newAsset.formattedSize}\n\nYou can now copy the Markdown code or set it as a post cover image.`
+        : `Asset Committed to GitHub!\n\nPath: ${targetPath}\nSize: ${newAsset.formattedSize}\n\nYou can now copy the Markdown code or set it as a post cover image.`);
     } catch (err) {
       console.error("Asset commit error:", err);
       alert(`Asset commit failed: ${err.message}`);
@@ -4934,14 +5089,13 @@ export const siteConfig: SiteConfig = defaultSiteConfig;
         renderPublishedItemToCatalog(pub);
       });
       const catBadge = document.getElementById('catalog-count-badge');
-      if (catBadge) catBadge.textContent = existingPosts.length;
+      if (catBadge) catBadge.textContent = `(${existingPosts.length})`;
     }
   } catch (e) {
     console.error("Failed to load locally published posts", e);
   }
 
   // Local development bypass listener
-  const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
   if (isLocalHost) {
     document.getElementById('local-dev-bypass')?.classList.remove('hidden');
     document.getElementById('btn-local-bypass')?.addEventListener('click', () => {
