@@ -26,7 +26,7 @@ tags:
   - "Reflections"
 ---
 
-This is a test
-This is the second line
-this is the third line
-This is #Bold
+This is a test        < br>
+This is the second line<br>
+this is the third line<br>
+This is **BOLD**<br>
