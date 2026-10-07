@@ -1397,7 +1397,7 @@ const existingPostsData = allPosts.map((p) => {
               class="min-h-[40px] px-4 py-2 rounded-lg bg-[var(--text-primary)] text-[var(--bg-primary)] font-semibold text-xs hover:opacity-90 transition-opacity cursor-pointer inline-flex items-center gap-1.5 shadow-xs"
             >
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
-              <span>Save Settings Locally</span>
+              <span>Save &amp; Commit Changes</span>
             </button>
           </div>
         </div>
@@ -1409,50 +1409,50 @@ const existingPostsData = allPosts.map((p) => {
           <aside class="hidden lg:block lg:col-span-3 sticky top-8 space-y-6">
             <div class="space-y-1">
               <span class="text-[10px] font-mono uppercase tracking-widest text-[var(--text-secondary)] font-semibold px-3 block mb-2">
-                Settings Sections
+                Pages &amp; Sections
               </span>
               <nav class="space-y-0.5" aria-label="Settings Sections">
+                <a href="#sec-cfg-home" class="cfg-side-link block px-3.5 py-2 rounded-lg text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]/50 transition-colors">
+                  Home Page
+                </a>
+                <a href="#sec-cfg-about" class="cfg-side-link block px-3.5 py-2 rounded-lg text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]/50 transition-colors">
+                  About Page
+                </a>
                 <a href="#sec-cfg-header" class="cfg-side-link block px-3.5 py-2 rounded-lg text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]/50 transition-colors">
-                  Navigation &amp; Tabs
-                </a>
-                <a href="#sec-cfg-author" class="cfg-side-link block px-3.5 py-2 rounded-lg text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]/50 transition-colors">
-                  Author &amp; Biography
-                </a>
-                <a href="#sec-cfg-spotlight" class="cfg-side-link block px-3.5 py-2 rounded-lg text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]/50 transition-colors">
-                  Fieldwork Spotlight
+                  Header &amp; Menu
                 </a>
                 <a href="#sec-cfg-socials" class="cfg-side-link block px-3.5 py-2 rounded-lg text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]/50 transition-colors">
-                  Social &amp; Academic
-                </a>
-                <a href="#sec-cfg-pages" class="cfg-side-link block px-3.5 py-2 rounded-lg text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]/50 transition-colors">
-                  Page Introductions
+                  Social Links
                 </a>
                 <a href="#sec-cfg-footer" class="cfg-side-link block px-3.5 py-2 rounded-lg text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]/50 transition-colors">
                   Footer &amp; Notices
                 </a>
+                <a href="#sec-cfg-pages" class="cfg-side-link block px-3.5 py-2 rounded-lg text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]/50 transition-colors">
+                  Other Page Headers
+                </a>
                 <a href="#sec-cfg-github" class="cfg-side-link block px-3.5 py-2 rounded-lg text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]/50 transition-colors">
-                  GitHub Synchronization
+                  GitHub &amp; Sync
                 </a>
                 <a href="#sec-cfg-export" class="cfg-side-link block px-3.5 py-2 rounded-lg text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]/50 transition-colors">
-                  Export TypeScript
+                  Developer Export
                 </a>
               </nav>
             </div>
 
             <div class="p-4 rounded-xl border border-[var(--border-color)]/60 bg-[var(--bg-secondary)]/20 space-y-1.5 text-[11px] text-[var(--text-secondary)] leading-relaxed">
-              <span class="font-semibold text-[var(--text-primary)] block">Live Storage Notice</span>
-              <p>Edits are preserved in browser storage for instant preview. Export the TypeScript file when ready to commit to the repository.</p>
+              <span class="font-semibold text-[var(--text-primary)] block">Auto-Sync Enabled</span>
+              <p>Clicking <strong>Save &amp; Commit Changes</strong> directly updates your site configuration in the repository.</p>
             </div>
           </aside>
 
           <!-- Mobile Quick Jump Bar (Shown on small screens) -->
           <div class="lg:hidden flex items-center gap-1.5 overflow-x-auto pb-2 text-xs font-medium border-b border-[var(--border-color)]/60">
-            <a href="#sec-cfg-header" class="px-3 py-1.5 rounded-lg bg-[var(--bg-secondary)]/60 text-[var(--text-secondary)] whitespace-nowrap">Navigation</a>
-            <a href="#sec-cfg-author" class="px-3 py-1.5 rounded-lg bg-[var(--bg-secondary)]/60 text-[var(--text-secondary)] whitespace-nowrap">Author</a>
-            <a href="#sec-cfg-spotlight" class="px-3 py-1.5 rounded-lg bg-[var(--bg-secondary)]/60 text-[var(--text-secondary)] whitespace-nowrap">Spotlight</a>
+            <a href="#sec-cfg-home" class="px-3 py-1.5 rounded-lg bg-[var(--bg-secondary)]/60 text-[var(--text-secondary)] whitespace-nowrap">Home</a>
+            <a href="#sec-cfg-about" class="px-3 py-1.5 rounded-lg bg-[var(--bg-secondary)]/60 text-[var(--text-secondary)] whitespace-nowrap">About</a>
+            <a href="#sec-cfg-header" class="px-3 py-1.5 rounded-lg bg-[var(--bg-secondary)]/60 text-[var(--text-secondary)] whitespace-nowrap">Menu</a>
             <a href="#sec-cfg-socials" class="px-3 py-1.5 rounded-lg bg-[var(--bg-secondary)]/60 text-[var(--text-secondary)] whitespace-nowrap">Socials</a>
-            <a href="#sec-cfg-pages" class="px-3 py-1.5 rounded-lg bg-[var(--bg-secondary)]/60 text-[var(--text-secondary)] whitespace-nowrap">Pages</a>
             <a href="#sec-cfg-footer" class="px-3 py-1.5 rounded-lg bg-[var(--bg-secondary)]/60 text-[var(--text-secondary)] whitespace-nowrap">Footer</a>
+            <a href="#sec-cfg-pages" class="px-3 py-1.5 rounded-lg bg-[var(--bg-secondary)]/60 text-[var(--text-secondary)] whitespace-nowrap">Headers</a>
             <a href="#sec-cfg-github" class="px-3 py-1.5 rounded-lg bg-[var(--bg-secondary)]/60 text-[var(--text-secondary)] whitespace-nowrap">GitHub</a>
             <a href="#sec-cfg-export" class="px-3 py-1.5 rounded-lg bg-[var(--bg-secondary)]/60 text-[var(--text-secondary)] whitespace-nowrap">Export</a>
           </div>
@@ -1460,40 +1460,71 @@ const existingPostsData = allPosts.map((p) => {
           <!-- Right Column: Spacious Form Sections -->
           <div id="site-config-form" class="lg:col-span-9 space-y-14">
             
-            <!-- 1. Header & Navigation -->
-            <div id="sec-cfg-header" class="p-6 sm:p-8 rounded-2xl border border-[var(--border-color)]/70 bg-[var(--bg-primary)] space-y-6 shadow-xs">
+            <!-- Compatibility anchor for tests or older links -->
+            <div id="sec-cfg-author" class="hidden" aria-hidden="true"></div>
+
+            <!-- 1. Home Page Settings -->
+            <div id="sec-cfg-home" class="p-6 sm:p-8 rounded-2xl border border-[var(--border-color)]/70 bg-[var(--bg-primary)] space-y-8 shadow-xs">
               <div class="flex items-center justify-between pb-4 border-b border-[var(--border-color)]/60">
                 <div class="space-y-1">
                   <h3 class="text-base sm:text-lg font-serif font-bold text-[var(--text-primary)]">
-                    Header Navigation &amp; Tab Order
+                    Home Page Settings &amp; Identity
                   </h3>
                   <p class="text-xs text-[var(--text-secondary)] leading-relaxed">
-                    Reorder buttons, customize display labels, or toggle header tab visibility.
+                    Customise your hero profile picture, bio blurb, academic title, hero action buttons, and fieldwork spotlight.
                   </p>
                 </div>
-                <span class="text-xs font-mono text-[var(--accent)] font-semibold shrink-0">
-                  7 Tabs
+              </div>
+
+              <!-- Visual Media Picker: Profile Avatar -->
+              <div class="p-5 rounded-xl border border-[var(--border-color)]/60 bg-[var(--bg-secondary)]/20 space-y-4">
+                <span class="text-xs font-semibold uppercase tracking-wider text-[var(--text-primary)] block">
+                  Profile Picture (Home Page Hero)
                 </span>
+                <div class="flex flex-col sm:flex-row sm:items-center gap-5">
+                  <div class="relative shrink-0">
+                    <img
+                      id="avatar-preview-img"
+                      src="/images/posts/avatar.webp"
+                      alt="Avatar Preview"
+                      class="w-24 h-24 rounded-full object-cover border-2 border-[var(--border-color)] shadow-sm bg-[var(--bg-secondary)]"
+                      onerror="this.src='/images/posts/avatar.webp'"
+                    />
+                  </div>
+                  <div class="space-y-3 flex-1">
+                    <div class="flex flex-wrap items-center gap-2.5">
+                      <button
+                        type="button"
+                        id="btn-upload-avatar"
+                        class="min-h-[38px] px-3.5 py-2 rounded-lg bg-[var(--text-primary)] text-[var(--bg-primary)] text-xs font-semibold hover:opacity-90 transition-opacity cursor-pointer inline-flex items-center gap-1.5"
+                      >
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                        <span>Upload New Photo</span>
+                      </button>
+                      <button
+                        type="button"
+                        id="btn-pick-avatar-asset"
+                        class="min-h-[38px] px-3.5 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-secondary)] hover:bg-[var(--bg-primary)] text-xs font-medium text-[var(--text-primary)] transition-colors cursor-pointer inline-flex items-center gap-1.5"
+                      >
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        <span>Choose from Asset Library</span>
+                      </button>
+                      <input type="file" id="file-input-avatar" accept="image/*" class="hidden" />
+                    </div>
+                    <div class="space-y-1">
+                      <label class="text-[10px] font-mono uppercase tracking-wider text-[var(--text-secondary)] block">Image File Path</label>
+                      <input
+                        type="text"
+                        id="cfg-author-avatar"
+                        class="w-full px-3 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] focus:border-[var(--text-primary)] focus:outline-none text-xs font-mono text-[var(--text-primary)] transition-all"
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <!-- List rendered dynamically by JavaScript -->
-              <div id="cfg-nav-list" class="space-y-3">
-                <!-- Rendered via JS -->
-              </div>
-            </div>
-
-            <!-- 2. Author Profile & Bio -->
-            <div id="sec-cfg-author" class="p-6 sm:p-8 rounded-2xl border border-[var(--border-color)]/70 bg-[var(--bg-primary)] space-y-6 shadow-xs">
-              <div class="pb-4 border-b border-[var(--border-color)]/60 space-y-1">
-                <h3 class="text-base sm:text-lg font-serif font-bold text-[var(--text-primary)]">
-                  Author Profile &amp; Biography
-                </h3>
-                <p class="text-xs text-[var(--text-secondary)] leading-relaxed">
-                  Academic identity, degrees, institutional affiliations, and biography texts displayed across Home and About.
-                </p>
-              </div>
-
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <!-- Author Identity Details -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div class="space-y-2">
                   <label class="block text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)]">Full Name</label>
                   <input type="text" id="cfg-author-name" class="w-full px-4 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/20 focus:bg-[var(--bg-primary)] focus:border-[var(--text-primary)] focus:outline-none text-xs sm:text-sm text-[var(--text-primary)] transition-all" />
@@ -1507,46 +1538,27 @@ const existingPostsData = allPosts.map((p) => {
                   <input type="text" id="cfg-author-title" class="w-full px-4 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/20 focus:bg-[var(--bg-primary)] focus:border-[var(--text-primary)] focus:outline-none text-xs sm:text-sm text-[var(--text-primary)] transition-all" />
                 </div>
                 <div class="space-y-2">
-                  <label class="block text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)]">Qualification</label>
-                  <input type="text" id="cfg-author-qualification" class="w-full px-4 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/20 focus:bg-[var(--bg-primary)] focus:border-[var(--text-primary)] focus:outline-none text-xs sm:text-sm text-[var(--text-primary)] transition-all" />
-                </div>
-                <div class="space-y-2">
                   <label class="block text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)]">Affiliation</label>
                   <input type="text" id="cfg-author-affiliation" class="w-full px-4 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/20 focus:bg-[var(--bg-primary)] focus:border-[var(--text-primary)] focus:outline-none text-xs sm:text-sm text-[var(--text-primary)] transition-all" />
                 </div>
-                <div class="space-y-2">
+                <div class="space-y-2 sm:col-span-2">
                   <label class="block text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)]">Location</label>
                   <input type="text" id="cfg-author-location" class="w-full px-4 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/20 focus:bg-[var(--bg-primary)] focus:border-[var(--text-primary)] focus:outline-none text-xs sm:text-sm text-[var(--text-primary)] transition-all" />
                 </div>
               </div>
 
+              <!-- Short Bio (Hero Section) -->
               <div class="space-y-2">
-                <label class="block text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)]">Short Bio (Hero Section)</label>
-                <textarea id="cfg-author-shortbio" rows="2" class="w-full p-3.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/20 focus:bg-[var(--bg-primary)] focus:border-[var(--text-primary)] focus:outline-none text-xs sm:text-sm text-[var(--text-primary)] leading-relaxed"></textarea>
-              </div>
-
-              <div class="space-y-2">
-                <label class="block text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)]">Full Biography (About Page - Paragraphs separated by blank line)</label>
-                <textarea id="cfg-author-fullbio" rows="5" class="w-full p-3.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/20 focus:bg-[var(--bg-primary)] focus:border-[var(--text-primary)] focus:outline-none text-xs sm:text-sm text-[var(--text-primary)] leading-relaxed"></textarea>
-              </div>
-
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div class="space-y-2">
-                  <label class="block text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)]">Avatar Image Path</label>
-                  <input type="text" id="cfg-author-avatar" class="w-full px-4 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/20 focus:bg-[var(--bg-primary)] focus:border-[var(--text-primary)] focus:outline-none text-xs font-mono text-[var(--text-primary)] transition-all" />
+                <div class="flex items-center justify-between">
+                  <label class="block text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)]">
+                    Home Page Hero Short Bio
+                  </label>
+                  <span class="text-[10px] font-mono text-[var(--text-secondary)]">Displayed in hero intro</span>
                 </div>
-                <div class="space-y-2">
-                  <label class="block text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)]">Full Photo Path</label>
-                  <input type="text" id="cfg-author-photo" class="w-full px-4 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/20 focus:bg-[var(--bg-primary)] focus:border-[var(--text-primary)] focus:outline-none text-xs font-mono text-[var(--text-primary)] transition-all" />
-                </div>
+                <textarea id="cfg-author-shortbio" rows="3" class="w-full p-3.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/20 focus:bg-[var(--bg-primary)] focus:border-[var(--text-primary)] focus:outline-none text-xs sm:text-sm text-[var(--text-primary)] leading-relaxed"></textarea>
               </div>
 
-              <div class="space-y-2">
-                <label class="block text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)]">Research Areas (Comma separated)</label>
-                <input type="text" id="cfg-author-research-areas" class="w-full px-4 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/20 focus:bg-[var(--bg-primary)] focus:border-[var(--text-primary)] focus:outline-none text-xs sm:text-sm text-[var(--text-primary)] transition-all" />
-              </div>
-
-              <!-- Metrics & Action Buttons in Spacious Structured Cards -->
+              <!-- Metrics & Action Buttons -->
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
                 <div class="p-5 rounded-xl bg-[var(--bg-secondary)]/20 border border-[var(--border-color)]/60 space-y-4">
                   <span class="text-xs font-semibold uppercase tracking-wider text-[var(--text-primary)] block">Hero Metrics</span>
@@ -1592,76 +1604,203 @@ const existingPostsData = allPosts.map((p) => {
                   </div>
                 </div>
               </div>
+
+              <!-- Fieldwork Spotlight embedded within Home Page section -->
+              <div id="sec-cfg-spotlight" class="p-5 rounded-xl border border-[var(--border-color)]/70 bg-[var(--bg-secondary)]/20 space-y-6">
+                <div class="flex items-center justify-between pb-3 border-b border-[var(--border-color)]/60">
+                  <div class="space-y-1">
+                    <h4 class="text-sm font-serif font-bold text-[var(--text-primary)]">
+                      Fieldwork Spotlight Card (Homepage)
+                    </h4>
+                    <p class="text-xs text-[var(--text-secondary)] leading-relaxed">
+                      Interlinear glossed linguistic demonstration featured on the home page.
+                    </p>
+                  </div>
+                  <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+                    <input type="checkbox" id="cfg-spotlight-enabled" class="rounded border-[var(--border-color)] w-4 h-4 text-[var(--accent)]" />
+                    <span class="text-xs font-semibold text-[var(--text-primary)]">Enable on Homepage</span>
+                  </label>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <div class="space-y-2">
+                    <label class="text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)] block">Badge Label</label>
+                    <input type="text" id="cfg-spotlight-badge" class="w-full px-4 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-primary)] focus:border-[var(--text-primary)] focus:outline-none text-xs sm:text-sm text-[var(--text-primary)]" />
+                  </div>
+                  <div class="space-y-2">
+                    <label class="text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)] block">Subtitle / Language</label>
+                    <input type="text" id="cfg-spotlight-sub" class="w-full px-4 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-primary)] focus:border-[var(--text-primary)] focus:outline-none text-xs sm:text-sm text-[var(--text-primary)]" />
+                  </div>
+                  <div class="space-y-2">
+                    <label class="text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)] block">Study Link Text</label>
+                    <input type="text" id="cfg-spotlight-link-text" class="w-full px-4 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-primary)] focus:border-[var(--text-primary)] focus:outline-none text-xs sm:text-sm text-[var(--text-primary)]" />
+                  </div>
+                  <div class="space-y-2">
+                    <label class="text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)] block">Study Link URL</label>
+                    <input type="text" id="cfg-spotlight-link-href" class="w-full px-4 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-primary)] focus:border-[var(--text-primary)] focus:outline-none text-xs sm:text-sm text-[var(--text-primary)]" />
+                  </div>
+                </div>
+
+                <!-- Interlinear Gloss Word Units -->
+                <div class="space-y-3">
+                  <label class="block text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)]">
+                    Interlinear Gloss Pairs (Source Morpheme + Gloss Annotation)
+                  </label>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="p-3.5 rounded-xl border border-[var(--border-color)]/60 bg-[var(--bg-primary)] space-y-2">
+                      <span class="text-[10px] font-mono text-[var(--accent)] block font-semibold">Word 1</span>
+                      <input type="text" id="cfg-spotlight-w1-src" placeholder="Source" class="w-full px-3 py-1.5 rounded-lg bg-[var(--bg-secondary)]/20 border border-[var(--border-color)] text-xs font-serif" />
+                      <input type="text" id="cfg-spotlight-w1-gloss" placeholder="Gloss" class="w-full px-3 py-1.5 rounded-lg bg-[var(--bg-secondary)]/20 border border-[var(--border-color)] text-[11px] font-mono text-[var(--text-secondary)]" />
+                    </div>
+                    <div class="p-3.5 rounded-xl border border-[var(--border-color)]/60 bg-[var(--bg-primary)] space-y-2">
+                      <span class="text-[10px] font-mono text-[var(--accent)] block font-semibold">Word 2</span>
+                      <input type="text" id="cfg-spotlight-w2-src" placeholder="Source" class="w-full px-3 py-1.5 rounded-lg bg-[var(--bg-secondary)]/20 border border-[var(--border-color)] text-xs font-serif" />
+                      <input type="text" id="cfg-spotlight-w2-gloss" placeholder="Gloss" class="w-full px-3 py-1.5 rounded-lg bg-[var(--bg-secondary)]/20 border border-[var(--border-color)] text-[11px] font-mono text-[var(--text-secondary)]" />
+                    </div>
+                    <div class="p-3.5 rounded-xl border border-[var(--border-color)]/60 bg-[var(--bg-primary)] space-y-2">
+                      <span class="text-[10px] font-mono text-[var(--accent)] block font-semibold">Word 3</span>
+                      <input type="text" id="cfg-spotlight-w3-src" placeholder="Source" class="w-full px-3 py-1.5 rounded-lg bg-[var(--bg-secondary)]/20 border border-[var(--border-color)] text-xs font-serif" />
+                      <input type="text" id="cfg-spotlight-w3-gloss" placeholder="Gloss" class="w-full px-3 py-1.5 rounded-lg bg-[var(--bg-secondary)]/20 border border-[var(--border-color)] text-[11px] font-mono text-[var(--text-secondary)]" />
+                    </div>
+                    <div class="p-3.5 rounded-xl border border-[var(--border-color)]/60 bg-[var(--bg-primary)] space-y-2">
+                      <span class="text-[10px] font-mono text-[var(--accent)] block font-semibold">Word 4</span>
+                      <input type="text" id="cfg-spotlight-w4-src" placeholder="Source" class="w-full px-3 py-1.5 rounded-lg bg-[var(--bg-secondary)]/20 border border-[var(--border-color)] text-xs font-serif" />
+                      <input type="text" id="cfg-spotlight-w4-gloss" placeholder="Gloss" class="w-full px-3 py-1.5 rounded-lg bg-[var(--bg-secondary)]/20 border border-[var(--border-color)] text-[11px] font-mono text-[var(--text-secondary)]" />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="space-y-2">
+                  <label class="block text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)]">Free English Translation</label>
+                  <input type="text" id="cfg-spotlight-trans" class="w-full px-4 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-primary)] focus:border-[var(--text-primary)] focus:outline-none text-xs sm:text-sm font-serif text-[var(--text-primary)]" />
+                </div>
+              </div>
             </div>
 
-            <!-- 3. Fieldwork Spotlight -->
-            <div id="sec-cfg-spotlight" class="p-6 sm:p-8 rounded-2xl border border-[var(--border-color)]/70 bg-[var(--bg-primary)] space-y-6 shadow-xs">
+            <!-- 2. About Page Settings -->
+            <div id="sec-cfg-about" class="p-6 sm:p-8 rounded-2xl border border-[var(--border-color)]/70 bg-[var(--bg-primary)] space-y-8 shadow-xs">
               <div class="flex items-center justify-between pb-4 border-b border-[var(--border-color)]/60">
                 <div class="space-y-1">
                   <h3 class="text-base sm:text-lg font-serif font-bold text-[var(--text-primary)]">
-                    Fieldwork Spotlight Card (Homepage)
+                    About Page Settings &amp; Biography
                   </h3>
                   <p class="text-xs text-[var(--text-secondary)] leading-relaxed">
-                    Interlinear glossed linguistic demonstration featured on the home page.
+                    Customise your full portrait photo, page lead header, academic qualifications, long-form biography, and research areas.
                   </p>
                 </div>
-                <label class="inline-flex items-center gap-2 cursor-pointer select-none">
-                  <input type="checkbox" id="cfg-spotlight-enabled" class="rounded border-[var(--border-color)] w-4 h-4 text-[var(--accent)]" />
-                  <span class="text-xs font-semibold text-[var(--text-primary)]">Enable on Homepage</span>
-                </label>
               </div>
 
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div class="space-y-2">
-                  <label class="text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)] block">Badge Label</label>
-                  <input type="text" id="cfg-spotlight-badge" class="w-full px-4 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/20 focus:bg-[var(--bg-primary)] focus:border-[var(--text-primary)] focus:outline-none text-xs sm:text-sm text-[var(--text-primary)]" />
-                </div>
-                <div class="space-y-2">
-                  <label class="text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)] block">Subtitle / Language</label>
-                  <input type="text" id="cfg-spotlight-sub" class="w-full px-4 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/20 focus:bg-[var(--bg-primary)] focus:border-[var(--text-primary)] focus:outline-none text-xs sm:text-sm text-[var(--text-primary)]" />
-                </div>
-                <div class="space-y-2">
-                  <label class="text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)] block">Study Link Text</label>
-                  <input type="text" id="cfg-spotlight-link-text" class="w-full px-4 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/20 focus:bg-[var(--bg-primary)] focus:border-[var(--text-primary)] focus:outline-none text-xs sm:text-sm text-[var(--text-primary)]" />
-                </div>
-                <div class="space-y-2">
-                  <label class="text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)] block">Study Link URL</label>
-                  <input type="text" id="cfg-spotlight-link-href" class="w-full px-4 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/20 focus:bg-[var(--bg-primary)] focus:border-[var(--text-primary)] focus:outline-none text-xs sm:text-sm text-[var(--text-primary)]" />
-                </div>
-              </div>
-
-              <!-- Interlinear Gloss Word Units -->
-              <div class="space-y-3">
-                <label class="block text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)]">
-                  Interlinear Gloss Pairs (Source Morpheme + Gloss Annotation)
-                </label>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div class="p-3.5 rounded-xl border border-[var(--border-color)]/60 bg-[var(--bg-secondary)]/20 space-y-2">
-                    <span class="text-[10px] font-mono text-[var(--accent)] block font-semibold">Word 1</span>
-                    <input type="text" id="cfg-spotlight-w1-src" placeholder="Source" class="w-full px-3 py-1.5 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-color)] text-xs font-serif" />
-                    <input type="text" id="cfg-spotlight-w1-gloss" placeholder="Gloss" class="w-full px-3 py-1.5 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-color)] text-[11px] font-mono text-[var(--text-secondary)]" />
+              <!-- Visual Media Picker: About Portrait Photo -->
+              <div class="p-5 rounded-xl border border-[var(--border-color)]/60 bg-[var(--bg-secondary)]/20 space-y-4">
+                <span class="text-xs font-semibold uppercase tracking-wider text-[var(--text-primary)] block">
+                  Portrait Photo (About Page)
+                </span>
+                <div class="flex flex-col sm:flex-row sm:items-center gap-5">
+                  <div class="relative shrink-0">
+                    <img
+                      id="photo-preview-img"
+                      src="/images/posts/avatar.webp"
+                      alt="Portrait Preview"
+                      class="w-28 h-36 rounded-xl object-cover border-2 border-[var(--border-color)] shadow-sm bg-[var(--bg-secondary)]"
+                      onerror="this.src='/images/posts/avatar.webp'"
+                    />
                   </div>
-                  <div class="p-3.5 rounded-xl border border-[var(--border-color)]/60 bg-[var(--bg-secondary)]/20 space-y-2">
-                    <span class="text-[10px] font-mono text-[var(--accent)] block font-semibold">Word 2</span>
-                    <input type="text" id="cfg-spotlight-w2-src" placeholder="Source" class="w-full px-3 py-1.5 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-color)] text-xs font-serif" />
-                    <input type="text" id="cfg-spotlight-w2-gloss" placeholder="Gloss" class="w-full px-3 py-1.5 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-color)] text-[11px] font-mono text-[var(--text-secondary)]" />
-                  </div>
-                  <div class="p-3.5 rounded-xl border border-[var(--border-color)]/60 bg-[var(--bg-secondary)]/20 space-y-2">
-                    <span class="text-[10px] font-mono text-[var(--accent)] block font-semibold">Word 3</span>
-                    <input type="text" id="cfg-spotlight-w3-src" placeholder="Source" class="w-full px-3 py-1.5 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-color)] text-xs font-serif" />
-                    <input type="text" id="cfg-spotlight-w3-gloss" placeholder="Gloss" class="w-full px-3 py-1.5 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-color)] text-[11px] font-mono text-[var(--text-secondary)]" />
-                  </div>
-                  <div class="p-3.5 rounded-xl border border-[var(--border-color)]/60 bg-[var(--bg-secondary)]/20 space-y-2">
-                    <span class="text-[10px] font-mono text-[var(--accent)] block font-semibold">Word 4</span>
-                    <input type="text" id="cfg-spotlight-w4-src" placeholder="Source" class="w-full px-3 py-1.5 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-color)] text-xs font-serif" />
-                    <input type="text" id="cfg-spotlight-w4-gloss" placeholder="Gloss" class="w-full px-3 py-1.5 rounded-lg bg-[var(--bg-primary)] border border-[var(--border-color)] text-[11px] font-mono text-[var(--text-secondary)]" />
+                  <div class="space-y-3 flex-1">
+                    <div class="flex flex-wrap items-center gap-2.5">
+                      <button
+                        type="button"
+                        id="btn-upload-photo"
+                        class="min-h-[38px] px-3.5 py-2 rounded-lg bg-[var(--text-primary)] text-[var(--bg-primary)] text-xs font-semibold hover:opacity-90 transition-opacity cursor-pointer inline-flex items-center gap-1.5"
+                      >
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                        <span>Upload New Portrait</span>
+                      </button>
+                      <button
+                        type="button"
+                        id="btn-pick-photo-asset"
+                        class="min-h-[38px] px-3.5 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-secondary)] hover:bg-[var(--bg-primary)] text-xs font-medium text-[var(--text-primary)] transition-colors cursor-pointer inline-flex items-center gap-1.5"
+                      >
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        <span>Choose from Asset Library</span>
+                      </button>
+                      <input type="file" id="file-input-photo" accept="image/*" class="hidden" />
+                    </div>
+                    <div class="space-y-1">
+                      <label class="text-[10px] font-mono uppercase tracking-wider text-[var(--text-secondary)] block">Full Photo File Path</label>
+                      <input
+                        type="text"
+                        id="cfg-author-photo"
+                        class="w-full px-3 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] focus:border-[var(--text-primary)] focus:outline-none text-xs font-mono text-[var(--text-primary)] transition-all"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
 
+              <!-- About Page Headline & Introductions -->
+              <div class="p-5 rounded-xl border border-[var(--border-color)]/60 bg-[var(--bg-secondary)]/10 space-y-4">
+                <span class="text-xs font-semibold uppercase tracking-wider text-[var(--text-primary)] block">
+                  About Page Header &amp; Subtitle
+                </span>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div class="space-y-1">
+                    <label class="text-[10px] font-mono text-[var(--text-secondary)] block">Page Eyebrow</label>
+                    <input type="text" id="cfg-page-about-eyebrow" placeholder="Eyebrow" class="w-full px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)]" />
+                  </div>
+                  <div class="space-y-1">
+                    <label class="text-[10px] font-mono text-[var(--text-secondary)] block">Page Title</label>
+                    <input type="text" id="cfg-page-about-title" placeholder="Title" class="w-full px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)] font-bold" />
+                  </div>
+                </div>
+                <div class="space-y-1">
+                  <label class="text-[10px] font-mono text-[var(--text-secondary)] block">Page Subtitle / Tagline</label>
+                  <textarea id="cfg-page-about-sub" rows="2" placeholder="Subtitle" class="w-full p-3 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)]"></textarea>
+                </div>
+              </div>
+
+              <!-- Qualification & Degrees -->
               <div class="space-y-2">
-                <label class="block text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)]">Free English Translation</label>
-                <input type="text" id="cfg-spotlight-trans" class="w-full px-4 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/20 focus:bg-[var(--bg-primary)] focus:border-[var(--text-primary)] focus:outline-none text-xs sm:text-sm font-serif text-[var(--text-primary)]" />
+                <label class="block text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)]">Academic Qualifications &amp; Degrees</label>
+                <input type="text" id="cfg-author-qualification" class="w-full px-4 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/20 focus:bg-[var(--bg-primary)] focus:border-[var(--text-primary)] focus:outline-none text-xs sm:text-sm text-[var(--text-primary)] transition-all" />
+              </div>
+
+              <!-- Full Biography -->
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <label class="block text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)]">
+                    Full Biography (About Page)
+                  </label>
+                  <span class="text-[10px] font-mono text-[var(--text-secondary)]">Separate paragraphs with blank lines</span>
+                </div>
+                <textarea id="cfg-author-fullbio" rows="6" class="w-full p-3.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/20 focus:bg-[var(--bg-primary)] focus:border-[var(--text-primary)] focus:outline-none text-xs sm:text-sm text-[var(--text-primary)] leading-relaxed"></textarea>
+              </div>
+
+              <!-- Research Areas -->
+              <div class="space-y-2">
+                <label class="block text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)]">Research &amp; Specialization Areas (Comma separated)</label>
+                <input type="text" id="cfg-author-research-areas" class="w-full px-4 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/20 focus:bg-[var(--bg-primary)] focus:border-[var(--text-primary)] focus:outline-none text-xs sm:text-sm text-[var(--text-primary)] transition-all" />
+              </div>
+            </div>
+
+            <!-- 3. Header & Navigation -->
+            <div id="sec-cfg-header" class="p-6 sm:p-8 rounded-2xl border border-[var(--border-color)]/70 bg-[var(--bg-primary)] space-y-6 shadow-xs">
+              <div class="flex items-center justify-between pb-4 border-b border-[var(--border-color)]/60">
+                <div class="space-y-1">
+                  <h3 class="text-base sm:text-lg font-serif font-bold text-[var(--text-primary)]">
+                    Header Navigation &amp; Tab Order
+                  </h3>
+                  <p class="text-xs text-[var(--text-secondary)] leading-relaxed">
+                    Reorder buttons, customize display labels, or toggle header tab visibility.
+                  </p>
+                </div>
+                <span class="text-xs font-mono text-[var(--accent)] font-semibold shrink-0">
+                  7 Tabs
+                </span>
+              </div>
+
+              <!-- List rendered dynamically by JavaScript -->
+              <div id="cfg-nav-list" class="space-y-3">
+                <!-- Rendered via JS -->
               </div>
             </div>
 
@@ -1686,11 +1825,11 @@ const existingPostsData = allPosts.map((p) => {
               </div>
             </div>
 
-            <!-- 5. Page Leads & Headers -->
+            <!-- 5. Page Introductions & Leads -->
             <div id="sec-cfg-pages" class="p-6 sm:p-8 rounded-2xl border border-[var(--border-color)]/70 bg-[var(--bg-primary)] space-y-6 shadow-xs">
               <div class="pb-4 border-b border-[var(--border-color)]/60 space-y-1">
                 <h3 class="text-base sm:text-lg font-serif font-bold text-[var(--text-primary)]">
-                  Page Introductions &amp; Leads
+                  Other Page Introductions &amp; Leads
                 </h3>
                 <p class="text-xs text-[var(--text-secondary)] leading-relaxed">
                   Customizable headline, eyebrow badge, and introductory description for each public page.
@@ -1736,16 +1875,6 @@ const existingPostsData = allPosts.map((p) => {
                     <input type="text" id="cfg-page-archive-title" placeholder="Title" class="px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)] font-bold" />
                   </div>
                   <textarea id="cfg-page-archive-desc" rows="2" placeholder="Description" class="w-full p-3 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)]"></textarea>
-                </div>
-
-                <!-- About Page -->
-                <div class="p-4 sm:p-5 rounded-xl border border-[var(--border-color)]/60 bg-[var(--bg-secondary)]/20 space-y-3">
-                  <span class="text-xs font-semibold uppercase tracking-wider text-[var(--text-primary)] block">About Page</span>
-                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <input type="text" id="cfg-page-about-eyebrow" placeholder="Eyebrow" class="px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)]" />
-                    <input type="text" id="cfg-page-about-title" placeholder="Title" class="px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)] font-bold" />
-                  </div>
-                  <textarea id="cfg-page-about-sub" rows="2" placeholder="Subtitle" class="w-full p-3 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)]"></textarea>
                 </div>
 
                 <!-- Socials Page -->
@@ -1917,6 +2046,42 @@ const existingPostsData = allPosts.map((p) => {
               ><code>// Generated siteConfig.ts will appear here</code></pre>
             </div>
 
+          </div>
+        </div>
+
+        <!-- Modal: Settings Asset Library Picker -->
+        <div id="settings-asset-picker-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs hidden" role="dialog" aria-modal="true" aria-labelledby="settings-asset-modal-title">
+          <div class="bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-2xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+            <div class="p-5 border-b border-[var(--border-color)]/70 flex items-center justify-between">
+              <div>
+                <h3 id="settings-asset-modal-title" class="text-base font-serif font-bold text-[var(--text-primary)]">
+                  Choose from Asset Library
+                </h3>
+                <p class="text-xs text-[var(--text-secondary)]">Select any existing photo to use for this setting.</p>
+              </div>
+              <button
+                type="button"
+                id="btn-close-settings-asset-modal"
+                class="p-2 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition-colors cursor-pointer"
+                aria-label="Close asset picker"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+              </button>
+            </div>
+            <div class="p-4 border-b border-[var(--border-color)]/60 bg-[var(--bg-secondary)]/20">
+              <input
+                type="text"
+                id="settings-asset-picker-search"
+                placeholder="Search images by filename..."
+                class="w-full px-3.5 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--text-primary)]"
+              />
+            </div>
+            <div id="settings-asset-picker-grid" class="p-5 overflow-y-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 max-h-[460px]">
+              <!-- Rendered via JS -->
+            </div>
+            <div id="settings-asset-picker-empty" class="p-10 text-center text-xs text-[var(--text-secondary)] hidden">
+              No matching images found in asset library.
+            </div>
           </div>
         </div>
       </section>
@@ -4446,6 +4611,7 @@ const existingPostsData = allPosts.map((p) => {
   // SITE SETTINGS STUDIO (Local Configuration & Export)
   // -------------------------------------------------------------
   const initialSiteConfig = (typeof siteConfig !== 'undefined' && siteConfig) ? siteConfig : defaultSiteConfig;
+  const baselineDefaultConfig = JSON.parse(JSON.stringify(defaultSiteConfig));
   let activeSiteConfig = null;
   const cfgStorageKey = 'hk_cms_site_config';
 
@@ -4774,6 +4940,7 @@ const existingPostsData = allPosts.map((p) => {
     renderNavList();
     renderSocialsList();
     updateSiteConfigCodeOutput();
+    updateSettingsImageThumbnails();
   }
 
   function syncSiteConfigFromForm() {
@@ -5023,9 +5190,9 @@ export interface SiteConfig {
   };
 }
 
-export const defaultSiteConfig: SiteConfig = ${JSON.stringify(cfg, null, 2)};
+export const siteConfig: SiteConfig = ${JSON.stringify(cfg, null, 2)};
 
-export const siteConfig: SiteConfig = defaultSiteConfig;
+export const defaultSiteConfig: SiteConfig = ${JSON.stringify(baselineDefaultConfig, null, 2)};
 `;
   }
 
@@ -5036,23 +5203,292 @@ export const siteConfig: SiteConfig = defaultSiteConfig;
     }
   }
 
+  function updateSettingsImageThumbnails() {
+    const avatarInput = document.getElementById('cfg-author-avatar');
+    const avatarImg = document.getElementById('avatar-preview-img');
+    if (avatarImg && avatarInput) {
+      avatarImg.src = avatarInput.value.trim() || '/images/posts/avatar.webp';
+    }
+
+    const photoInput = document.getElementById('cfg-author-photo');
+    const photoImg = document.getElementById('photo-preview-img');
+    if (photoImg && photoInput) {
+      photoImg.src = photoInput.value.trim() || '/images/posts/avatar.webp';
+    }
+  }
+
+  // Live thumbnail update listeners
+  document.getElementById('cfg-author-avatar')?.addEventListener('input', updateSettingsImageThumbnails);
+  document.getElementById('cfg-author-photo')?.addEventListener('input', updateSettingsImageThumbnails);
+
+  // Settings Photo Upload with WebP canvas compression
+  async function handleSettingsPhotoUpload(file, maxDimension, targetInputId) {
+    if (!file || !file.type.startsWith('image/')) {
+      showToast('Please select a valid image file');
+      return;
+    }
+
+    try {
+      showToast('Compressing image...');
+      const dataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+
+      const img = await new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = reject;
+        image.src = dataUrl;
+      });
+
+      let width = img.width;
+      let height = img.height;
+      if (width > maxDimension || height > maxDimension) {
+        if (width > height) {
+          height = Math.round((height * maxDimension) / width);
+          width = maxDimension;
+        } else {
+          width = Math.round((width * maxDimension) / height);
+          height = maxDimension;
+        }
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+
+      const webpDataUrl = canvas.toDataURL('image/webp', 0.88);
+      const base64Data = webpDataUrl.split(',')[1];
+      const cleanName = file.name.replace(/\.[^/.]+$/, '').toLowerCase().replace(/[^a-z0-9_-]+/g, '-');
+      const filename = `${cleanName || 'photo'}-${Date.now()}.webp`;
+      let savedPath = `/images/posts/${filename}`;
+
+      let persisted = false;
+      if (isLocalHost) {
+        try {
+          const res = await fetch('/api/save-asset', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ filename, base64: base64Data })
+          });
+          if (res.ok) {
+            const data = await res.json();
+            savedPath = data.path || savedPath;
+            persisted = true;
+          }
+        } catch (localErr) {
+          console.warn('Local save-asset failed:', localErr);
+        }
+      }
+
+      const token = getGhToken();
+      if (!persisted && token) {
+        try {
+          await commitFileToGitHub(`public/images/posts/${filename}`, atob(base64Data), `feat(assets): upload photo ${filename}`);
+          persisted = true;
+        } catch (ghErr) {
+          console.warn('GitHub photo commit failed:', ghErr);
+        }
+      }
+
+      if (!persisted && !isLocalHost) {
+        savedPath = webpDataUrl;
+      }
+
+      const targetInput = document.getElementById(targetInputId);
+      if (targetInput) {
+        targetInput.value = savedPath;
+        targetInput.dispatchEvent(new Event('input', { bubbles: true }));
+        targetInput.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+
+      const assetObj = {
+        path: savedPath,
+        filename,
+        size: Math.round(base64Data.length * 0.75),
+        usedIn: [{ title: 'Site Settings', slug: 'settings' }]
+      };
+      if (!currentAssets.some(a => a.path === savedPath)) {
+        currentAssets.unshift(assetObj);
+      }
+
+      updateSettingsImageThumbnails();
+      showToast('Photo uploaded & updated successfully!');
+    } catch (err) {
+      console.error('Photo upload failed:', err);
+      showToast('Failed to upload photo: ' + err.message);
+    }
+  }
+
+  document.getElementById('btn-upload-avatar')?.addEventListener('click', () => {
+    document.getElementById('file-input-avatar')?.click();
+  });
+  document.getElementById('file-input-avatar')?.addEventListener('change', (e) => {
+    const file = e.target.files?.[0];
+    if (file) handleSettingsPhotoUpload(file, 800, 'cfg-author-avatar');
+    e.target.value = '';
+  });
+
+  document.getElementById('btn-upload-photo')?.addEventListener('click', () => {
+    document.getElementById('file-input-photo')?.click();
+  });
+  document.getElementById('file-input-photo')?.addEventListener('change', (e) => {
+    const file = e.target.files?.[0];
+    if (file) handleSettingsPhotoUpload(file, 1400, 'cfg-author-photo');
+    e.target.value = '';
+  });
+
+  // Settings Asset Library Picker Modal
+  let activeSettingsAssetTargetId = null;
+
+  function openSettingsAssetPickerModal(targetInputId) {
+    activeSettingsAssetTargetId = targetInputId;
+    const modal = document.getElementById('settings-asset-picker-modal');
+    const searchInput = document.getElementById('settings-asset-picker-search');
+    if (!modal) return;
+    if (searchInput) searchInput.value = '';
+    renderSettingsAssetPickerGrid();
+    modal.classList.remove('hidden');
+    searchInput?.focus();
+  }
+
+  function closeSettingsAssetPickerModal() {
+    const modal = document.getElementById('settings-asset-picker-modal');
+    if (modal) modal.classList.add('hidden');
+    activeSettingsAssetTargetId = null;
+  }
+
+  function renderSettingsAssetPickerGrid(query = '') {
+    const grid = document.getElementById('settings-asset-picker-grid');
+    const emptyEl = document.getElementById('settings-asset-picker-empty');
+    if (!grid) return;
+
+    const q = query.toLowerCase().trim();
+    const filtered = currentAssets.filter(a => !q || a.filename.toLowerCase().includes(q) || a.path.toLowerCase().includes(q));
+
+    if (filtered.length === 0) {
+      grid.innerHTML = '';
+      if (emptyEl) emptyEl.classList.remove('hidden');
+      return;
+    }
+
+    if (emptyEl) emptyEl.classList.add('hidden');
+    grid.innerHTML = filtered.map(asset => `
+      <button
+        type="button"
+        class="group relative flex flex-col items-center p-2 rounded-xl border border-[var(--border-color)]/70 hover:border-[var(--accent)] hover:shadow-md bg-[var(--bg-secondary)]/30 transition-all cursor-pointer text-left w-full select-asset-btn"
+        data-path="${asset.path}"
+        data-filename="${asset.filename}"
+      >
+        <img
+          src="${asset.path}"
+          alt="${asset.filename}"
+          class="w-full h-24 object-cover rounded-lg bg-[var(--bg-secondary)]"
+          onerror="this.src='/images/posts/avatar.webp'"
+        />
+        <span class="mt-2 text-[11px] font-mono text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] truncate w-full block">
+          ${asset.filename}
+        </span>
+      </button>
+    `).join('');
+
+    grid.querySelectorAll('.select-asset-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const path = btn.getAttribute('data-path');
+        const filename = btn.getAttribute('data-filename');
+        if (activeSettingsAssetTargetId && path) {
+          const targetInput = document.getElementById(activeSettingsAssetTargetId);
+          if (targetInput) {
+            targetInput.value = path;
+            targetInput.dispatchEvent(new Event('input', { bubbles: true }));
+            targetInput.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+          updateSettingsImageThumbnails();
+          closeSettingsAssetPickerModal();
+          showToast(`Selected "${filename}"`);
+        }
+      });
+    });
+  }
+
+  document.getElementById('btn-pick-avatar-asset')?.addEventListener('click', () => {
+    openSettingsAssetPickerModal('cfg-author-avatar');
+  });
+
+  document.getElementById('btn-pick-photo-asset')?.addEventListener('click', () => {
+    openSettingsAssetPickerModal('cfg-author-photo');
+  });
+
+  document.getElementById('btn-close-settings-asset-modal')?.addEventListener('click', closeSettingsAssetPickerModal);
+
+  document.getElementById('settings-asset-picker-modal')?.addEventListener('click', (e) => {
+    if (e.target.id === 'settings-asset-picker-modal') closeSettingsAssetPickerModal();
+  });
+
+  document.getElementById('settings-asset-picker-search')?.addEventListener('input', (e) => {
+    renderSettingsAssetPickerGrid(e.target.value);
+  });
+
   // Site Config Form listeners
   document.getElementById('site-config-form')?.addEventListener('input', syncSiteConfigFromForm);
   document.getElementById('site-config-form')?.addEventListener('change', syncSiteConfigFromForm);
 
-  // Save Settings Locally button
-  document.getElementById('btn-save-site-config')?.addEventListener('click', () => {
+  // Save Settings Locally and Commit Changes button
+  document.getElementById('btn-save-site-config')?.addEventListener('click', async () => {
     syncSiteConfigFromForm();
     localStorage.setItem(cfgStorageKey, JSON.stringify(activeSiteConfig));
     updateStorageStatusBadge(true);
-    showToast("Site configuration saved locally!");
+
+    const tsCode = generateSiteConfigTs(activeSiteConfig);
+    let diskSaved = false;
+    let ghCommitted = false;
+
+    // 1. Write directly to src/data/siteConfig.ts on disk if on localhost (non-automated session)
+    if (isLocalHost && !navigator.webdriver) {
+      try {
+        const res = await fetch('/api/save-config', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code: tsCode })
+        });
+        if (res.ok) diskSaved = true;
+      } catch (err) {
+        console.warn('Local disk save error:', err);
+      }
+    }
+
+    // 2. Commit directly to GitHub if token is set
+    const token = getGhToken();
+    if (token) {
+      try {
+        await commitFileToGitHub('src/data/siteConfig.ts', tsCode, 'chore(config): update siteConfig via admin studio');
+        ghCommitted = true;
+      } catch (ghErr) {
+        console.warn('GitHub config commit error:', ghErr);
+      }
+    }
+
+    if (diskSaved && ghCommitted) {
+      showToast("Saved to local codebase & committed to GitHub!");
+    } else if (diskSaved) {
+      showToast("Saved directly to src/data/siteConfig.ts on disk!");
+    } else if (ghCommitted) {
+      showToast("Committed site configuration directly to GitHub!");
+    } else {
+      showToast("Site configuration saved locally (localStorage)!");
+    }
   });
 
   // Reset to Defaults button
   document.getElementById('btn-reset-site-config')?.addEventListener('click', () => {
     if (confirm("Reset all site settings back to default configurations? Any unsaved local overrides will be removed.")) {
       localStorage.removeItem(cfgStorageKey);
-      activeSiteConfig = JSON.parse(JSON.stringify(defaultSiteConfig));
+      activeSiteConfig = JSON.parse(JSON.stringify(baselineDefaultConfig));
       populateSiteConfigForm();
       updateStorageStatusBadge(false);
       showToast("Reset to default configuration!");

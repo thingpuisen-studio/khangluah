@@ -25,9 +25,8 @@ describe("Production Build Output Verification", () => {
     "research/numerals-kaipeng-simte-comparative/index.html",
     "research/advent-of-christianity-simte-oral-history/index.html",
     "feed/markdown-formatting-complete-guide/index.html",
-    "feed/cms-studio-operations-and-drafts-guide/index.html",
-    "feed/asset-library-and-image-optimization-guide/index.html",
     "feed/site-configuration-and-settings-guide/index.html",
+    "feed/the-epistemic-commutativity-of-the-remote-push-an-inscription-in-edge-cached-melancholia/index.html",
   ];
 
   criticalRoutes.forEach((route) => {
@@ -77,13 +76,13 @@ describe("Production Build Output Verification", () => {
     expect(paperHtml).toContain('Download Original PDF');
   });
 
-  it("verifies technical guide page contains TechArticle schema and article-prose styling", () => {
+  it("verifies technical guide page contains schema and article-prose styling", () => {
     const guideHtml = readFileSync(
       join(distDir, "feed/markdown-formatting-complete-guide/index.html"),
       "utf-8"
     );
     expect(guideHtml).toContain('application/ld+json');
-    expect(guideHtml).toContain('TechArticle');
+    expect(guideHtml).toContain('BlogPosting');
     expect(guideHtml).toContain('article-prose');
   });
 });

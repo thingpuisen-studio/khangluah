@@ -16,9 +16,10 @@ You do **not** need to install any software or use the command line. You can man
 4. [How to Edit an Existing Post](#4-how-to-edit-an-existing-post)
 5. [How to Delete a Post](#5-how-to-delete-a-post)
 6. [How to Upload and Use Images](#6-how-to-upload-and-use-images)
-7. [How to Update Your Bio, Social Links, and Site Settings](#7-how-to-update-your-bio-social-links-and-site-settings)
+7. [How to Update Your Bio, Photos, and Site Settings](#7-how-to-update-your-bio-photos-and-site-settings)
 8. [Using the In-Browser CMS Studio](#8-using-the-in-browser-cms-studio)
 9. [Important Rules for Non-Technical Editors](#9-important-rules-for-non-technical-editors)
+10. [Developer Setup, Building, and Automated Testing](#10-developer-setup-building-and-automated-testing)
 
 ---
 
@@ -222,46 +223,59 @@ If you have author photos, field photographs, or cover images:
 
 ---
 
-## 7. How to Update Your Bio, Social Links, and Site Settings
+## 7. How to Update Your Bio, Photos, and Site Settings
 
-The entire website's global information (author biography, affiliation, research pillars, navigation tabs, social handles, and footer text) is controlled by a single master settings file:
+The site's global settings, author biography, profile photos, navigation, and social links are managed visually inside the **Site Settings Studio** at `/admin`.
 
-File: **`src/data/siteConfig.ts`**
+You do not need to edit code files manually.
 
-### How to Edit Site Settings:
-1. Navigate to `src` -> `data` -> `siteConfig.ts`.
-2. Click the **pencil icon** (Edit this file).
-3. Find the section you want to change:
-   - **Author Name & Title:** Change `name: "H. Kapginlian"` or `role: "..."`.
-   - **Location:** Change `location: "Shillong, Meghalaya • Manipur"`.
-   - **ORCID:** Change `orcid: "0009-0008-9045-3527"`.
-   - **Social Links:** Update your Twitter/X handle, Facebook URL, YouTube channel, Academia profile, or GitHub URL.
-   - **Bio Summary:** Update the biographical paragraphs shown on the About and Home pages.
-4. **Crucial rule:** Keep all quotation marks `"` around text and commas `,` at the ends of lines intact.
-5. Click **Commit changes...** -> **Commit changes**.
+### How to Edit Settings in the CMS:
+1. Open your browser and go to `/admin`.
+2. Click the **Site Settings** tab in the top navigation bar.
+3. The settings are organized page-by-page:
+   - **Home Page Settings:**
+     - **Profile Avatar:** Click **Upload New Photo** to upload a new portrait from your computer, or click **Choose from Asset Library** to pick an existing image. The live thumbnail preview updates instantly.
+     - **Hero Short Bio:** Edit the concise bio shown on the home page hero section.
+     - **Hero Metrics & Fieldwork Spotlight:** Adjust published counts, fieldwork highlight labels, interlinear gloss lines, and action buttons.
+   - **About Page Settings:**
+     - **About Portrait Photo:** Upload a new portrait photo or pick from the asset library with live thumbnail preview.
+     - **Page Introductions:** Customize the eyebrow, title, and subtitle displayed at the top of the About page.
+     - **Academic Qualifications & Full Bio:** Edit degrees, research areas, and write your full multi-paragraph biographical narrative.
+   - **Header Navigation & Social Directory:** Toggle menu links, reorder tabs, or update social and academic directory links.
+4. Click **Save All Settings**:
+   - In local development, changes are saved directly to `src/data/siteConfig.ts` on disk.
+   - On the web, if configured with your GitHub token, changes are synced directly to your GitHub repository.
+   - You can also click **Copy siteConfig.ts** or **Download siteConfig.ts** at the bottom of the page.
+
+*(Note for developers: You can still directly edit `src/data/siteConfig.ts` in your code editor if preferred).*
 
 ---
 
 ## 8. Using the In-Browser CMS Studio
 
-Your website comes with a private, built-in visual Content Studio at:
-`https://lianhangluah.com/admin` *(or `http://localhost:4321/admin` in development)*
+Your website comes with a private, visual Content Studio at:  
+`https://lianhangluah.com/admin` *(or `http://localhost:4321/admin` in local development)*
 
-### How to Use the Studio:
-1. Open your browser and go to your site URL with `/admin` at the end.
-2. Select your content type: **Poem**, **Essay**, or **Academic Research Paper**.
-3. Type into the dedicated form fields (title, excerpt, couplet, verses).
-4. Watch the **Live Preview Plate** update in real time with your selected color tips and background gradients.
-5. Click **Publish Post** to save it locally and test it.
-6. Open the **Publish & Code** tab and click **Copy Markdown** or **Download .md**.
-7. Paste or upload that file to `src/content/posts/` on GitHub as described in Section 2.
+### Studio Features:
+1. **Compose & Write:**
+   - Select your content type: **Poem**, **Essay**, or **Academic Research Paper**.
+   - Fill in metadata (title, slug, date, couplet, tags) with real-time typography and color gradient previews.
+   - Write body content with Markdown formatting aids.
+2. **Visual Asset Manager:**
+   - Upload new image assets (JPEG, PNG, WebP) directly to `public/images/posts/`.
+   - Browse existing images with visual thumbnails, search filtering, and one-click path copying.
+3. **Site Settings Studio:**
+   - Configure Home and About page text, profile and portrait photos, navigation order, and social links without writing code.
+4. **Publish & Sync:**
+   - Commit and push changes directly to GitHub via the GitHub API.
+   - Copy or download `.md` content files and `siteConfig.ts`.
 
 ---
 
 ## 9. Important Rules for Non-Technical Editors
 
 1. **Keep the three dashes `---` in place:**  
-   The frontmatter metadata at the top of every file must start with `---` on line 1 and end with `---` right before your poem/essay body begins. Do not delete these dashes.
+   The frontmatter metadata at the top of every post file must start with `---` on line 1 and end with `---` right before your body begins. Do not delete these dashes.
 2. **Use quotes around text fields:**  
    If a title or subtitle contains a colon, comma, or apostrophe, ensure it is wrapped in double quotes (e.g. `title: "Aw Simlei: Traditional Simte Verses"`).
 3. **Indentation matters in YAML:**  
@@ -270,3 +284,63 @@ Your website comes with a private, built-in visual Content Studio at:
    To maintain the scholarly academic standard of the site, avoid inserting emojis into file names, titles, or commit messages.
 5. **Always give Cloudflare 1-2 minutes:**  
    After you commit a change on GitHub, allow 60 to 90 seconds before refreshing your browser to view the update. If you don't see the change immediately, press `Ctrl + Shift + R` (or `Cmd + Shift + R` on Mac) to perform a hard refresh and clear your browser cache.
+
+---
+
+## 10. Developer Setup, Building, and Automated Testing
+
+For developers and maintainers working with the codebase locally:
+
+### Prerequisites
+- [Bun](https://bun.sh) (v1.1 or later)
+- Node.js (>=22.12.0)
+
+### Local Development Server
+Start the local Astro development server:
+```bash
+bun run dev
+```
+The site runs at `http://localhost:4321` and the CMS studio is accessible at `http://localhost:4321/admin`.
+
+### Production Build
+Generate the static production build:
+```bash
+bun run build
+```
+
+### Automated Testing
+
+The repository maintains full automated test coverage comprising **494 tests** across unit, schema, static build, and Playwright browser suites.
+
+Detailed test logs and architecture reports are maintained centrally in:
+- [CMS Tab-by-Tab Coverage Report](tests/CMS_TAB_COVERAGE_REPORT.md) (429 Playwright E2E browser tests)
+- [Unit, Schema & Smoke Test Report](tests/TEST_REPORT.md) (65 Bun unit & schema tests)
+
+#### Unit & Schema Tests (65 tests)
+```bash
+bun test
+```
+Runs unit tests verifying URL utilities, Schema.org/JSON-LD graphs, academic monograph metadata, and production smoke tests.
+
+#### Playwright E2E Test Suites (429 tests)
+
+All suites can be run headed or headless (`HEADLESS=true`).
+
+| Test Command | Test File | Description |
+| :--- | :--- | :--- |
+| `bun run test:settings-redesign` | `tests/playwright-settings-redesign.test.ts` | Page-centric Home/About settings, visual media pickers, asset modal, and local APIs |
+| `bun run test:settings` | `tests/playwright-settings-tab.test.ts` | Core settings tab reordering, gloss, author details, and local storage |
+| `bun run test:settings-edges` | `tests/playwright-settings-edge-cases.test.ts` | Corrupted JSON resilience, boundary guards, monotonic order, Unicode/IPA |
+| `bun run test:e2e` | `tests/playwright-cms.test.ts` | End-to-end multi-tab CMS workflow test |
+| `bun run test:write` | `tests/playwright-write-tab.test.ts` | Compose tab form fields, markdown formatting, and couplet callouts |
+| `bun run test:write-edges` | `tests/playwright-write-edge-cases.test.ts` | Compose tab edge cases (XSS, unclosed fences, rapid input) |
+| `bun run test:preview` | `tests/playwright-preview-tab.test.ts` | Card plate and live preview rendering |
+| `bun run test:preview-edges` | `tests/playwright-preview-edge-cases.test.ts` | Live preview edge cases and clamping |
+| `bun run test:catalog` | `tests/playwright-catalog-tab.test.ts` | Post catalog search, filters, and edit lifecycle |
+| `bun run test:catalog-edges` | `tests/playwright-catalog-edge-cases.test.ts` | Catalog regex query safety, whitespace queries, deletion modals |
+| `bun run test:assets` | `tests/playwright-assets-tab.test.ts` | Asset gallery uploads, WebP conversion, usage metrics |
+| `bun run test:assets-edges` | `tests/playwright-assets-edge-cases.test.ts` | Asset gallery error handling, deletion protection guards |
+| `bun run test:drafts` | `tests/playwright-drafts-tab.test.ts` | Local browser draft save, restore, and delete |
+| `bun run test:drafts-edges` | `tests/playwright-drafts-edge-cases.test.ts` | Draft storage healing, corrupted JSON, large payloads |
+| `bun run test:export` | `tests/playwright-export-tab.test.ts` | Ready-to-commit .md download and clipboard copy |
+| `bun run test:export-edges` | `tests/playwright-export-edge-cases.test.ts` | Export YAML escaping, poem line break formatting |

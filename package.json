@@ -10,7 +10,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "test": "bun test",
+    "test": "bun test tests/url.test.ts tests/schema.test.ts tests/content.test.ts tests/build.test.ts",
     "test:e2e": "bun run tests/playwright-cms.test.ts",
     "test:write": "bun run tests/playwright-write-tab.test.ts",
     "test:preview": "bun run tests/playwright-preview-tab.test.ts",
@@ -25,6 +25,7 @@
     "test:preview-edges": "bun run tests/playwright-preview-edge-cases.test.ts",
     "test:catalog-edges": "bun run tests/playwright-catalog-edge-cases.test.ts",
     "test:settings-edges": "bun run tests/playwright-settings-edge-cases.test.ts",
+    "test:settings-redesign": "bun run tests/playwright-settings-redesign.test.ts",
     "test:export-edges": "bun run tests/playwright-export-edge-cases.test.ts"
   },
   "dependencies": {

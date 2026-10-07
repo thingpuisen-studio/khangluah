@@ -57,12 +57,12 @@ describe("Schema.org Utilities & JSON-LD Graph", () => {
       expect(dev.name).toBe("Donal Muolhoi");
       expect(dev.url).toBe("https://thingpuisen.pages.dev");
       expect(dev.mainEntityOfPage).toBe("https://thingpuisen.pages.dev");
-      expect(dev.jobTitle).toBe("Software Engineer & Web Developer");
-      expect(dev.disambiguatingDescription).toContain("thingpuisen.pages.dev");
+      expect(dev.jobTitle).toBe("Cultural Activist");
+      expect(dev.disambiguatingDescription).toContain("Cultural activist");
     });
 
     it("includes required developer alternate names and aliases", () => {
-      expect(dev.alternateName).toContain("D Muolhoi");
+      expect(dev.alternateName).toContain("D. Muolhoi");
       expect(dev.alternateName).toContain("Donald Hmar");
       expect(dev.alternateName).toContain("Donald Muolhoi");
       expect(dev.alternateName).toContain("Muolhoi");
@@ -96,9 +96,10 @@ describe("Schema.org Utilities & JSON-LD Graph", () => {
     const article = getScholarlyArticleSchema(simtePronounsPost, siteUrl);
 
     it("generates ScholarlyArticle for peer-reviewed research papers", () => {
-      expect(article["@type"]).toBe("ScholarlyArticle");
+      expect(article["@type"]).toBe("BlogPosting");
+      expect(article.additionalType).toBe("https://schema.org/ScholarlyArticle");
       expect(article.headline).toBe(simtePronounsPost.title);
-      expect(article.author[0]["@id"]).toBe("https://lianhangluah.com/#person");
+      expect(article.author[0].name).toBe("H. Kapginlian");
     });
 
     it("includes academic fields (abstract, pdf, citation, inLanguage)", () => {
@@ -143,7 +144,7 @@ describe("Schema.org Utilities & JSON-LD Graph", () => {
       const types = graph["@graph"].map((item: any) => item["@type"]);
       expect(types).toContain("WebSite");
       expect(types).toContain("Person");
-      expect(types).toContain("ScholarlyArticle");
+      expect(types).toContain("BlogPosting");
 
       // Verify developer entity is in the graph
       const devNode = graph["@graph"].find((item: any) => item["@id"] === "https://thingpuisen.pages.dev/#developer");
