@@ -236,8 +236,26 @@ const existingPostsData = allPosts.map((p) => {
   </div>
 
   <!-- Main Authenticated Studio (Hidden by default until authenticated) -->
-  <div id="admin-main-ui" class="hidden max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 py-8 sm:py-12 pb-28 md:pb-20 font-sans text-[var(--text-primary)]">
+  <div id="admin-main-ui" class="hidden max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 py-6 sm:py-8 pb-28 md:pb-20 font-sans text-[var(--text-primary)]">
     
+    <!-- Top Notice Strip: Bug Advisory & Developer Contact -->
+    <div id="cms-notice-banner" class="mb-5 px-3 py-1.5 rounded-lg border border-amber-500/25 bg-amber-500/5 text-[var(--text-secondary)] text-[11px] flex items-center justify-between gap-3">
+      <div class="flex items-center gap-2 truncate">
+        <span class="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
+        <span class="truncate">
+          <strong class="font-semibold text-[var(--text-primary)]">Note:</strong> This console may have occasional bugs or formatting quirks. If you run into issues, please contact the developer.
+        </span>
+      </div>
+      <button
+        type="button"
+        id="btn-dismiss-cms-notice"
+        class="shrink-0 text-[11px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] px-1 py-0.5 rounded hover:bg-amber-500/10 transition-colors cursor-pointer"
+        aria-label="Dismiss notice"
+      >
+        Dismiss &times;
+      </button>
+    </div>
+
     <!-- Top Global Header Bar -->
     <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[var(--border-color)]/60">
       <div class="flex items-center gap-4 flex-wrap">
@@ -276,18 +294,6 @@ const existingPostsData = allPosts.map((p) => {
         >
           <span>View Site</span>
           <span class="font-mono text-[11px]">&nearr;</span>
-        </a>
-
-        <a
-          href={url("/prompts")}
-          id="btn-ai-prompts"
-          class="min-h-[40px] px-3.5 py-1.5 rounded-lg border border-[var(--border-color)]/70 bg-[var(--bg-secondary)]/30 hover:bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-medium transition-colors inline-flex items-center gap-1.5 cursor-pointer"
-          title="Open AI Prompts library"
-        >
-          <svg class="w-3.5 h-3.5 text-[var(--accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
-          <span>AI Prompts</span>
         </a>
 
         <button
@@ -3609,6 +3615,16 @@ const existingPostsData = allPosts.map((p) => {
   // Publish Modal handlers
   document.getElementById('pub-modal-close')?.addEventListener('click', () => {
     document.getElementById('publish-modal')?.classList.add('hidden');
+  });
+
+  // Notice banner dismiss handler
+  const noticeBanner = document.getElementById('cms-notice-banner');
+  if (localStorage.getItem('hk_cms_notice_dismissed') === 'true') {
+    noticeBanner?.classList.add('hidden');
+  }
+  document.getElementById('btn-dismiss-cms-notice')?.addEventListener('click', () => {
+    noticeBanner?.classList.add('hidden');
+    localStorage.setItem('hk_cms_notice_dismissed', 'true');
   });
 
   document.getElementById('pub-modal-view-catalog')?.addEventListener('click', () => {

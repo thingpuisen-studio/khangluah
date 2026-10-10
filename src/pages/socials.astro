@@ -167,11 +167,13 @@ const directLinks = socialLinks.filter((s) => s.category === "direct" && s.isAct
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 font-sans">
-        {directLinks.map((item) => (
-          <a
-            href={item.href}
-            class={`group p-5 rounded-2xl border transition-all duration-200 flex items-center justify-between ${item.colorTheme} shadow-xs hover:shadow-md`}
-          >
+        {directLinks.map((item, index) => {
+          const isLastAndOdd = index === directLinks.length - 1 && directLinks.length % 2 === 1;
+          return (
+            <a
+              href={item.href}
+              class={`group p-5 rounded-2xl border transition-all duration-200 flex items-center justify-between ${item.colorTheme} shadow-xs hover:shadow-md ${isLastAndOdd ? 'sm:col-span-2' : ''}`}
+            >
             <div class="space-y-2 max-w-[85%]">
               <div class="flex items-center gap-2.5">
                 <div class="p-2 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-color)] shadow-2xs text-[var(--text-primary)]">
@@ -195,7 +197,8 @@ const directLinks = socialLinks.filter((s) => s.category === "direct" && s.isAct
               →
             </span>
           </a>
-        ))}
+          );
+        })}
       </div>
     </div>
 

@@ -16,7 +16,6 @@ describe("Production Build Output Verification", () => {
     "feed/index.html",
     "poems/index.html",
     "privacy/index.html",
-    "prompts/index.html",
     "research/index.html",
     "socials/index.html",
     "terms/index.html",

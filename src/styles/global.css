@@ -452,5 +452,9 @@ html.dark .article-prose pre.astro-code {
 .poem-prose p {
   white-space: pre-line;
   margin-bottom: 2rem;
-  line-height: 1.95;
+  line-height: 1.8;
+}
+
+.poem-prose br {
+  display: none;
 }

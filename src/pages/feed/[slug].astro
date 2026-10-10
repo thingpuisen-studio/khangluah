@@ -24,6 +24,12 @@ const currentIndex = feedPosts.findIndex((p) => p.slug === post.slug);
 const prevPost = currentIndex > 0 ? feedPosts[currentIndex - 1] : null;
 const nextPost = currentIndex < feedPosts.length - 1 ? feedPosts[currentIndex + 1] : null;
 const isAcademic = post.postType === "academic_paper";
+
+// Normalize poem HTML: await compiled content and remove redundant <br> tags before newlines so white-space: pre-line preserves single verse breaks
+const rawHtml = post.html ? await post.html : "";
+const cleanHtml = post.postType === "poem" && typeof rawHtml === "string"
+  ? rawHtml.replace(/<br\s*\/?>\s*\n/gi, '\n')
+  : rawHtml;
 ---
 
 <BaseLayout
@@ -172,9 +178,9 @@ const isAcademic = post.postType === "academic_paper";
     )}
 
     <!-- ARTICLE BODY -->
-    {post.html ? (
+    {cleanHtml ? (
       <div class={`article-prose max-w-none ${post.postType === 'poem' ? 'poem-prose' : ''}`}>
-        <Fragment set:html={post.html} />
+        <Fragment set:html={cleanHtml} />
       </div>
     ) : (
       <div class={`article-prose max-w-none space-y-10 ${post.postType === 'poem' ? 'poem-prose' : ''}`}>
